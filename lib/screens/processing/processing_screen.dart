@@ -64,19 +64,24 @@ class _ProcessingScreenState extends State<ProcessingScreen>
         _statusText = 'Analiz başlatılıyor...';
       });
 
-      final dietAnalysis = widget.params?['dietAnalysis'] as DietAnalysisResult?;
+      final dietAnalysis =
+          widget.params?['dietAnalysis'] as DietAnalysisResult?;
       final dietFile = widget.params?['dietFile'] as File?;
-      final dietValidationResult = widget.params?['dietValidationResult'] as DocumentValidationResult?;
+      final dietValidationResult =
+          widget.params?['dietValidationResult'] as DocumentValidationResult?;
       final bloodFile = widget.params?['bloodFile'] as File?;
-      final bloodValidationResult = widget.params?['bloodValidationResult'] as DocumentValidationResult?;
-      final previousBloodAnalysis = widget.params?['previousBloodAnalysis'] as BloodAnalysisResult?;
+      final bloodValidationResult =
+          widget.params?['bloodValidationResult'] as DocumentValidationResult?;
+      final previousBloodAnalysis =
+          widget.params?['previousBloodAnalysis'] as BloodAnalysisResult?;
 
       if (dietAnalysis == null) {
         throw Exception('Diyet analizi bulunamadı.');
       }
 
       final profileRepo = UserHealthProfileRepository.instance;
-      UserHealthProfile? userProfile = await profileRepo.getCurrentUserHealthProfile();
+      UserHealthProfile? userProfile = await profileRepo
+          .getCurrentUserHealthProfile();
       userProfile ??= UserHealthProfile.empty();
 
       final orchestrator = FullAnalysisOrchestrator();
@@ -105,12 +110,15 @@ class _ProcessingScreenState extends State<ProcessingScreen>
           final fileName = 'diet_${DateTime.now().millisecondsSinceEpoch}.pdf';
           final filePath = '$userId/$fileName';
           try {
-            await Supabase.instance.client.storage.from('user-documents').upload(filePath, dietFile);
+            await Supabase.instance.client.storage
+                .from('user-documents')
+                .upload(filePath, dietFile);
             final doc = UploadedDocumentModel(
               id: '',
               userId: userId,
               documentType: 'diet',
-              fileName: 'Diyet Listesi - ${DateTime.now().toIso8601String().split('T').first}',
+              fileName:
+                  'Diyet Listesi - ${DateTime.now().toIso8601String().split('T').first}',
               filePath: filePath,
               status: 'verified',
               parsedData: result.dietAnalysis.toJson(),
@@ -123,17 +131,20 @@ class _ProcessingScreenState extends State<ProcessingScreen>
             debugPrint('Failed to save diet doc to Supabase: $e');
           }
         }
-        
+
         if (bloodFile != null) {
           final fileName = 'blood_${DateTime.now().millisecondsSinceEpoch}.pdf';
           final filePath = '$userId/$fileName';
           try {
-            await Supabase.instance.client.storage.from('user-documents').upload(filePath, bloodFile);
+            await Supabase.instance.client.storage
+                .from('user-documents')
+                .upload(filePath, bloodFile);
             final doc = UploadedDocumentModel(
               id: '',
               userId: userId,
               documentType: 'blood',
-              fileName: 'Kan Tahlili - ${DateTime.now().toIso8601String().split('T').first}',
+              fileName:
+                  'Kan Tahlili - ${DateTime.now().toIso8601String().split('T').first}',
               filePath: filePath,
               status: 'verified',
               parsedData: result.bloodAnalysis?.toJson(),
@@ -151,19 +162,23 @@ class _ProcessingScreenState extends State<ProcessingScreen>
       await Future.delayed(const Duration(milliseconds: 800));
 
       if (mounted) {
-        context.go('/analysis', extra: {
-          'dietAnalysisResult': result.dietAnalysis,
-          'bloodAnalysisResult': result.bloodAnalysis,
-          'combinedAnalysisResult': result.combinedAnalysis,
-          'recommendedRecipes': result.recommendations,
-          'userHealthProfile': result.userHealthProfile,
-          'candidateRecipes': result.candidateRecipes,
-        });
+        context.go(
+          '/analysis',
+          extra: {
+            'dietAnalysisResult': result.dietAnalysis,
+            'bloodAnalysisResult': result.bloodAnalysis,
+            'combinedAnalysisResult': result.combinedAnalysis,
+            'recommendedRecipes': result.recommendations,
+            'userHealthProfile': result.userHealthProfile,
+            'candidateRecipes': result.candidateRecipes,
+          },
+        );
       }
     } catch (e) {
       debugPrint('Navigating to AnalysisFailureScreen because: $e');
       setState(() {
-        _processingError = 'Diyet listen ve kan değerlerin birlikte değerlendirilemedi. Lütfen tekrar deneyiniz.';
+        _processingError =
+            'Diyet listen ve kan değerlerin birlikte değerlendirilemedi. Lütfen tekrar deneyiniz.';
       });
     }
   }
@@ -177,9 +192,19 @@ class _ProcessingScreenState extends State<ProcessingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageBg = isDark ? const Color(0xFF0F241E) : AppColors.background;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+    final mockDocBg = isDark ? const Color(0xFF17332B) : Colors.grey.shade200;
+    final mockBlurBg = isDark
+        ? const Color(0xFF0F241E).withValues(alpha: 0.6)
+        : Colors.white.withValues(alpha: 0.3);
+
     if (_processingError != null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: pageBg,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -193,8 +218,11 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     color: AppColors.error.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.error_outline_rounded,
-                      color: AppColors.error, size: 40),
+                  child: const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 40,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -227,7 +255,9 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     ),
                     child: Text(
                       'Tekrar Dene',
-                      style: AppTextStyles.labelLarge.copyWith(color: Colors.white),
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -238,14 +268,19 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                   child: OutlinedButton(
                     onPressed: () => context.go('/home'),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.divider, width: 1.5),
+                      side: const BorderSide(
+                        color: AppColors.divider,
+                        width: 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: Text(
                       'Ana Sayfaya Dön',
-                      style: AppTextStyles.labelLarge.copyWith(color: AppColors.textMedium),
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.textMedium,
+                      ),
                     ),
                   ),
                 ),
@@ -257,7 +292,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: pageBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -272,8 +307,13 @@ class _ProcessingScreenState extends State<ProcessingScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Diyetin analiz ediliyor',
-                      style: AppTextStyles.displayMedium.copyWith(fontSize: 22)),
+                  Text(
+                    'Diyetin analiz ediliyor',
+                    style: AppTextStyles.displayMedium.copyWith(
+                      fontSize: 22,
+                      color: titleColor,
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   AnimatedBuilder(
                     animation: _pulseCtrl,
@@ -285,7 +325,11 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                 ],
               ),
               const SizedBox(height: 6),
-              Text(_statusText, textAlign: TextAlign.center, style: AppTextStyles.bodyMedium),
+              Text(
+                _statusText,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMedium.copyWith(color: descColor),
+              ),
               const SizedBox(height: 28),
 
               // ── Scan Visual ──────────────────────────────
@@ -299,15 +343,15 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                       // Blurred document placeholder
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
+                          color: mockDocBg,
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        child: _buildMockDocument(),
+                        child: _buildMockDocument(isDark),
                       ),
                       // Blur overlay
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.3),
+                          color: mockBlurBg,
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
@@ -317,21 +361,28 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                         builder: (_, child) {
                           final y = _scanCtrl.value * 320;
                           return Positioned(
-                            left: 0, right: 0, top: y,
+                            left: 0,
+                            right: 0,
+                            top: y,
                             child: Container(
                               height: 3,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(colors: [
-                                  AppColors.primary.withValues(alpha: 0),
-                                  AppColors.primary.withValues(alpha: 0.8),
-                                  AppColors.primary,
-                                  AppColors.primary.withValues(alpha: 0.8),
-                                  AppColors.primary.withValues(alpha: 0),
-                                ]),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.primary.withValues(alpha: 0),
+                                    AppColors.primary.withValues(alpha: 0.8),
+                                    AppColors.primary,
+                                    AppColors.primary.withValues(alpha: 0.8),
+                                    AppColors.primary.withValues(alpha: 0),
+                                  ],
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.4),
-                                    blurRadius: 16, spreadRadius: 4,
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 16,
+                                    spreadRadius: 4,
                                   ),
                                 ],
                               ),
@@ -346,13 +397,16 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                           builder: (_, child) => Opacity(
                             opacity: 0.5 + _pulseCtrl.value * 0.5,
                             child: Container(
-                              width: 56, height: 56,
+                              width: 56,
+                              height: 56,
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.85),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.2),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     blurRadius: 20,
                                   ),
                                 ],
@@ -379,20 +433,34 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     child: Column(
                       children: [
                         Container(
-                          width: 44, height: 44,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
                             color: active
                                 ? AppColors.primary.withValues(alpha: 0.12)
-                                : AppColors.divider.withValues(alpha: 0.5),
+                                : (isDark
+                                      ? const Color(0xFF2B4A40)
+                                      : AppColors.divider.withValues(
+                                          alpha: 0.5,
+                                        )),
                             borderRadius: BorderRadius.circular(14),
                             border: active
-                                ? Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5)
+                                ? Border.all(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    width: 1.5,
+                                  )
                                 : null,
                           ),
                           child: Icon(
                             _steps[i].icon,
                             size: 20,
-                            color: active ? AppColors.primary : AppColors.textHint,
+                            color: active
+                                ? AppColors.primary
+                                : (isDark
+                                      ? const Color(0xFFB7CCC5)
+                                      : AppColors.textHint),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -401,8 +469,14 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                           textAlign: TextAlign.center,
                           style: AppTextStyles.labelSmall.copyWith(
                             fontSize: 9,
-                            color: active ? AppColors.primary : AppColors.textHint,
-                            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                            color: active
+                                ? AppColors.primary
+                                : (isDark
+                                      ? const Color(0xFFB7CCC5)
+                                      : AppColors.textHint),
+                            fontWeight: active
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
                       ],
@@ -414,33 +488,53 @@ class _ProcessingScreenState extends State<ProcessingScreen>
 
               // ── Security Card ────────────────────────────
               SoftCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                backgroundColor: cardBg,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     Container(
-                      width: 40, height: 40,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.verified_user_rounded,
-                          color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        Icons.verified_user_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Verilerin Güvende',
-                              style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                          Text(
+                            'Verilerin Güvende',
+                            style: AppTextStyles.h3.copyWith(
+                              fontSize: 14,
+                              color: titleColor,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text('Tüm verilerin gizli ve güvenli bir şekilde işlenir.',
-                              style: AppTextStyles.bodySmall),
+                          Text(
+                            'Tüm verilerin gizli ve güvenli bir şekilde işlenir.',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: descColor,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    Icon(Icons.lock_rounded,
-                        color: AppColors.primary.withValues(alpha: 0.4), size: 20),
+                    Icon(
+                      Icons.lock_rounded,
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -448,29 +542,44 @@ class _ProcessingScreenState extends State<ProcessingScreen>
 
               // ── Did-you-know Card ────────────────────────
               SoftCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                backgroundColor: cardBg,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     Container(
-                      width: 40, height: 40,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.auto_awesome,
-                          color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Biliyor muydun?',
-                              style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                          Text(
+                            'Biliyor muydun?',
+                            style: AppTextStyles.h3.copyWith(
+                              fontSize: 14,
+                              color: titleColor,
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             'ChefRay, yapay zeka ile 50\'den fazla besin öğesini analiz eder.',
-                            style: AppTextStyles.bodySmall,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: descColor,
+                            ),
                           ),
                         ],
                       ),
@@ -489,67 +598,92 @@ class _ProcessingScreenState extends State<ProcessingScreen>
   }
 
   // Mock blurred document content
-  Widget _buildMockDocument() {
+  Widget _buildMockDocument(bool isDark) {
+    final textColor = isDark ? const Color(0xFFB7CCC5) : Colors.grey.shade600;
+    final skeletonColor = isDark
+        ? const Color(0xFF2B4A40)
+        : Colors.grey.shade300;
+
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Pazartesi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600)),
+          Text(
+            'Pazartesi',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
           const SizedBox(height: 4),
-          ...List.generate(8, (i) => Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
+          ...List.generate(
+            8,
+            (i) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: skeletonColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Container(
+                    width: 50,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: skeletonColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Container(
-                  width: 50, height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
           const SizedBox(height: 10),
-          Text('Öğle Yemeği', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600)),
+          Text(
+            'Öğle Yemeği',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
           const SizedBox(height: 4),
-          ...List.generate(5, (i) => Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
+          ...List.generate(
+            5,
+            (i) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: skeletonColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Container(
+                    width: 50,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: skeletonColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Container(
-                  width: 50, height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );

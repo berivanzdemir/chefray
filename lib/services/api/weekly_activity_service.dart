@@ -11,7 +11,8 @@ class WeeklyActivityService {
       if (user == null) return;
 
       final now = DateTime.now();
-      final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
       await _client.from('user_daily_activity').upsert({
         'user_id': user.id,
@@ -31,7 +32,8 @@ class WeeklyActivityService {
 
       final now = DateTime.now();
       final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-      final startStr = "${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}";
+      final startStr =
+          "${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}";
 
       final response = await _client
           .from('user_daily_activity')
@@ -50,7 +52,7 @@ class WeeklyActivityService {
     } catch (e) {
       debugPrint("WeeklyActivityService getActiveDaysThisWeek error: $e");
       // Graceful fallback if table missing
-      return [DateTime.now().weekday]; 
+      return [DateTime.now().weekday];
     }
   }
 
@@ -62,7 +64,10 @@ class WeeklyActivityService {
 
       final now = DateTime.now();
       // Look back up to 90 days to calculate streak
-      final startStr = now.subtract(const Duration(days: 90)).toIso8601String().split('T')[0];
+      final startStr = now
+          .subtract(const Duration(days: 90))
+          .toIso8601String()
+          .split('T')[0];
 
       final response = await _client
           .from('user_daily_activity')
@@ -80,16 +85,18 @@ class WeeklyActivityService {
 
       int streak = 0;
       DateTime checkDate = now;
-      
+
       // Check if active today
-      final todayStr = "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
+      final todayStr =
+          "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
       if (activeDates.contains(todayStr)) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       } else {
         // If not active today, check if active yesterday (streak doesn't break if you just haven't logged in *yet* today)
         checkDate = checkDate.subtract(const Duration(days: 1));
-        final yesterdayStr = "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
+        final yesterdayStr =
+            "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
         if (!activeDates.contains(yesterdayStr)) {
           return 0; // No streak
         }
@@ -97,7 +104,8 @@ class WeeklyActivityService {
 
       // Keep counting backwards
       while (true) {
-        final dateStr = "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
+        final dateStr =
+            "${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}";
         if (activeDates.contains(dateStr)) {
           streak++;
           checkDate = checkDate.subtract(const Duration(days: 1));

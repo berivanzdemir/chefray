@@ -7,10 +7,7 @@ import '../../../widgets/common/soft_card.dart';
 class AllergyCard extends StatelessWidget {
   final List<String> allergies;
 
-  const AllergyCard({
-    super.key,
-    required this.allergies,
-  });
+  const AllergyCard({super.key, required this.allergies});
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +31,27 @@ class AllergyCard extends StatelessWidget {
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.warning_amber_rounded,
-                    color: AppColors.error, size: 18),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: AppColors.error,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Alerjiler ve Kaçınılan Besinler',
-                        style: AppTextStyles.h3.copyWith(fontSize: 13)),
+                    Text(
+                      'Alerjiler ve Kaçınılan Besinler',
+                      style: AppTextStyles.h3.copyWith(fontSize: 13),
+                    ),
                     Text(
                       'ChefRay tarif önerilerinde bu içeriklere dikkat eder.',
                       style: AppTextStyles.labelSmall.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 9),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 9,
+                      ),
                     ),
                   ],
                 ),
@@ -60,25 +64,29 @@ class AllergyCard extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: filtered
-                  .map((item) => Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppColors.error.withValues(alpha: 0.2),
-                          ),
+                  .map(
+                    (item) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.2),
                         ),
-                        child: Text(
-                          item,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.error,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
-                          ),
+                      ),
+                      child: Text(
+                        item,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.error,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
                         ),
-                      ))
+                      ),
+                    ),
+                  )
                   .toList(),
             )
           else
@@ -99,9 +107,12 @@ class AllergyCard extends StatelessWidget {
         children: [
           Icon(Icons.info_outline, size: 14, color: AppColors.textHint),
           const SizedBox(width: 8),
-          Text(text,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            text,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

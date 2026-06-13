@@ -1,0 +1,14 @@
+# Release keystore yapılandırması
+# Bu dosyayı key.properties olarak kopyalayın ve gerçek değerlerle doldurun.
+# key.properties dosyası .gitignore tarafından repo dışında tutulur.
+#
+# Keystore oluşturmak için:
+# keytool -genkey -v -keystore android/keystore/chefray-release-key.jks \
+#   -keyalg RSA -keysize 2048 -validity 10000 -alias chefray
+#
+# NOT: key.properties olmadan release build imzasız kalır.
+# Debug build'ler bu dosyadan bağımsız çalışır.
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=chefray
+storeFile=../keystore/chefray-release-key.jks

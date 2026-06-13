@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-
 class WeeklyProgressCard extends StatelessWidget {
   final List<int> activeWeekdays;
 
-  const WeeklyProgressCard({
-    super.key,
-    required this.activeWeekdays,
-  });
+  const WeeklyProgressCard({super.key, required this.activeWeekdays});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,11 @@ class WeeklyProgressCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.trending_up, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.trending_up,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Haftalık İlerleme',
@@ -70,13 +70,41 @@ class WeeklyProgressCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildDayIndicator(context, 'Pzt', activeWeekdays.contains(1)),
-                        _buildDayIndicator(context, 'Sal', activeWeekdays.contains(2)),
-                        _buildDayIndicator(context, 'Çar', activeWeekdays.contains(3)),
-                        _buildDayIndicator(context, 'Per', activeWeekdays.contains(4)),
-                        _buildDayIndicator(context, 'Cum', activeWeekdays.contains(5)),
-                        _buildDayIndicator(context, 'Cmt', activeWeekdays.contains(6)),
-                        _buildDayIndicator(context, 'Paz', activeWeekdays.contains(7)),
+                        _buildDayIndicator(
+                          context,
+                          'Pzt',
+                          activeWeekdays.contains(1),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Sal',
+                          activeWeekdays.contains(2),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Çar',
+                          activeWeekdays.contains(3),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Per',
+                          activeWeekdays.contains(4),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Cum',
+                          activeWeekdays.contains(5),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Cmt',
+                          activeWeekdays.contains(6),
+                        ),
+                        _buildDayIndicator(
+                          context,
+                          'Paz',
+                          activeWeekdays.contains(7),
+                        ),
                       ],
                     ),
                   ],
@@ -131,14 +159,22 @@ class WeeklyProgressCard extends StatelessWidget {
           height: 24,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? Theme.of(context).colorScheme.primary : Colors.transparent,
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
             border: Border.all(
-              color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey.shade300,
               width: 1.5,
             ),
           ),
           child: isActive
-              ? Icon(Icons.check, size: 16, color: Theme.of(context).colorScheme.surface)
+              ? Icon(
+                  Icons.check,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.surface,
+                )
               : null,
         ),
         const SizedBox(height: 6),
@@ -147,7 +183,9 @@ class WeeklyProgressCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: isActive ? Theme.of(context).colorScheme.onSurface : Colors.grey.shade400,
+            color: isActive
+                ? Theme.of(context).colorScheme.onSurface
+                : Colors.grey.shade400,
           ),
         ),
       ],

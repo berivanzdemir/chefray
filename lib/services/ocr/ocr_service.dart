@@ -16,11 +16,8 @@ class OcrResult {
     this.error,
   });
 
-  factory OcrResult.failure(String error) => OcrResult(
-        rawText: '',
-        success: false,
-        error: error,
-      );
+  factory OcrResult.failure(String error) =>
+      OcrResult(rawText: '', success: false, error: error);
 
   bool get isEmpty => rawText.trim().isEmpty;
   String get lowerText => rawText.toLowerCase();
@@ -54,15 +51,17 @@ class OcrService {
       final recognizedText = await _textRecognizer.processImage(inputImage);
 
       final blocks = recognizedText.blocks
-          .map((b) => OcrTextBlock(
-                text: b.text,
-                boundingBox: Rect(
-                  b.boundingBox.left.toDouble(),
-                  b.boundingBox.top.toDouble(),
-                  b.boundingBox.width.toDouble(),
-                  b.boundingBox.height.toDouble(),
-                ),
-              ))
+          .map(
+            (b) => OcrTextBlock(
+              text: b.text,
+              boundingBox: Rect(
+                b.boundingBox.left.toDouble(),
+                b.boundingBox.top.toDouble(),
+                b.boundingBox.width.toDouble(),
+                b.boundingBox.height.toDouble(),
+              ),
+            ),
+          )
           .toList();
 
       final rawText = recognizedText.text;
@@ -71,7 +70,9 @@ class OcrService {
       debugPrint('OCR blocks: ${blocks.length}');
 
       if (rawText.trim().isEmpty) {
-        return OcrResult.failure('OCR metin çıkaramadı. Belge okunabilir değil.');
+        return OcrResult.failure(
+          'OCR metin çıkaramadı. Belge okunabilir değil.',
+        );
       }
 
       return OcrResult(rawText: rawText, blocks: blocks);
@@ -87,34 +88,36 @@ class OcrService {
       debugPrint('PDF to Image OCR started for: ${pdfFile.path}');
       final document = await PdfDocument.openFile(pdfFile.path);
       final page = await document.getPage(1);
-      
+
       // Render at 2x scale for better OCR quality
       final pageImage = await page.render(
         width: page.width * 2,
         height: page.height * 2,
         format: PdfPageImageFormat.jpeg,
       );
-      
+
       if (pageImage == null) {
         await page.close();
         await document.close();
         return OcrResult.failure('PDF sayfası görsele çevrilemedi.');
       }
-      
+
       final tempDir = Directory.systemTemp;
-      final tempFile = File('${tempDir.path}/pdf_page_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final tempFile = File(
+        '${tempDir.path}/pdf_page_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
       await tempFile.writeAsBytes(pageImage.bytes);
-      
+
       await page.close();
       await document.close();
-      
+
       debugPrint('PDF rendered to image, running ML Kit...');
       final result = await recognizeImage(tempFile);
-      
+
       if (await tempFile.exists()) {
         await tempFile.delete();
       }
-      
+
       return result;
     } catch (e) {
       debugPrint('PDF extraction error: $e');

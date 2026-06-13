@@ -10,7 +10,7 @@ class TtsService extends ChangeNotifier {
 
   String _currentText = "";
   int _lastProgress = 0;
-  
+
   TtsService() {
     _initTts();
   }
@@ -83,7 +83,7 @@ class TtsService extends ChangeNotifier {
         } else if (spaceIdx == -1) {
           startCut = 0; // fallback
         }
-        
+
         String remainingText = _currentText.substring(startCut).trim();
         await _flutterTts.speak(remainingText);
       } else {

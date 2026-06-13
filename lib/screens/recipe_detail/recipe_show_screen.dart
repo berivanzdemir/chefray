@@ -25,7 +25,7 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
   bool _isLoadingRecipe = true;
   late RecipeModel _recipe;
   List<IngredientModel> _ingredients = [];
-  
+
   // Stages
   bool _showIntro = true;
   bool _startShow = false;
@@ -36,7 +36,7 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
     super.initState();
     final raw = widget.recipe ?? RecipeMockData.primary;
     _recipe = RecipeTranslationService.translateRecipe(raw);
-    
+
     _loadIngredients();
     _checkFavorite();
     FavoriteService.favoriteUpdateNotifier.addListener(_checkFavorite);
@@ -69,7 +69,11 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
 
     if (!mounted) return;
 
-    final all = IngredientResolverService.getDisplayIngredients(rawJson, _recipe.shownTitle, _recipe.id);
+    final all = IngredientResolverService.getDisplayIngredients(
+      rawJson,
+      _recipe.shownTitle,
+      _recipe.id,
+    );
     final resolved = all.take(6).toList();
 
     setState(() {
@@ -87,35 +91,40 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
   /// Precaches all ingredient images with a 3-second per-image timeout.
   /// Images that fail to load or time out are logged and the placeholder
   /// will be used instead, but the animation won't be delayed.
-  Future<void> _precacheIngredientImages(List<IngredientModel> ingredients) async {
+  Future<void> _precacheIngredientImages(
+    List<IngredientModel> ingredients,
+  ) async {
     final futures = <Future<void>>[];
 
     for (final ing in ingredients) {
       final url = ing.imageUrl ?? '';
       if (url.isEmpty || url.contains('default_ingredient')) {
-        debugPrint('Precache [SKIP] "${ing.name}" → placeholder (no image URL)');
+        debugPrint(
+          'Precache [SKIP] "${ing.name}" → placeholder (no image URL)',
+        );
         continue;
       }
 
       futures.add(
-        Future<void>(() async {
-          try {
-            await precacheImage(CachedNetworkImageProvider(url), context)
-                .timeout(const Duration(seconds: 3));
-            debugPrint('Precache [OK] "${ing.name}" → $url');
-          } catch (e) {
-            debugPrint('Precache [FAIL] "${ing.name}" → $url | error: $e');
-          }
-        }),
+        precacheImage(CachedNetworkImageProvider(url), context)
+            .timeout(const Duration(seconds: 3))
+            .then((_) {
+              debugPrint('Precache [OK] "${ing.name}" → $url');
+            })
+            .catchError((e) {
+              debugPrint('Precache [FAIL] "${ing.name}" → $url | error: $e');
+            }),
       );
     }
 
     if (futures.isNotEmpty) {
       await Future.wait(futures);
     }
-    debugPrint('Precache [DONE] All ${ingredients.length} ingredient images processed.');
+    debugPrint(
+      'Precache [DONE] All ${ingredients.length} ingredient images processed.',
+    );
   }
-  
+
   void _startTimers() {
     // Stage 1: Recipe Intro (0s to 2.2s)
     Future.delayed(const Duration(milliseconds: 2200), () {
@@ -123,7 +132,7 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
       setState(() {
         _showIntro = false; // Trigger fade out
       });
-      
+
       // Stage 2: Ingredients Show starts slightly after intro begins fading
       Future.delayed(const Duration(milliseconds: 400), () {
         if (!mounted) return;
@@ -131,7 +140,7 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
           _startShow = true;
         });
       });
-      
+
       // Stage 3: Bottom Panel appears after ingredients finish animating
       Future.delayed(const Duration(milliseconds: 2800), () {
         if (!mounted) return;
@@ -159,14 +168,18 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
     debugPrint('- current favorite state: $_isFavorite');
 
     setState(() => _isFavorite = !_isFavorite);
-    
+
     final newFav = await FavoriteService.toggleFavorite(_recipe.id);
     debugPrint('- toggle result: $newFav');
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(newFav ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı')),
+        SnackBar(
+          content: Text(
+            newFav ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı',
+          ),
+        ),
       );
       if (_isFavorite != newFav) {
         setState(() => _isFavorite = newFav);
@@ -185,21 +198,33 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: Theme.of(context).brightness == Brightness.dark
-                ? [Theme.of(context).scaffoldBackgroundColor, Theme.of(context).colorScheme.surfaceContainerHighest, Theme.of(context).colorScheme.surface]
-                : [const Color(0xFFF8FCFA), const Color(0xFFF1FAF5), Theme.of(context).colorScheme.surface],
+                ? [
+                    Theme.of(context).scaffoldBackgroundColor,
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                    Theme.of(context).colorScheme.surface,
+                  ]
+                : [
+                    const Color(0xFFF8FCFA),
+                    const Color(0xFFF1FAF5),
+                    Theme.of(context).colorScheme.surface,
+                  ],
           ),
         ),
         child: SafeArea(
           child: Stack(
             children: [
               _buildTopBar(),
-              
+
               if (_isLoadingRecipe)
-                Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary))
+                Center(
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                )
               else ...[
                 // The Show Stage
                 Positioned.fill(
-                  top: 80, 
+                  top: 80,
                   bottom: 120,
                   child: AnimatedOpacity(
                     opacity: _startShow ? 1.0 : 0.0,
@@ -207,7 +232,7 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
                     child: _buildShowStage(),
                   ),
                 ),
-                
+
                 // The Intro Stage (shows "Malzemeler hazırlanıyor..." while images load)
                 AnimatedOpacity(
                   opacity: _showIntro ? 1.0 : 0.0,
@@ -217,10 +242,10 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
                     child: _buildIntroStage(),
                   ),
                 ),
-                
+
                 // Bottom Panel
                 _buildBottomPanel(),
-              ]
+              ],
             ],
           ),
         ),
@@ -240,9 +265,13 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
           _isLoadingFavorite
               ? const SizedBox(width: 44, height: 44)
               : _circleBtn(
-                  _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  _isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   _toggleFavorite,
-                  iconColor: _isFavorite ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
+                  iconColor: _isFavorite
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
         ],
       ),
@@ -277,7 +306,9 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
               color: Theme.of(context).colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.15),
                   blurRadius: 40,
                   spreadRadius: 5,
                   offset: const Offset(0, 10),
@@ -293,18 +324,28 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               'Şov Başlıyor',
-              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'Malzemeler hazırlanıyor...',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -315,21 +356,20 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final centerX = constraints.maxWidth / 2;
-        final plateCenterY = constraints.maxHeight * 0.74; // Approx center of the plate Align(0, 0.48)
+        final plateCenterY =
+            constraints.maxHeight *
+            0.74; // Approx center of the plate Align(0, 0.48)
         final plateTopY = plateCenterY - 45; // Top of the plate
         final itemGap = constraints.maxHeight < 700 ? 72.0 : 82.0;
         final maxItems = constraints.maxHeight < 700 ? 5 : 6;
-        
+
         final displayIngredients = _ingredients.take(maxItems).toList();
 
         return Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: [
-            const Align(
-              alignment: Alignment(0, 0.48),
-              child: _EmptyPlate(),
-            ),
+            const Align(alignment: Alignment(0, 0.48), child: _EmptyPlate()),
             ...List.generate(displayIngredients.length, (index) {
               final slotY = plateTopY - 20 - (index * itemGap);
               final isRight = index.isEven;
@@ -378,52 +418,96 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
             children: [
               if (_recipe.recommendationReady)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.star_rounded, size: 14, color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        Icons.star_rounded,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 4),
-                      Text('En Uygun Tarif', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 11)),
+                      Text(
+                        'En Uygun Tarif',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               const SizedBox(height: 12),
-              Text(
-                _recipe.shownTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 24, fontWeight: FontWeight.bold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  _recipe.shownTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              
+
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _infoItem(Icons.schedule_rounded, _recipe.displayTime ?? '30 dk', 'Süre'),
-                    Container(width: 1, height: 24, color: Theme.of(context).dividerColor),
+                    _infoItem(
+                      Icons.schedule_rounded,
+                      _recipe.displayTime ?? '30 dk',
+                      'Süre',
+                    ),
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: Theme.of(context).dividerColor,
+                    ),
                     _infoItem(Icons.bar_chart_rounded, 'Orta', 'Zorluk'),
-                    Container(width: 1, height: 24, color: Theme.of(context).dividerColor),
-                    _infoItem(Icons.eco_outlined, _getMealType(_recipe.mealTypeV2 ?? _recipe.mealType), 'Öğün'),
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: Theme.of(context).dividerColor,
+                    ),
+                    _infoItem(
+                      Icons.eco_outlined,
+                      _getMealType(_recipe.mealTypeV2 ?? _recipe.mealType),
+                      'Öğün',
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               GestureDetector(
                 onTap: () => context.push('/recipe-detail', extra: _recipe),
                 child: Container(
@@ -433,15 +517,32 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
                     color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
-                      BoxShadow(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3), blurRadius: 15, offset: Offset(0, 5)),
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 15,
+                        offset: Offset(0, 5),
+                      ),
                     ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.play_circle_fill_rounded, color: Theme.of(context).colorScheme.surface, size: 24),
+                      Icon(
+                        Icons.play_circle_fill_rounded,
+                        color: Theme.of(context).colorScheme.surface,
+                        size: 24,
+                      ),
                       const SizedBox(width: 10),
-                      Text('Tarifi Gör', style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.surface, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Tarifi Gör',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.surface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -455,11 +556,16 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
 
   String _getMealType(String type) {
     switch (type.toLowerCase()) {
-      case 'breakfast': return 'Kahvaltı';
-      case 'lunch': return 'Öğle';
-      case 'dinner': return 'Akşam';
-      case 'snack': return 'Ara Öğün';
-      default: return 'Sağlıklı';
+      case 'breakfast':
+        return 'Kahvaltı';
+      case 'lunch':
+        return 'Öğle';
+      case 'dinner':
+        return 'Akşam';
+      case 'snack':
+        return 'Ara Öğün';
+      default:
+        return 'Sağlıklı';
     }
   }
 
@@ -472,11 +578,24 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
           children: [
             Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 4),
-            Text(val, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 12)),
+            Text(
+              val,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 10,
+          ),
+        ),
       ],
     );
   }
@@ -491,10 +610,18 @@ class _RecipeShowScreenState extends State<RecipeShowScreen> {
           color: Theme.of(context).colorScheme.surface,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
-        child: Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.onSurface, size: 20),
+        child: Icon(
+          icon,
+          color: iconColor ?? Theme.of(context).colorScheme.onSurface,
+          size: 20,
+        ),
       ),
     );
   }
@@ -508,9 +635,7 @@ class _EmptyPlate extends StatelessWidget {
     return SizedBox(
       width: 260,
       height: 90,
-      child: CustomPaint(
-        painter: _PlatePainter(context),
-      ),
+      child: CustomPaint(painter: _PlatePainter(context)),
     );
   }
 }
@@ -522,7 +647,11 @@ class _PlatePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final rect = Rect.fromCenter(center: center, width: size.width, height: size.height);
+    final rect = Rect.fromCenter(
+      center: center,
+      width: size.width,
+      height: size.height,
+    );
 
     // 1. Zemin Gölgesi (Alt Drop Shadow)
     final shadowPath = Path()..addOval(rect.translate(0, 15));
@@ -608,10 +737,12 @@ class AnimatedVerticalIngredient extends StatefulWidget {
   });
 
   @override
-  State<AnimatedVerticalIngredient> createState() => _AnimatedVerticalIngredientState();
+  State<AnimatedVerticalIngredient> createState() =>
+      _AnimatedVerticalIngredientState();
 }
 
-class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient> with SingleTickerProviderStateMixin {
+class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
+    with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _yAnim;
   late Animation<double> _scaleAnim;
@@ -621,19 +752,38 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
-    
-    _yAnim = Tween<double>(begin: widget.startY, end: widget.endY)
-      .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic)));
-      
-    _scaleAnim = Tween<double>(begin: 0.75, end: 1.0)
-      .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack)));
-      
-    _opacityAnim = Tween<double>(begin: 0.0, end: 1.0)
-      .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.4, curve: Curves.easeOut)));
-      
-    _labelOpacityAnim = Tween<double>(begin: 0.0, end: 1.0)
-      .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.7, 1.0, curve: Curves.easeIn)));
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _yAnim = Tween<double>(begin: widget.startY, end: widget.endY).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _scaleAnim = Tween<double>(begin: 0.75, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      ),
+    );
+
+    _labelOpacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
+      ),
+    );
   }
 
   @override
@@ -681,23 +831,24 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
                 ),
               ),
             ),
-            
+
             // Label & Connector
             if (isLeft) ...[
               Positioned(
-                right: MediaQuery.of(context).size.width - widget.centerX + (itemSize / 2) + 4,
+                right:
+                    MediaQuery.of(context).size.width -
+                    widget.centerX +
+                    (itemSize / 2) +
+                    4,
                 top: animatedY + (itemSize / 2) - 20,
                 child: Opacity(
                   opacity: _labelOpacityAnim.value,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildLabel(),
-                      _buildLine(isLeft: true),
-                    ],
+                    children: [_buildLabel(), _buildLine(isLeft: true)],
                   ),
                 ),
-              )
+              ),
             ] else ...[
               Positioned(
                 left: widget.centerX + (itemSize / 2) + 4,
@@ -706,14 +857,11 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
                   opacity: _labelOpacityAnim.value,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildLine(isLeft: false),
-                      _buildLabel(),
-                    ],
+                    children: [_buildLine(isLeft: false), _buildLabel()],
                   ),
                 ),
-              )
-            ]
+              ),
+            ],
           ],
         );
       },
@@ -728,7 +876,11 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
         color: Theme.of(context).colorScheme.surface,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: ClipOval(
@@ -738,9 +890,15 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
               ? CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.contain,
-                  errorWidget: (c, u, e) => Icon(Icons.eco_rounded, color: Theme.of(context).colorScheme.primary),
+                  errorWidget: (c, u, e) => Icon(
+                    Icons.eco_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 )
-              : Icon(Icons.eco_rounded, color: Theme.of(context).colorScheme.primary),
+              : Icon(
+                  Icons.eco_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
         ),
       ),
     );
@@ -754,21 +912,29 @@ class _AnimatedVerticalIngredientState extends State<AnimatedVerticalIngredient>
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1), width: 1),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            width: 1,
+          ),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 3)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
-        child: Text(
-          widget.ingredient.name,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            widget.ingredient.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

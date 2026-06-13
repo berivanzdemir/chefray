@@ -34,12 +34,14 @@ class _BreathingAuraState extends State<BreathingAura>
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 0.97, end: 1.04).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.10, end: 0.24).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.97,
+      end: 1.04,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _opacityAnimation = Tween<double>(
+      begin: 0.10,
+      end: 0.24,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -64,16 +66,17 @@ class _BreathingAuraState extends State<BreathingAura>
                 height: widget.auraHeight,
                 decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
-                  borderRadius:
-                      BorderRadius.circular(widget.auraWidth * 0.55),
+                  borderRadius: BorderRadius.circular(widget.auraWidth * 0.55),
                   gradient: RadialGradient(
                     center: Alignment.center,
                     radius: 0.65,
                     colors: [
-                      widget.auraColor
-                          .withValues(alpha: _opacityAnimation.value),
-                      widget.auraColor
-                          .withValues(alpha: _opacityAnimation.value * 0.3),
+                      widget.auraColor.withValues(
+                        alpha: _opacityAnimation.value,
+                      ),
+                      widget.auraColor.withValues(
+                        alpha: _opacityAnimation.value * 0.3,
+                      ),
                       widget.auraColor.withValues(alpha: 0.0),
                     ],
                     stops: const [0.0, 0.45, 1.0],

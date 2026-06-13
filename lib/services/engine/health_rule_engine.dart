@@ -15,19 +15,19 @@ class HealthRuleEngineResult {
   });
 
   Map<String, dynamic> toJson() => {
-        'lab_flags': labFlags,
-        'recipe_tags': recipeTags,
-        'avoid_tags': avoidTags,
-        'diet_gaps': dietGaps,
-      };
+    'lab_flags': labFlags,
+    'recipe_tags': recipeTags,
+    'avoid_tags': avoidTags,
+    'diet_gaps': dietGaps,
+  };
 
   /// Builds the anonymized JSON for AI consumption.
   Map<String, dynamic> toAnonymizedJson() => {
-        'lab_flags': labFlags,
-        'recipe_tags': recipeTags,
-        'avoid_tags': avoidTags,
-        'diet_gaps': dietGaps,
-      };
+    'lab_flags': labFlags,
+    'recipe_tags': recipeTags,
+    'avoid_tags': avoidTags,
+    'diet_gaps': dietGaps,
+  };
 
   bool get hasFlags => labFlags.isNotEmpty;
 }
@@ -54,7 +54,12 @@ class HealthRuleEngine {
     final b12 = bloodValues.values['b12'];
     if (b12 != null && b12.status == 'low') {
       labFlags.addAll(['low_b12', 'b12_deficiency_risk']);
-      recipeTags.addAll(['b12_rich', 'prefer_egg', 'prefer_fish', 'prefer_animal_protein']);
+      recipeTags.addAll([
+        'b12_rich',
+        'prefer_egg',
+        'prefer_fish',
+        'prefer_animal_protein',
+      ]);
       dietGaps.add('b12_support_needed');
     }
 
@@ -62,16 +67,27 @@ class HealthRuleEngine {
     final vitD = bloodValues.values['vitamin_d'];
     if (vitD != null && vitD.status == 'low') {
       labFlags.addAll(['low_vitamin_d', 'vitamin_d_deficiency_risk']);
-      recipeTags.addAll(['vitamin_d_rich', 'prefer_fish', 'prefer_egg', 'prefer_dairy']);
+      recipeTags.addAll([
+        'vitamin_d_rich',
+        'prefer_fish',
+        'prefer_egg',
+        'prefer_dairy',
+      ]);
       dietGaps.add('vitamin_d_support_needed');
     }
 
     // Ferritin / Iron rules
     final ferritin = bloodValues.values['ferritin'];
     final iron = bloodValues.values['iron'];
-    if ((ferritin != null && ferritin.status == 'low') || (iron != null && iron.status == 'low')) {
+    if ((ferritin != null && ferritin.status == 'low') ||
+        (iron != null && iron.status == 'low')) {
       labFlags.addAll(['low_ferritin', 'iron_deficiency_risk']);
-      recipeTags.addAll(['iron_rich', 'prefer_legumes', 'prefer_red_meat_moderate', 'prefer_spinach']);
+      recipeTags.addAll([
+        'iron_rich',
+        'prefer_legumes',
+        'prefer_red_meat_moderate',
+        'prefer_spinach',
+      ]);
       dietGaps.add('iron_support_needed');
     }
 
@@ -79,7 +95,12 @@ class HealthRuleEngine {
     final ldl = bloodValues.values['ldl'];
     if (ldl != null && ldl.status == 'high') {
       labFlags.addAll(['high_ldl', 'ldl_elevated']);
-      recipeTags.addAll(['fiber_rich', 'prefer_olive_oil', 'low_saturated_fat', 'prefer_fish']);
+      recipeTags.addAll([
+        'fiber_rich',
+        'prefer_olive_oil',
+        'low_saturated_fat',
+        'prefer_fish',
+      ]);
       avoidTags.addAll(['high_saturated_fat', 'fried', 'processed_meat']);
       dietGaps.add('fiber_support_needed');
     }
@@ -88,7 +109,12 @@ class HealthRuleEngine {
     final hdl = bloodValues.values['hdl'];
     if (hdl != null && hdl.status == 'low') {
       labFlags.addAll(['low_hdl', 'hdl_decreased']);
-      recipeTags.addAll(['omega3', 'prefer_olive_oil', 'prefer_fish', 'prefer_nuts']);
+      recipeTags.addAll([
+        'omega3',
+        'prefer_olive_oil',
+        'prefer_fish',
+        'prefer_nuts',
+      ]);
       avoidTags.addAll(['high_saturated_fat', 'trans_fat']);
       dietGaps.add('omega3_support_needed');
     }
@@ -143,7 +169,8 @@ class HealthRuleEngine {
     // ALT/AST rules
     final alt = bloodValues.values['alt'];
     final ast = bloodValues.values['ast'];
-    if ((alt != null && alt.status == 'high') || (ast != null && ast.status == 'high')) {
+    if ((alt != null && alt.status == 'high') ||
+        (ast != null && ast.status == 'high')) {
       labFlags.addAll(['elevated_liver_enzymes']);
       avoidTags.addAll(['alcohol', 'fried', 'processed_food']);
       recipeTags.addAll(['antioxidant_rich', 'prefer_vegetables', 'low_fat']);
@@ -162,7 +189,12 @@ class HealthRuleEngine {
     final hgb = bloodValues.values['hemoglobin'];
     if (hgb != null && hgb.status == 'low') {
       labFlags.addAll(['low_hemoglobin', 'anemia_risk']);
-      recipeTags.addAll(['iron_rich', 'b12_rich', 'folate_rich', 'prefer_red_meat_moderate']);
+      recipeTags.addAll([
+        'iron_rich',
+        'b12_rich',
+        'folate_rich',
+        'prefer_red_meat_moderate',
+      ]);
       dietGaps.add('iron_support_needed');
     }
 
@@ -178,17 +210,33 @@ class HealthRuleEngine {
 
     // ── Diet gap analysis from diet plan ────────────────────
     if (dietPlan != null && dietPlan.hasContent) {
-      final allFoods = dietPlan.detectedFoodItems.map((f) => f.toLowerCase()).toList();
+      final allFoods = dietPlan.detectedFoodItems
+          .map((f) => f.toLowerCase())
+          .toList();
       final allFoodText = allFoods.join(' ');
 
       // Check for protein sources
-      final hasAnimalProtein = RegExp(r'tavuk|et|balık|balik|köfte|kofte|somon|ton|yumurta').hasMatch(allFoodText);
-      final hasPlantProtein = RegExp(r'mercimek|nohut|fasulye|bezelye|börülce|soya|tofu').hasMatch(allFoodText);
-      final hasDairy = RegExp(r'süt|sut|yoğurt|yogurt|peynir|kefir|ayran').hasMatch(allFoodText);
-      final hasFish = RegExp(r'balık|balik|somon|ton|levrek|çupra|cupra|alabalık').hasMatch(allFoodText);
-      final hasVegetables = RegExp(r'sebze|salata|ıspanak|brokoli|havuç|domates|biber|patlıcan|kabak').hasMatch(allFoodText);
-      final hasLegumes = RegExp(r'mercimek|nohut|fasulye|börülce|bezelye').hasMatch(allFoodText);
-      final hasWholeGrain = RegExp(r'bulgur|tam buğday|tam bugday|çavdar|cavdar|yulaf|kinoa|kepek').hasMatch(allFoodText);
+      final hasAnimalProtein = RegExp(
+        r'tavuk|et|balık|balik|köfte|kofte|somon|ton|yumurta',
+      ).hasMatch(allFoodText);
+      final hasPlantProtein = RegExp(
+        r'mercimek|nohut|fasulye|bezelye|börülce|soya|tofu',
+      ).hasMatch(allFoodText);
+      final hasDairy = RegExp(
+        r'süt|sut|yoğurt|yogurt|peynir|kefir|ayran',
+      ).hasMatch(allFoodText);
+      final hasFish = RegExp(
+        r'balık|balik|somon|ton|levrek|çupra|cupra|alabalık',
+      ).hasMatch(allFoodText);
+      final hasVegetables = RegExp(
+        r'sebze|salata|ıspanak|brokoli|havuç|domates|biber|patlıcan|kabak',
+      ).hasMatch(allFoodText);
+      final hasLegumes = RegExp(
+        r'mercimek|nohut|fasulye|börülce|bezelye',
+      ).hasMatch(allFoodText);
+      final hasWholeGrain = RegExp(
+        r'bulgur|tam buğday|tam bugday|çavdar|cavdar|yulaf|kinoa|kepek',
+      ).hasMatch(allFoodText);
 
       if (!hasFish) {
         dietGaps.add('fish_intake_low');

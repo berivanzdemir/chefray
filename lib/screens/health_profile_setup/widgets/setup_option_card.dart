@@ -29,7 +29,9 @@ class SetupOptionCard extends StatelessWidget {
           color: isSelected ? const Color(0xFFEFFFF5) : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2DFF88) : const Color(0xFFE8F3ED),
+            color: isSelected
+                ? const Color(0xFF2DFF88)
+                : const Color(0xFFE8F3ED),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -65,7 +67,9 @@ class SetupOptionCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 22,
-                  color: isSelected ? const Color(0xFF008F4C) : const Color(0xFF8A9B9B),
+                  color: isSelected
+                      ? const Color(0xFF008F4C)
+                      : const Color(0xFF8A9B9B),
                 ),
               ),
               const SizedBox(width: 16),
@@ -80,7 +84,9 @@ class SetupOptionCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? const Color(0xFF102B2B) : const Color(0xFF102B2B),
+                      color: isSelected
+                          ? const Color(0xFF102B2B)
+                          : const Color(0xFF102B2B),
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -108,11 +114,17 @@ class SetupOptionCard extends StatelessWidget {
                         color: Color(0xFF2DFF88),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.check_rounded,
-                          size: 16, color: Color(0xFF102B2B)),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: Color(0xFF102B2B),
+                      ),
                     )
                   : const SizedBox(
-                      key: ValueKey('empty'), width: 28, height: 28),
+                      key: ValueKey('empty'),
+                      width: 28,
+                      height: 28,
+                    ),
             ),
           ],
         ),

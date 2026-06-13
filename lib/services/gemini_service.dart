@@ -6,7 +6,8 @@ class GeminiService {
   final ai.GeminiService _delegate = ai.GeminiService();
 
   Future<Map<String, dynamic>> analyzeDietList(String inputOrPrompt) async {
-    final prompt = '''
+    final prompt =
+        '''
 Sen profesyonel bir diyetisyensin. Kullanıcının gönderdiği diyet verisini analiz edeceksin.
 Aşağıdaki bilgileri JSON formatında döndür. Sadece JSON kodunu yaz, markdown işareti kullanma:
 {
@@ -23,9 +24,12 @@ Aşağıdaki bilgileri JSON formatında döndür. Sadece JSON kodunu yaz, markdo
 
     try {
       final responseText = await _delegate.generateText(prompt: prompt);
-      
+
       // Clean JSON formatting
-      String clean = responseText.replaceAll('```json', '').replaceAll('```', '').trim();
+      String clean = responseText
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
       final firstBrace = clean.indexOf('{');
       final lastBrace = clean.lastIndexOf('}');
       if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
@@ -41,14 +45,16 @@ Aşağıdaki bilgileri JSON formatında döndür. Sadece JSON kodunu yaz, markdo
         "carbs": 180,
         "fat": 65,
         "score": 8.0,
-        "summary": "Analiz başarısız oldu ancak verileriniz işleniyor. Sistem hatası."
+        "summary":
+            "Analiz başarısız oldu ancak verileriniz işleniyor. Sistem hatası.",
       };
     }
   }
 
   Future<String> generateDailyTip() async {
-    final prompt = 'Sen ChefRay isimli sağlıklı beslenme ve yemek uygulaması içindeki AI beslenme koçusun. Kullanıcıya 1 veya 2 cümlelik, motive edici ve sağlıklı beslenme ile ilgili çok kısa bir ipucu ver. Samimi bir dil kullan. Emojiler içerebilir.';
-    
+    final prompt =
+        'Sen ChefRay isimli sağlıklı beslenme ve yemek uygulaması içindeki AI beslenme koçusun. Kullanıcıya 1 veya 2 cümlelik, motive edici ve sağlıklı beslenme ile ilgili çok kısa bir ipucu ver. Samimi bir dil kullan. Emojiler içerebilir.';
+
     try {
       final responseText = await _delegate.generateText(prompt: prompt);
       return responseText.trim();

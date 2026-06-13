@@ -23,8 +23,10 @@ class SectionHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            title, 
-            style: AppTextStyles.h2.copyWith(color: Theme.of(context).colorScheme.onSurface),
+            title,
+            style: AppTextStyles.h2.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           if (actionText != null)
             GestureDetector(

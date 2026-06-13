@@ -19,7 +19,9 @@ class IngredientAssetModel {
       ingredientKey: json['ingredient_key'] as String,
       displayName: json['display_name'] as String,
       imageUrl: json['image_url'] as String,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
     );
   }
 }

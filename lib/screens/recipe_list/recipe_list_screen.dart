@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,7 +15,7 @@ class RecipeListScreen extends StatefulWidget {
   final List<RecipeModel>? preloadedRecipes;
   final List<RecommendedRecipeViewModel>? recommendedRecipes;
   final String? initialMealType;
-  
+
   const RecipeListScreen({
     super.key,
     this.preloadedRecipes,
@@ -33,24 +34,46 @@ class _RecipeListScreenState extends State<RecipeListScreen>
   final int _navIndex = 3; // Tarifler tab
   late final AnimationController _fadeCtrl;
 
+  // Search Variables
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounce;
+  List<RecipeModel> _searchResults = [];
+  bool _isSearching = false;
+  int _searchRequestId = 0;
+
   bool _isLoading = true;
   bool _isLoadingMore = false;
   String _error = '';
-  
+
   int _page = 0;
   final int _pageSize = 20;
   bool _hasMore = true;
   int _requestId = 0;
   final ScrollController _scrollCtrl = ScrollController();
-  
+
   List<RecipeModel> _allRecommendedRecipes = [];
   List<RecipeModel> _filteredRecipes = [];
   Set<String> _favoriteRecipeIds = {};
 
   static const _meals = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği', 'Ara Öğün'];
   static const _mealKeys = ['breakfast', 'lunch', 'dinner', 'snack'];
-  static const _mealIcons = [Icons.wb_sunny_outlined, Icons.wb_sunny_rounded, Icons.nightlight_round, Icons.cookie_outlined];
-  static const _sortOptions = ['En Uygun', 'Yüksek Protein', 'Düşük Kalori', 'Glutensiz', 'En Kısa Süre'];
+  static const _mealIcons = [
+    Icons.wb_sunny_outlined,
+    Icons.wb_sunny_rounded,
+    Icons.nightlight_round,
+    Icons.cookie_outlined,
+  ];
+  static const _sortOptions = [
+    'En Uygun',
+    'Yüksek Protein',
+    'Düşük Kalori',
+    'Glutensiz',
+    'En Kısa Süre',
+  ];
+
+  List<RecipeModel> get _displayedRecipes =>
+      _searchQuery.isNotEmpty ? _searchResults : _filteredRecipes;
 
   @override
   void initState() {
@@ -59,24 +82,32 @@ class _RecipeListScreenState extends State<RecipeListScreen>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     _scrollCtrl.addListener(_onScroll);
-    
+
     if (widget.initialMealType != null) {
-      final index = _mealKeys.indexWhere((m) => m == widget.initialMealType!.toLowerCase());
+      final index = _mealKeys.indexWhere(
+        (m) => m == widget.initialMealType!.toLowerCase(),
+      );
       if (index != -1) {
         _selectedMeal = index;
       }
-    } else if (widget.preloadedRecipes != null && widget.preloadedRecipes!.isNotEmpty) {
-       final firstMealType = widget.preloadedRecipes!.first.mealType;
-       // Map Turkish to English keys if necessary
-       final mapping = {'kahvaltı': 0, 'öğle yemeği': 1, 'akşam yemeği': 2, 'ara öğün': 3};
-       final index = mapping[firstMealType.toLowerCase()] ?? -1;
-       if (index != -1) {
-         _selectedMeal = index;
-       }
+    } else if (widget.preloadedRecipes != null &&
+        widget.preloadedRecipes!.isNotEmpty) {
+      final firstMealType = widget.preloadedRecipes!.first.mealType;
+      // Map Turkish to English keys if necessary
+      final mapping = {
+        'kahvaltı': 0,
+        'öğle yemeği': 1,
+        'akşam yemeği': 2,
+        'ara öğün': 3,
+      };
+      final index = mapping[firstMealType.toLowerCase()] ?? -1;
+      if (index != -1) {
+        _selectedMeal = index;
+      }
     }
-    
+
     _fetchFavorites();
     _fetchRecipes();
   }
@@ -97,7 +128,7 @@ class _RecipeListScreenState extends State<RecipeListScreen>
   Future<void> _toggleFavorite(RecipeModel recipe) async {
     final recipeId = recipe.id;
     final isFav = _favoriteRecipeIds.contains(recipeId);
-    
+
     // Optimistic UI update
     setState(() {
       if (isFav) {
@@ -120,9 +151,9 @@ class _RecipeListScreenState extends State<RecipeListScreen>
         await FavoriteService.addFavorite(recipeId);
         if (mounted) {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Favorilere eklendi')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Favorilere eklendi')));
         }
       }
     } catch (e) {
@@ -144,7 +175,8 @@ class _RecipeListScreenState extends State<RecipeListScreen>
   }
 
   void _onScroll() {
-    if (_scrollCtrl.position.pixels >= _scrollCtrl.position.maxScrollExtent - 200) {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
       if (!_isLoading && !_isLoadingMore && _hasMore) {
         _fetchRecipes(isLoadMore: true);
       }
@@ -180,25 +212,29 @@ class _RecipeListScreenState extends State<RecipeListScreen>
 
     try {
       final repo = SupabaseRecipeRepository();
-      
+
       final recipes = await repo.getRecommendedRecipes(
-        selectedMealType, 
+        selectedMealType,
         sortFilter: _selectedSort,
         page: _page,
         pageSize: _pageSize,
       );
-      
+
       if (!mounted) return;
       if (currentRequestId != _requestId) {
-        debugPrint('Race check: requestId $currentRequestId is NOT latest, discarding');
+        debugPrint(
+          'Race check: requestId $currentRequestId is NOT latest, discarding',
+        );
         return;
       }
-      debugPrint('Race check: requestId $currentRequestId isLatestRequest: true');
+      debugPrint(
+        'Race check: requestId $currentRequestId isLatestRequest: true',
+      );
 
       debugPrint('\nRecipe fetch result:');
       debugPrint('selectedMealType: $selectedMealType');
       debugPrint('resultCount: ${recipes.length}');
-      
+
       if (selectedMealType == 'snack') {
         debugPrint('\nAra Öğün için özellikle:');
         debugPrint('selectedMealLabel: $selectedMealLabel');
@@ -212,18 +248,20 @@ class _RecipeListScreenState extends State<RecipeListScreen>
           debugPrint('Filter changed: clearedOldResults: true');
         } else {
           for (var r in recipes) {
-            if (!_allRecommendedRecipes.any((existing) => existing.id == r.id)) {
+            if (!_allRecommendedRecipes.any(
+              (existing) => existing.id == r.id,
+            )) {
               _allRecommendedRecipes.add(r);
             }
           }
         }
-        
+
         if (recipes.length < _pageSize) {
           _hasMore = false;
         } else {
           _page++;
         }
-        
+
         debugPrint('totalLoadedCount: ${_allRecommendedRecipes.length}');
         debugPrint('hasMore: $_hasMore');
         debugPrint('error: None');
@@ -231,9 +269,9 @@ class _RecipeListScreenState extends State<RecipeListScreen>
         _isLoading = false;
         _isLoadingMore = false;
       });
-      
+
       _applyFilters();
-      
+
       if (!isLoadMore) {
         _fadeCtrl.forward(from: 0);
       }
@@ -243,7 +281,8 @@ class _RecipeListScreenState extends State<RecipeListScreen>
 
       debugPrint('\nRecipe fetch result: error: $e');
       setState(() {
-        _error = "Tarifler yüklenirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
+        _error =
+            "Tarifler yüklenirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
         _isLoading = false;
         _isLoadingMore = false;
       });
@@ -263,31 +302,46 @@ class _RecipeListScreenState extends State<RecipeListScreen>
 
     // Double-layer local strict recommendation and meal type security
     filtered = filtered.where((r) {
-      final recommendMatch = r.recommendationReady == true && r.isRecommendable == true && r.isDietFriendly == true;
+      final recommendMatch =
+          r.recommendationReady == true &&
+          r.isRecommendable == true &&
+          r.isDietFriendly == true;
       final blockedMatch = r.blockedReason == null || r.blockedReason!.isEmpty;
-      
+
       if (!recommendMatch || !blockedMatch) {
-         if (selectedMealType == 'snack') {
-            debugPrint('Local filter excluded snack recipe ${r.id} due to recommendMatch:$recommendMatch, blockedMatch:$blockedMatch');
-         }
+        if (selectedMealType == 'snack') {
+          debugPrint(
+            'Local filter excluded snack recipe ${r.id} due to recommendMatch:$recommendMatch, blockedMatch:$blockedMatch',
+          );
+        }
       }
-      
+
       return recommendMatch && blockedMatch;
     }).toList();
 
     // Double-layer robust local boolean filtering
-    if (_selectedSort == 'Yüksek Protein' || _selectedSort == 'En Yüksek Protein') {
-      filtered = filtered.where((r) => r.proteinStatus == 'high' || r.isHighProtein).toList();
+    if (_selectedSort == 'Yüksek Protein' ||
+        _selectedSort == 'En Yüksek Protein') {
+      filtered = filtered
+          .where((r) => r.proteinStatus == 'high' || r.isHighProtein)
+          .toList();
       filtered.sort((a, b) => (b.proteinG ?? 0).compareTo(a.proteinG ?? 0));
     } else if (_selectedSort == 'Düşük Kalori') {
-      filtered = filtered.where((r) => r.calorieStatus == 'low' || r.isLowCalorie).toList();
-      filtered.sort((a, b) => (a.caloriesKcal ?? 0).compareTo(b.caloriesKcal ?? 0));
+      filtered = filtered
+          .where((r) => r.calorieStatus == 'low' || r.isLowCalorie)
+          .toList();
+      filtered.sort(
+        (a, b) => (a.caloriesKcal ?? 0).compareTo(b.caloriesKcal ?? 0),
+      );
     } else if (_selectedSort == 'Glutensiz') {
-      filtered = filtered.where((r) =>
-        (r.glutenStatus == 'gluten_free' || r.isGlutenFree) &&
-        r.glutenStatus != 'unknown' &&
-        r.glutenStatus != 'contains_gluten'
-      ).toList();
+      filtered = filtered
+          .where(
+            (r) =>
+                (r.glutenStatus == 'gluten_free' || r.isGlutenFree) &&
+                r.glutenStatus != 'unknown' &&
+                r.glutenStatus != 'contains_gluten',
+          )
+          .toList();
     } else if (_selectedSort == 'En Kısa Süre') {
       // Sort by calculatedTotalMinutes ascending, null values go to the end
       filtered.sort((a, b) {
@@ -297,8 +351,12 @@ class _RecipeListScreenState extends State<RecipeListScreen>
       });
     }
 
-    if (selectedMealType == 'snack' && filtered.isEmpty && _allRecommendedRecipes.isNotEmpty) {
-       debugPrint('\nAra Öğün için tüm sonuçlar (_allRecommendedRecipes:${_allRecommendedRecipes.length}) yerel filtreler ($_selectedSort) tarafından sıfırlandı!');
+    if (selectedMealType == 'snack' &&
+        filtered.isEmpty &&
+        _allRecommendedRecipes.isNotEmpty) {
+      debugPrint(
+        '\nAra Öğün için tüm sonuçlar (_allRecommendedRecipes:${_allRecommendedRecipes.length}) yerel filtreler ($_selectedSort) tarafından sıfırlandı!',
+      );
     }
 
     setState(() {
@@ -306,15 +364,101 @@ class _RecipeListScreenState extends State<RecipeListScreen>
     });
   }
 
+  Future<void> _performSearch(String query) async {
+    final currentRequestId = ++_searchRequestId;
+    final selectedMealType = _mealKeys[_selectedMeal];
+
+    setState(() {
+      _isSearching = true;
+    });
+
+    final repo = SupabaseRecipeRepository();
+    final results = await repo.searchRecipesDetailed(query, selectedMealType);
+
+    if (!mounted) return;
+    if (currentRequestId != _searchRequestId) {
+      debugPrint(
+        'RecipeSearch:\n mode: search\n rawQuery: ${_searchCtrl.text}\n normalizedQuery: $query\n selectedMealType: $selectedMealType\n ignoredOldRequest: true',
+      );
+      return;
+    }
+
+    // Client-side validation to remove false positives
+    final validatedResults = results.where((r) {
+      final t = _normalizeTurkish(r.title);
+      final cTitle = _normalizeTurkish(r.displayTitle ?? '');
+      final d = _normalizeTurkish(r.description);
+      final c = _normalizeTurkish(r.category ?? '');
+      final dt = _normalizeTurkish(r.dietTypes.join(' '));
+      final ht = _normalizeTurkish(r.tags.join(' '));
+      final i = _normalizeTurkish(r.ingredients.map((e) => e.name).join(' '));
+
+      final searchableText = '$t $cTitle $d $c $i $dt $ht';
+      return searchableText.contains(query);
+    }).toList();
+
+    debugPrint(
+      'RecipeSearch:\n mode: search\n rawQuery: ${_searchCtrl.text}\n normalizedQuery: $query\n selectedMealType: $selectedMealType\n requestId: $currentRequestId\n supabaseResultCount: ${results.length}\n clientValidatedCount: ${validatedResults.length}\n displayedCount: ${validatedResults.length}\n ignoredOldRequest: false',
+    );
+
+    setState(() {
+      _searchResults = validatedResults;
+      _isSearching = false;
+    });
+  }
+
   void _clearFilters() {
+    _searchCtrl.clear();
     setState(() {
       _selectedSort = 'En Uygun';
+      _searchQuery = '';
     });
     _fetchRecipes();
   }
 
+  String _normalizeTurkish(String text) {
+    var result = text.toLowerCase().trim();
+    result = result
+        .replaceAll('ç', 'c')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ı', 'i')
+        .replaceAll('ö', 'o')
+        .replaceAll('ş', 's')
+        .replaceAll('ü', 'u');
+    return result;
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final normalized = _normalizeTurkish(query);
+      setState(() {
+        _searchQuery = normalized;
+      });
+      if (normalized.isEmpty) {
+        setState(() {
+          _searchResults.clear();
+          _isSearching = false;
+        });
+      } else {
+        _performSearch(normalized);
+      }
+    });
+  }
+
+  void _clearSearch() {
+    _searchCtrl.clear();
+    setState(() {
+      _searchQuery = '';
+      _searchResults.clear();
+      _isSearching = false;
+    });
+  }
+
   @override
   void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
     _scrollCtrl.dispose();
     _fadeCtrl.dispose();
     super.dispose();
@@ -331,14 +475,23 @@ class _RecipeListScreenState extends State<RecipeListScreen>
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).dividerColor, borderRadius: BorderRadius.circular(2))),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).dividerColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Padding(
@@ -346,7 +499,12 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Sıralama ve Filtre', style: AppTextStyles.h3.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                        Text(
+                          'Sıralama ve Filtre',
+                          style: AppTextStyles.h3.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () {
                             setModalState(() => _selectedSort = 'En Uygun');
@@ -354,7 +512,12 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                             _fetchRecipes();
                             Navigator.pop(context);
                           },
-                          child: Text('Temizle', style: AppTextStyles.labelMedium.copyWith(color: Theme.of(context).colorScheme.primary)),
+                          child: Text(
+                            'Temizle',
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -375,19 +538,30 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                             Navigator.pop(context);
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
-                              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).scaffoldBackgroundColor,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).scaffoldBackgroundColor,
                               border: Border.all(
-                                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor,
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).dividerColor,
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               option,
                               style: AppTextStyles.labelMedium.copyWith(
-                                color: isSelected ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.onSurface,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.surface
+                                    : Theme.of(context).colorScheme.onSurface,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
                               ),
                             ),
                           ),
@@ -398,7 +572,7 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                 ],
               ),
             );
-          }
+          },
         );
       },
     );
@@ -420,16 +594,29 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                   GestureDetector(
                     onTap: () => context.pop(),
                     child: Container(
-                      width: 42, height: 42,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface, shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).dividerColor),
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor,
+                        ),
                       ),
-                      child: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  Text('Tarif Önerileri', style: AppTextStyles.h2.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    'Tarif Önerileri',
+                    style: AppTextStyles.h2.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   const Spacer(),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -439,10 +626,14 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                         child: GestureDetector(
                           onTap: _navigateToFavorites,
                           child: Container(
-                            width: 42, height: 42,
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface, shape: BoxShape.circle,
-                              border: Border.all(color: Theme.of(context).dividerColor),
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Theme.of(context).dividerColor,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.04),
@@ -451,7 +642,11 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                                 ),
                               ],
                             ),
-                            child: Icon(Icons.favorite_border, color: Theme.of(context).colorScheme.primary, size: 20),
+                            child: Icon(
+                              Icons.favorite_border,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
@@ -459,10 +654,14 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                       GestureDetector(
                         onTap: _showSortFilterBottomSheet,
                         child: Container(
-                          width: 42, height: 42,
+                          width: 42,
+                          height: 42,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface, shape: BoxShape.circle,
-                            border: Border.all(color: Theme.of(context).dividerColor),
+                            color: Theme.of(context).colorScheme.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.04),
@@ -471,7 +670,11 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                               ),
                             ],
                           ),
-                          child: Icon(Icons.tune_rounded, color: Theme.of(context).colorScheme.onSurface, size: 20),
+                          child: Icon(
+                            Icons.tune_rounded,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -483,44 +686,68 @@ class _RecipeListScreenState extends State<RecipeListScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Analizine göre sana özel tarifler ', style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(
+                  'Analizine göre sana özel tarifler ',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 const Text('✨', style: TextStyle(fontSize: 12)),
               ],
             ),
             const SizedBox(height: 12),
 
-            // Info banner
+            // Search Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                height: 48,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.auto_awesome, size: 18, color: Theme.of(context).colorScheme.primary),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Hedeflerine uygun, dengeli ve lezzetli tarifler',
-                              style: AppTextStyles.labelMedium.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
-                          Text('Öğününü seç, sana en uygun tarifleri gösterelim.',
-                              style: AppTextStyles.bodySmall.copyWith(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                        ],
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: _onSearchChanged,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Tarif, malzeme veya kategori ara...',
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                    suffixIcon:
+                        _searchQuery.isNotEmpty || _searchCtrl.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: _clearSearch,
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                 ),
               ),
             ),
@@ -541,7 +768,11 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                   onTap: () {
                     if (_selectedMeal != i) {
                       setState(() => _selectedMeal = i);
-                      _fetchRecipes();
+                      if (_searchQuery.isNotEmpty) {
+                        _performSearch(_searchQuery);
+                      } else {
+                        _fetchRecipes();
+                      }
                     }
                   },
                 ),
@@ -557,14 +788,38 @@ class _RecipeListScreenState extends State<RecipeListScreen>
                 children: [
                   GestureDetector(
                     onTap: _showSortFilterBottomSheet,
-                    child: Row(children: [
-                      Text('Sıralama: ', style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      Text(_selectedSort, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
-                      Icon(Icons.arrow_drop_down, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ]),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Sıralama: ',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          _selectedSort,
+                          style: AppTextStyles.labelSmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ],
+                    ),
                   ),
-                  Text('${_filteredRecipes.length} tarif bulundu',
-                      style: AppTextStyles.bodySmall.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text(
+                    '${_displayedRecipes.length} tarif bulundu',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -572,51 +827,56 @@ class _RecipeListScreenState extends State<RecipeListScreen>
 
             // Recipe list
             Expanded(
-              child: _isLoading 
-                ? const Center(child: CircularProgressIndicator())
-                : _error.isNotEmpty
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error.isNotEmpty
                   ? Center(child: Text(_error))
-                  : _filteredRecipes.isEmpty 
-                    ? _buildEmptyState()
-                    : ListView.separated(
-                        controller: _scrollCtrl,
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-                        itemCount: _filteredRecipes.length + (_isLoadingMore ? 1 : 0),
-                        separatorBuilder: (_, i) => const SizedBox(height: 10),
-                        itemBuilder: (_, i) {
-                          if (i == _filteredRecipes.length) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                          final start = (i * 0.15).clamp(0.0, 0.7);
-                          final end = (start + 0.4).clamp(0.0, 1.0);
-                          final curve = CurvedAnimation(
-                            parent: _fadeCtrl,
-                            curve: Interval(start, end, curve: Curves.easeOut),
-                          );
-                          final recipe = _filteredRecipes[i];
-                          return AnimatedBuilder(
-                            animation: curve,
-                            builder: (ctx, ch) => Opacity(
-                              opacity: curve.value,
-                              child: Transform.translate(
-                                offset: Offset(0, 16 * (1 - curve.value)),
-                                child: ch,
-                              ),
-                            ),
-                            child: RecipeCard(
-                              recipe: recipe,
-                              onTap: () => context.push('/recipe-show', extra: recipe),
-                              isFavorite: _favoriteRecipeIds.contains(recipe.id),
-                              onFavoriteTap: () => _toggleFavorite(recipe),
+                  : _isSearching
+                  ? const Center(child: CircularProgressIndicator())
+                  : _displayedRecipes.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.separated(
+                      controller: _scrollCtrl,
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                      itemCount:
+                          _displayedRecipes.length +
+                          (_isLoadingMore && _searchQuery.isEmpty ? 1 : 0),
+                      separatorBuilder: (_, i) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        if (i == _displayedRecipes.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(),
                             ),
                           );
-                        },
-                      ),
+                        }
+                        final start = (i * 0.15).clamp(0.0, 0.7);
+                        final end = (start + 0.4).clamp(0.0, 1.0);
+                        final curve = CurvedAnimation(
+                          parent: _fadeCtrl,
+                          curve: Interval(start, end, curve: Curves.easeOut),
+                        );
+                        final recipe = _displayedRecipes[i];
+                        return AnimatedBuilder(
+                          animation: curve,
+                          builder: (ctx, ch) => Opacity(
+                            opacity: curve.value,
+                            child: Transform.translate(
+                              offset: Offset(0, 16 * (1 - curve.value)),
+                              child: ch,
+                            ),
+                          ),
+                          child: RecipeCard(
+                            recipe: recipe,
+                            onTap: () =>
+                                context.push('/recipe-show', extra: recipe),
+                            isFavorite: _favoriteRecipeIds.contains(recipe.id),
+                            onFavoriteTap: () => _toggleFavorite(recipe),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -641,40 +901,73 @@ class _RecipeListScreenState extends State<RecipeListScreen>
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80, height: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.search_off_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.search_off_rounded,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Aradığın tarif bulunamadı',
+                  style: AppTextStyles.h3.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Farklı bir kelime deneyebilir veya filtreleri temizleyebilirsin.',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _clearFilters,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: const Text(
+                    'Filtreleri Temizle',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
-            const SizedBox(height: 20),
-            Text('Bu filtreye uygun tarif bulunamadı', 
-                 style: AppTextStyles.h3.copyWith(color: Theme.of(context).colorScheme.onSurface), textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text('Filtreleri değiştirerek daha fazla tarif görebilirsin.', 
-                 style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _clearFilters,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onSurface,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              child: const Text('Filtreleri Temizle', style: TextStyle(fontWeight: FontWeight.w600)),
-            ),
-            const SizedBox(height: 40),
-          ],
+          ),
         ),
       ),
     );

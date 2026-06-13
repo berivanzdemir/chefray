@@ -18,7 +18,12 @@ class MacroMockData {
 
   static const List<MacroModel> macros = [
     MacroModel(name: 'Protein', current: 78, target: 110, percentage: 0.71),
-    MacroModel(name: 'Karbonhidrat', current: 165, target: 275, percentage: 0.60),
+    MacroModel(
+      name: 'Karbonhidrat',
+      current: 165,
+      target: 275,
+      percentage: 0.60,
+    ),
     MacroModel(name: 'Yağ', current: 42, target: 73, percentage: 0.58),
   ];
 }

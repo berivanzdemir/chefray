@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class TwinMetricCircle extends StatelessWidget {
   final IconData icon;
   final Color color;

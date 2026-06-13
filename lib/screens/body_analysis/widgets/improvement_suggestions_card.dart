@@ -7,10 +7,7 @@ import '../../../widgets/common/soft_card.dart';
 class ImprovementSuggestionsCard extends StatelessWidget {
   final List<String> suggestions;
 
-  const ImprovementSuggestionsCard({
-    super.key,
-    required this.suggestions,
-  });
+  const ImprovementSuggestionsCard({super.key, required this.suggestions});
 
   @override
   Widget build(BuildContext context) {

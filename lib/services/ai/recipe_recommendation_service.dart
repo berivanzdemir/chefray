@@ -26,18 +26,26 @@ class RecipeRecommendationService {
     List<String> dietGaps = const [],
     Map<String, List<String>> dietPlanSummary = const {},
   }) async {
-    debugPrint('RECOMMENDATION SERVICE START: ${candidateRecipes.length} candidates');
+    debugPrint(
+      'RECOMMENDATION SERVICE START: ${candidateRecipes.length} candidates',
+    );
 
     // 1. Local Pre-filtering (Allergies & Diet Preferences)
-    final userAllergies = userProfile.allergies.map((e) => e.toLowerCase().trim()).toList();
-    final userPrefs = userProfile.dietPreferences.map((e) => e.toLowerCase().trim()).toList();
+    final userAllergies = userProfile.allergies
+        .map((e) => e.toLowerCase().trim())
+        .toList();
+    final userPrefs = userProfile.dietPreferences
+        .map((e) => e.toLowerCase().trim())
+        .toList();
 
     List<RecipeModel> locallyFiltered = [];
     for (var recipe in candidateRecipes) {
       bool isExcluded = false;
 
       // 1a. Allergies Filter
-      final recipeAllergens = recipe.allergens.map((e) => e.toLowerCase().trim()).toList();
+      final recipeAllergens = recipe.allergens
+          .map((e) => e.toLowerCase().trim())
+          .toList();
       for (var allergy in userAllergies) {
         if (recipeAllergens.contains(allergy)) {
           isExcluded = true;
@@ -45,13 +53,18 @@ class RecipeRecommendationService {
         }
         final titleLower = recipe.title.toLowerCase();
         if (allergy.contains('gluten') &&
-            (recipeAllergens.contains('gluten') || titleLower.contains('un ') || titleLower.contains('buğday'))) {
+            (recipeAllergens.contains('gluten') ||
+                titleLower.contains('un ') ||
+                titleLower.contains('buğday'))) {
           isExcluded = true;
           break;
         }
         if ((allergy.contains('laktoz') || allergy.contains('süt')) &&
-            (recipeAllergens.contains('laktoz') || recipeAllergens.contains('süt ürünleri') ||
-                titleLower.contains('süt') || titleLower.contains('yoğurt') || titleLower.contains('peynir'))) {
+            (recipeAllergens.contains('laktoz') ||
+                recipeAllergens.contains('süt ürünleri') ||
+                titleLower.contains('süt') ||
+                titleLower.contains('yoğurt') ||
+                titleLower.contains('peynir'))) {
           isExcluded = true;
           break;
         }
@@ -60,7 +73,9 @@ class RecipeRecommendationService {
 
       // 1b. Avoid tags filter (from rule engine)
       if (avoidTags.isNotEmpty) {
-        final recipeText = '${recipe.title} ${recipe.ingredients.map((i) => i.name).join(" ")} ${recipe.tags.join(" ")}'.toLowerCase();
+        final recipeText =
+            '${recipe.title} ${recipe.ingredients.map((i) => i.name).join(" ")} ${recipe.tags.join(" ")}'
+                .toLowerCase();
         for (final avoidTag in avoidTags) {
           final normalTag = avoidTag.toLowerCase().replaceAll('_', ' ');
           if (_tagConflicts(normalTag, recipeText, recipe.tags)) {
@@ -72,21 +87,26 @@ class RecipeRecommendationService {
       }
 
       // 1c. Diet Preferences Filter
-      final recipeDietTypes = recipe.dietTypes.map((e) => e.toLowerCase().trim()).toList();
+      final recipeDietTypes = recipe.dietTypes
+          .map((e) => e.toLowerCase().trim())
+          .toList();
       for (var pref in userPrefs) {
         if (pref.contains('vegan') && !recipeDietTypes.contains('vegan')) {
           isExcluded = true;
           break;
         }
-        if (pref.contains('vejetaryen') && !recipeDietTypes.contains('vejetaryen')) {
+        if (pref.contains('vejetaryen') &&
+            !recipeDietTypes.contains('vejetaryen')) {
           isExcluded = true;
           break;
         }
-        if (pref.contains('glutensiz') && !recipeDietTypes.contains('glutensiz')) {
+        if (pref.contains('glutensiz') &&
+            !recipeDietTypes.contains('glutensiz')) {
           isExcluded = true;
           break;
         }
-        if (pref.contains('laktozsuz') && !recipeDietTypes.contains('laktozsuz')) {
+        if (pref.contains('laktozsuz') &&
+            !recipeDietTypes.contains('laktozsuz')) {
           isExcluded = true;
           break;
         }
@@ -106,7 +126,9 @@ class RecipeRecommendationService {
     }
 
     // 2. Serialize Candidate Recipes to Minimal JSON
-    final List<Map<String, dynamic>> minimalCandidates = candidateSubset.map((r) {
+    final List<Map<String, dynamic>> minimalCandidates = candidateSubset.map((
+      r,
+    ) {
       return {
         "recipeId": r.id.toString(),
         "title": r.title,
@@ -138,15 +160,23 @@ class RecipeRecommendationService {
 
     try {
       final rawResponse = await _gemini.generateText(prompt: prompt);
-      debugPrint('Gemini recommendations response received: ${rawResponse.length} chars');
+      debugPrint(
+        'Gemini recommendations response received: ${rawResponse.length} chars',
+      );
 
       if (rawResponse.trim().isEmpty) {
         throw Exception('Empty response from Gemini');
       }
 
-      final List<dynamic> jsonList = _gemini.extractAndParseJsonList(rawResponse);
+      final List<dynamic> jsonList = _gemini.extractAndParseJsonList(
+        rawResponse,
+      );
       final List<RecipeRecommendationResult> recommendations = jsonList
-          .map((item) => RecipeRecommendationResult.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => RecipeRecommendationResult.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
           .toList();
 
       final List<RecommendedRecipeViewModel> viewModels = [];
@@ -154,20 +184,35 @@ class RecipeRecommendationService {
         final matchingRecipe = candidateSubset.firstWhere(
           (r) => r.id.toString() == rec.recipeId.toString(),
           orElse: () => const RecipeModel(
-            id: '', title: '', description: '', calories: 0, protein: 0, carbs: 0, fat: 0,
-            timeMinutes: 0, tags: [], ingredients: [], steps: [], mealType: '',
+            id: '',
+            title: '',
+            description: '',
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            timeMinutes: 0,
+            tags: [],
+            ingredients: [],
+            steps: [],
+            mealType: '',
           ),
         );
 
         if (matchingRecipe.id.isNotEmpty) {
-          viewModels.add(RecommendedRecipeViewModel(
-            recipe: matchingRecipe,
-            recommendation: rec,
-          ));
+          viewModels.add(
+            RecommendedRecipeViewModel(
+              recipe: matchingRecipe,
+              recommendation: rec,
+            ),
+          );
         }
       }
 
-      viewModels.sort((a, b) => b.recommendation.matchScore.compareTo(a.recommendation.matchScore));
+      viewModels.sort(
+        (a, b) =>
+            b.recommendation.matchScore.compareTo(a.recommendation.matchScore),
+      );
       if (viewModels.isNotEmpty) return viewModels;
     } catch (e, st) {
       debugPrint('Error generating recipe recommendations: $e');
@@ -175,7 +220,12 @@ class RecipeRecommendationService {
     }
 
     // ── LOCAL FALLBACK ──
-    return _localFallback(locallyFiltered, userProfile, dietAnalysis, recipeTags);
+    return _localFallback(
+      locallyFiltered,
+      userProfile,
+      dietAnalysis,
+      recipeTags,
+    );
   }
 
   String _buildAnonymizedPrompt({
@@ -192,15 +242,21 @@ class RecipeRecommendationService {
   }) {
     final buffer = StringBuffer();
 
-    buffer.writeln('Sen ChefRay asistanısın. Görevin, verilen aday tarif listesini kullanıcının sağlık profili, diyet listesi ve beslenme ihtiyaçlarına göre değerlendirmek, her birini 0-100 arasında puanlamak ve en uygun olanları sıralamaktır.');
+    buffer.writeln(
+      'Sen ChefRay asistanısın. Görevin, verilen aday tarif listesini kullanıcının sağlık profili, diyet listesi ve beslenme ihtiyaçlarına göre değerlendirmek, her birini 0-100 arasında puanlamak ve en uygun olanları sıralamaktır.',
+    );
 
     // Only anonymized summary data — no raw documents, no PII
     buffer.writeln('\nKullanıcı Sağlık Profili (Anonim):');
     buffer.writeln('- Yaş: ${userProfile.age ?? "Belirtilmemiş"}');
     buffer.writeln('- Cinsiyet: ${userProfile.gender ?? "Belirtilmemiş"}');
     buffer.writeln('- Hedef: ${userProfile.goalType ?? "Dengeli Beslenme"}');
-    buffer.writeln('- Alerjiler: ${userProfile.allergies.isEmpty ? "Yok" : userProfile.allergies.join(", ")}');
-    buffer.writeln('- Beslenme Tercihleri: ${userProfile.dietPreferences.isEmpty ? "Belirtilmedi" : userProfile.dietPreferences.join(", ")}');
+    buffer.writeln(
+      '- Alerjiler: ${userProfile.allergies.isEmpty ? "Yok" : userProfile.allergies.join(", ")}',
+    );
+    buffer.writeln(
+      '- Beslenme Tercihleri: ${userProfile.dietPreferences.isEmpty ? "Belirtilmedi" : userProfile.dietPreferences.join(", ")}',
+    );
 
     // Anonymized diet plan summary (meal structure, not raw text)
     if (dietPlanSummary.isNotEmpty) {
@@ -210,8 +266,12 @@ class RecipeRecommendationService {
       }
     } else {
       buffer.writeln('\nDiyet Planı:');
-      buffer.writeln('- Kalori Hedefi: ${dietAnalysis.dailyCalorieTarget ?? "Belirtilmemiş"} kcal');
-      buffer.writeln('- Kaçınılan Besinler: ${dietAnalysis.avoidedFoods.isEmpty ? "Yok" : dietAnalysis.avoidedFoods.join(", ")}');
+      buffer.writeln(
+        '- Kalori Hedefi: ${dietAnalysis.dailyCalorieTarget ?? "Belirtilmemiş"} kcal',
+      );
+      buffer.writeln(
+        '- Kaçınılan Besinler: ${dietAnalysis.avoidedFoods.isEmpty ? "Yok" : dietAnalysis.avoidedFoods.join(", ")}',
+      );
     }
 
     // Rule engine flags — anonymized lab indicators, NOT raw values
@@ -233,12 +293,20 @@ class RecipeRecommendationService {
     buffer.writeln(jsonEncode(candidateRecipes));
 
     buffer.writeln('\nKESİN KURALLAR:');
-    buffer.writeln('1. YENİ TARİF ÜRETMEYİN. Sadece listedeki tarifleri değerlendirin.');
-    buffer.writeln('2. recipeId alanını tam olarak listedeki id ile eşleştirin.');
-    buffer.writeln('3. SADECE geçerli JSON array döndürün. Markdown ```json kullanmayın.');
+    buffer.writeln(
+      '1. YENİ TARİF ÜRETMEYİN. Sadece listedeki tarifleri değerlendirin.',
+    );
+    buffer.writeln(
+      '2. recipeId alanını tam olarak listedeki id ile eşleştirin.',
+    );
+    buffer.writeln(
+      '3. SADECE geçerli JSON array döndürün. Markdown ```json kullanmayın.',
+    );
     buffer.writeln('4. Her tarif için Türkçe kısa matchReason yazın.');
     buffer.writeln('5. Tıbbi tanı koymayın, ilaç veya tedavi önermeyin.');
-    buffer.writeln('6. "Doktorunuza/diyetisyeninize danışın" uyarısını uygun şekilde ekleyin.');
+    buffer.writeln(
+      '6. "Doktorunuza/diyetisyeninize danışın" uyarısını uygun şekilde ekleyin.',
+    );
 
     buffer.writeln('\nÇIKTI JSON FORMATI (Sadece bu formatta bir JSON Array):');
     buffer.writeln('[');
@@ -246,12 +314,18 @@ class RecipeRecommendationService {
     buffer.writeln('    "recipeId": "string",');
     buffer.writeln('    "recipeTitle": "string",');
     buffer.writeln('    "matchScore": 0,');
-    buffer.writeln('    "suggestedMealType": "Kahvaltı | Öğle Yemeği | Akşam Yemeği | Ara Öğün",');
-    buffer.writeln('    "matchReason": "Neden uygun olduğunu açıklayan Türkçe kısa cümle",');
+    buffer.writeln(
+      '    "suggestedMealType": "Kahvaltı | Öğle Yemeği | Akşam Yemeği | Ara Öğün",',
+    );
+    buffer.writeln(
+      '    "matchReason": "Neden uygun olduğunu açıklayan Türkçe kısa cümle",',
+    );
     buffer.writeln('    "healthNotes": ["Öne çıkan sağlık faydası"],');
     buffer.writeln('    "warnings": ["varsa dikkat edilmesi gereken nokta"],');
     buffer.writeln('    "allergenWarnings": ["varsa alerjen uyarısı"],');
-    buffer.writeln('    "priorityTags": ["Protein Kaynağı", "Düşük Sodyum" vb],');
+    buffer.writeln(
+      '    "priorityTags": ["Protein Kaynağı", "Düşük Sodyum" vb],',
+    );
     buffer.writeln('    "isSafeForUser": true');
     buffer.writeln('  }');
     buffer.writeln(']');
@@ -259,16 +333,46 @@ class RecipeRecommendationService {
     return buffer.toString();
   }
 
-  bool _tagConflicts(String avoidTag, String recipeText, List<String> recipeTags) {
+  bool _tagConflicts(
+    String avoidTag,
+    String recipeText,
+    List<String> recipeTags,
+  ) {
     final recipeTextLower = recipeText;
     final recipeTagsLower = recipeTags.map((t) => t.toLowerCase()).toList();
 
     final conflictMap = {
       'fried': ['kızart', 'kizart', 'fried', 'tava'],
-      'high_saturated_fat': ['tereyağı', 'tereyagi', 'krema', 'kaymak', 'kuyruk yağı'],
-      'refined_carbs': ['beyaz ekmek', 'beyaz un', 'şeker', 'seker', 'beyaz pirinç'],
-      'sugar': ['şeker', 'seker', 'reçel', 'recel', 'pekmez', 'bal', 'çikolata', 'cikolata'],
-      'high_glycemic': ['beyaz ekmek', 'patates püresi', 'patates puresi', 'mısır gevreği'],
+      'high_saturated_fat': [
+        'tereyağı',
+        'tereyagi',
+        'krema',
+        'kaymak',
+        'kuyruk yağı',
+      ],
+      'refined_carbs': [
+        'beyaz ekmek',
+        'beyaz un',
+        'şeker',
+        'seker',
+        'beyaz pirinç',
+      ],
+      'sugar': [
+        'şeker',
+        'seker',
+        'reçel',
+        'recel',
+        'pekmez',
+        'bal',
+        'çikolata',
+        'cikolata',
+      ],
+      'high_glycemic': [
+        'beyaz ekmek',
+        'patates püresi',
+        'patates puresi',
+        'mısır gevreği',
+      ],
       'processed_food': ['sosis', 'salam', 'hazır', 'paket', 'cips'],
       'processed_meat': ['sosis', 'salam', 'sucuk', 'pastırma', 'pastirma'],
       'alcohol': ['şarap', 'sarap', 'bira', 'rakı', 'raki', 'votka'],
@@ -293,9 +397,12 @@ class RecipeRecommendationService {
     debugPrint('Using local fallback for recommendations...');
     final fallbackList = <RecommendedRecipeViewModel>[];
 
-    final isHighProtein = userProfile.goalType?.toLowerCase().contains('protein') == true;
-    final isLowCalorie = userProfile.goalType?.toLowerCase().contains('kilo ver') == true ||
-        (dietAnalysis.dailyCalorieTarget != null && dietAnalysis.dailyCalorieTarget! < 1500);
+    final isHighProtein =
+        userProfile.goalType?.toLowerCase().contains('protein') == true;
+    final isLowCalorie =
+        userProfile.goalType?.toLowerCase().contains('kilo ver') == true ||
+        (dietAnalysis.dailyCalorieTarget != null &&
+            dietAnalysis.dailyCalorieTarget! < 1500);
 
     filtered.sort((a, b) {
       if (isHighProtein) return b.protein.compareTo(a.protein);
@@ -305,21 +412,23 @@ class RecipeRecommendationService {
 
     final fallbackSubset = filtered.take(10).toList();
     for (var recipe in fallbackSubset) {
-      fallbackList.add(RecommendedRecipeViewModel(
-        recipe: recipe,
-        recommendation: RecipeRecommendationResult(
-          recipeId: recipe.id.toString(),
-          recipeTitle: recipe.title,
-          matchScore: 85,
-          suggestedMealType: 'Öğle / Akşam Yemeği',
-          matchReason: 'Beslenme profilinize uygun olarak filtrelendi.',
-          healthNotes: ['Güvenli ve uyumlu tarif'],
-          warnings: [],
-          allergenWarnings: [],
-          priorityTags: recipeTags.isNotEmpty ? recipeTags : ['Önerilen'],
-          isSafeForUser: true,
+      fallbackList.add(
+        RecommendedRecipeViewModel(
+          recipe: recipe,
+          recommendation: RecipeRecommendationResult(
+            recipeId: recipe.id.toString(),
+            recipeTitle: recipe.title,
+            matchScore: 85,
+            suggestedMealType: 'Öğle / Akşam Yemeği',
+            matchReason: 'Beslenme profilinize uygun olarak filtrelendi.',
+            healthNotes: ['Güvenli ve uyumlu tarif'],
+            warnings: [],
+            allergenWarnings: [],
+            priorityTags: recipeTags.isNotEmpty ? recipeTags : ['Önerilen'],
+            isSafeForUser: true,
+          ),
         ),
-      ));
+      );
     }
     return fallbackList;
   }

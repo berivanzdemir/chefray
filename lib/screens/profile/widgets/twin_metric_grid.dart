@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// 2x2 metric grid inside a single white card with thin divider lines.
 /// Each cell: icon+label top, circular progress center, unit below.
 /// Circular progress shows SHORT values to avoid overflow.
@@ -156,15 +155,16 @@ class _MetricTile extends StatelessWidget {
               Icon(icon, color: color, size: 13),
               const SizedBox(width: 3),
               Flexible(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onSurface,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
                 ),
               ),
             ],
@@ -212,7 +212,9 @@ class _MetricTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 8,
                             fontWeight: FontWeight.w500,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             height: 1.3,
                           ),
                           textAlign: TextAlign.center,

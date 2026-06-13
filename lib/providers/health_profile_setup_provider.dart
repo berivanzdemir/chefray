@@ -30,7 +30,7 @@ class HealthProfileSetupProvider extends ChangeNotifier {
   String? errorMessage;
 
   // ── Navigation ───────────────────────────────────────────────────────
-  
+
   void initializeForEdit(UserHealthProfile profile) {
     mode = HealthProfileSetupMode.edit;
     age = profile.age;
@@ -87,14 +87,16 @@ class HealthProfileSetupProvider extends ChangeNotifier {
   }
 
   void toggleHealthCondition(String value) {
-    _toggleMulti(value, healthConditions,
-        noneKeys: {'Yok', 'Belirtmek istemiyorum'});
+    _toggleMulti(
+      value,
+      healthConditions,
+      noneKeys: {'Yok', 'Belirtmek istemiyorum'},
+    );
     notifyListeners();
   }
 
   void toggleAllergy(String value) {
-    _toggleMulti(value, allergies,
-        noneKeys: {'Yok', 'Belirtmek istemiyorum'});
+    _toggleMulti(value, allergies, noneKeys: {'Yok', 'Belirtmek istemiyorum'});
     notifyListeners();
   }
 
@@ -113,8 +115,11 @@ class HealthProfileSetupProvider extends ChangeNotifier {
   // If a "none" key is selected, clear all other selections.
   // If another option is selected, remove any "none" keys.
 
-  void _toggleMulti(String value, Set<String> targetSet,
-      {Set<String> noneKeys = const {}}) {
+  void _toggleMulti(
+    String value,
+    Set<String> targetSet, {
+    Set<String> noneKeys = const {},
+  }) {
     if (noneKeys.contains(value)) {
       targetSet.clear();
       targetSet.add(value);
@@ -149,26 +154,32 @@ class HealthProfileSetupProvider extends ChangeNotifier {
         return null;
       case 2:
         if (heightCm == null) return 'Lütfen boyunu gir.';
-        if (heightCm! < 100 || heightCm! > 230) return 'Boy 100-230 cm arasında olmalı.';
+        if (heightCm! < 100 || heightCm! > 230)
+          return 'Boy 100-230 cm arasında olmalı.';
         return null;
       case 3:
         if (weightKg == null) return 'Lütfen kilonu gir.';
-        if (weightKg! < 30 || weightKg! > 250) return 'Kilo 30-250 kg arasında olmalı.';
+        if (weightKg! < 30 || weightKg! > 250)
+          return 'Kilo 30-250 kg arasında olmalı.';
         return null;
       case 4:
-        if (goalType == null || goalType!.isEmpty) return 'Lütfen bir hedef seç.';
+        if (goalType == null || goalType!.isEmpty)
+          return 'Lütfen bir hedef seç.';
         return null;
       case 5:
-        if (healthConditions.isEmpty) return 'Lütfen en az bir seçenek işaretle.';
+        if (healthConditions.isEmpty)
+          return 'Lütfen en az bir seçenek işaretle.';
         return null;
       case 6:
         if (allergies.isEmpty) return 'Lütfen en az bir seçenek işaretle.';
         return null;
       case 7:
-        if (dietPreferences.isEmpty) return 'Lütfen en az bir seçenek işaretle.';
+        if (dietPreferences.isEmpty)
+          return 'Lütfen en az bir seçenek işaretle.';
         return null;
       case 8:
-        if (activityLevel == null || activityLevel!.isEmpty) return 'Lütfen aktivite seviyeni seç.';
+        if (activityLevel == null || activityLevel!.isEmpty)
+          return 'Lütfen aktivite seviyeni seç.';
         return null;
       case 9:
         return null;
@@ -210,7 +221,7 @@ class HealthProfileSetupProvider extends ChangeNotifier {
         final client = Supabase.instance.client;
         final userId = client.auth.currentUser?.id;
         final sessionExists = client.auth.currentSession != null;
-        
+
         final testProfile = UserHealthProfile(
           age: age,
           gender: gender,
@@ -229,7 +240,7 @@ class HealthProfileSetupProvider extends ChangeNotifier {
         debugPrint('Current User ID: $userId');
         debugPrint('Session Exists: $sessionExists');
         debugPrint('Payload Keys: $payloadKeys');
-        
+
         if (e is PostgrestException) {
           debugPrint('Exception Type: PostgrestException');
           debugPrint('Message: ${e.message}');

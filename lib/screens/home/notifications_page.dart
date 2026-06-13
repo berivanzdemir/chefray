@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import '../../../../core/constants/app_text_styles.dart';
 import '../../services/fcm_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/notification_settings_sync_service.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -23,11 +25,33 @@ class _NotificationsPageState extends State<NotificationsPage> {
   bool _weightRemindersEnabled = false;
   bool _analysisRemindersEnabled = false;
   List<Map<String, dynamic>> _history = [];
+  bool _hasUnread = false;
 
   @override
   void initState() {
     super.initState();
     _loadSwitchStates();
+    _checkUnread();
+  }
+
+  Future<void> _checkUnread() async {
+    final count = await NotificationService().getUnreadNotificationCount();
+    if (mounted) {
+      setState(() {
+        _hasUnread = count > 0;
+      });
+    }
+  }
+
+  Future<void> _markAllAsRead() async {
+    await NotificationService().markAllNotificationsAsRead();
+    await _loadSwitchStates();
+    await _checkUnread();
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Tüm bildirimler okundu.')));
+    }
   }
 
   /// SharedPreferences'tan switch durumlarını yükle + izin kontrolü yap.
@@ -54,8 +78,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
           final body = (item['body'] as String?) ?? '';
           final type = (item['type'] as String?) ?? '';
           // Test kayıtlarını filtrele
-          if (title.contains('Test') || 
-              body.contains('(Test)') || 
+          if (title.contains('Test') ||
+              body.contains('(Test)') ||
               body.contains('Bildirim sistemi çalışıyor') ||
               type == 'Test') {
             return false;
@@ -81,7 +105,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             hasPermission && (prefs.getBool('weight_reminders') ?? false);
         _analysisRemindersEnabled =
             hasPermission && (prefs.getBool('analysis_reminders') ?? false);
-            
+
         _history = filteredHistory;
       });
     }
@@ -89,7 +113,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   /// Switch açılınca izin iste; izin yoksa switch'i geri kapat.
   Future<void> _onSwitchChanged(
-      String key, bool value, void Function(bool) setStateCallback) async {
+    String key,
+    bool value,
+    void Function(bool) setStateCallback,
+  ) async {
     if (value) {
       // İzin kontrolü yap
       final status = await FcmService.instance.checkPermissionStatus();
@@ -100,8 +127,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         setStateCallback(true);
       } else {
         // İzin iste
-        final token =
-            await FcmService.instance.requestPermissionAndGetToken();
+        final token = await FcmService.instance.requestPermissionAndGetToken();
         if (token != null) {
           setStateCallback(true);
         } else {
@@ -116,7 +142,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     // Tercihi kaydet
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value && (await _isPermissionGranted()));
+    final finalValue = value && (await _isPermissionGranted());
+    await prefs.setBool(key, finalValue);
+
+    // Supabase'e gönder
+    NotificationSettingsSyncService.instance.updateSingleSetting(
+      key,
+      finalValue,
+    );
   }
 
   Future<bool> _isPermissionGranted() async {
@@ -133,7 +166,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -155,9 +191,37 @@ class _NotificationsPageState extends State<NotificationsPage> {
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'Geçmiş Bildirimler',
-                style: AppTextStyles.h3.copyWith(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Geçmiş Bildirimler',
+                    style: AppTextStyles.h3.copyWith(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  if (_hasUnread)
+                    TextButton(
+                      onPressed: _markAllAsRead,
+                      style: TextButton.styleFrom(
+                        minimumSize: Size.zero,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Tümünü oku',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -196,7 +260,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildSwitchTile('Günlük Hatırlatmalar', _dailyRemindersEnabled, (val) {
+          _buildSwitchTile('Günlük Hatırlatmalar', _dailyRemindersEnabled, (
+            val,
+          ) {
             _onSwitchChanged('daily_reminders', val, (v) {
               if (mounted) setState(() => _dailyRemindersEnabled = v);
             });
@@ -206,27 +272,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
               if (mounted) setState(() => _waterRemindersEnabled = v);
             });
           }),
-          _buildSwitchTile('Öğün / Kalori Hatırlatmaları', _calorieRemindersEnabled, (val) {
-            _onSwitchChanged('calorie_reminders', val, (v) {
-              if (mounted) setState(() => _calorieRemindersEnabled = v);
-            });
-          }),
-          _buildSwitchTile('Protein Hatırlatmaları', _proteinRemindersEnabled, (val) {
+          _buildSwitchTile(
+            'Öğün / Kalori Hatırlatmaları',
+            _calorieRemindersEnabled,
+            (val) {
+              _onSwitchChanged('calorie_reminders', val, (v) {
+                if (mounted) setState(() => _calorieRemindersEnabled = v);
+              });
+            },
+          ),
+          _buildSwitchTile('Protein Hatırlatmaları', _proteinRemindersEnabled, (
+            val,
+          ) {
             _onSwitchChanged('protein_reminders', val, (v) {
               if (mounted) setState(() => _proteinRemindersEnabled = v);
             });
           }),
-          _buildSwitchTile('Hareket Hatırlatmaları', _movementRemindersEnabled, (val) {
-            _onSwitchChanged('movement_reminders', val, (v) {
-              if (mounted) setState(() => _movementRemindersEnabled = v);
-            });
-          }),
-          _buildSwitchTile('Haftalık Tartı Hatırlatması', _weightRemindersEnabled, (val) {
-            _onSwitchChanged('weight_reminders', val, (v) {
-              if (mounted) setState(() => _weightRemindersEnabled = v);
-            });
-          }),
-          _buildSwitchTile('Analiz Bildirimleri', _analysisRemindersEnabled, (val) {
+          _buildSwitchTile(
+            'Hareket Hatırlatmaları',
+            _movementRemindersEnabled,
+            (val) {
+              _onSwitchChanged('movement_reminders', val, (v) {
+                if (mounted) setState(() => _movementRemindersEnabled = v);
+              });
+            },
+          ),
+          _buildSwitchTile(
+            'Haftalık Tartı Hatırlatması',
+            _weightRemindersEnabled,
+            (val) {
+              _onSwitchChanged('weight_reminders', val, (v) {
+                if (mounted) setState(() => _weightRemindersEnabled = v);
+              });
+            },
+          ),
+          _buildSwitchTile('Analiz Bildirimleri', _analysisRemindersEnabled, (
+            val,
+          ) {
             _onSwitchChanged('analysis_reminders', val, (v) {
               if (mounted) setState(() => _analysisRemindersEnabled = v);
             });
@@ -236,7 +318,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildSwitchTile(
+    String title,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -269,7 +355,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         child: Text(
           'Henüz bildirim geçmişi bulunmuyor.',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
@@ -290,17 +378,26 @@ class _NotificationsPageState extends State<NotificationsPage> {
         String timeDisplay = '';
         if (timeStr != null) {
           final dt = DateTime.parse(timeStr);
-          timeDisplay = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+          timeDisplay =
+              '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
         }
-        
+
         IconData icon = _getNotificationIcon(title, type);
-        
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isRead ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+            color: isRead
+                ? Theme.of(context).colorScheme.surface
+                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
-            border: isRead ? Border.all(color: Theme.of(context).dividerColor) : Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+            border: isRead
+                ? Border.all(color: Theme.of(context).dividerColor)
+                : Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                  ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,10 +405,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isRead ? Theme.of(context).dividerColor.withValues(alpha: 0.1) : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: isRead
+                      ? Theme.of(context).dividerColor.withValues(alpha: 0.1)
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 20, color: isRead ? Theme.of(context).colorScheme.onSurfaceVariant : Theme.of(context).colorScheme.primary),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: isRead
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : Theme.of(context).colorScheme.primary,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -326,18 +433,24 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             title,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w700,
+                              fontWeight: isRead
+                                  ? FontWeight.w600
+                                  : FontWeight.w700,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           timeDisplay,
                           style: TextStyle(
                             fontSize: 12,
-                            color: isRead ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7) : Theme.of(context).colorScheme.primary,
-                            fontWeight: isRead ? FontWeight.normal : FontWeight.w600,
+                            color: isRead
+                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.7)
+                                : Theme.of(context).colorScheme.primary,
+                            fontWeight: isRead
+                                ? FontWeight.normal
+                                : FontWeight.w600,
                           ),
                         ),
                       ],
@@ -347,7 +460,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       body,
                       style: TextStyle(
                         fontSize: 13,
-                        color: isRead ? Theme.of(context).colorScheme.onSurfaceVariant : Theme.of(context).colorScheme.onSurface,
+                        color: isRead
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -390,7 +505,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (title.contains('Protein')) return Icons.egg_alt;
     if (title.contains('Kalori')) return Icons.fastfood;
     if (title.contains('Analiz')) return Icons.auto_awesome;
-    if (title.contains('Günlük') || title.contains('Özet') || title.contains('Öğün')) return Icons.fastfood;
+    if (title.contains('Günlük') ||
+        title.contains('Özet') ||
+        title.contains('Öğün'))
+      return Icons.fastfood;
 
     return Icons.notifications;
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class ProfileDailyGoalsCard extends StatelessWidget {
   final double caloriePercent;
   final double proteinPercent;
@@ -50,7 +49,11 @@ class ProfileDailyGoalsCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.track_changes_rounded, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.track_changes_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Günlük Hedefler',
@@ -66,7 +69,10 @@ class ProfileDailyGoalsCard extends StatelessWidget {
               GestureDetector(
                 onTap: onEditTap,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     border: Border.all(color: const Color(0xFFE0E0E0)),
@@ -74,11 +80,19 @@ class ProfileDailyGoalsCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.edit_rounded, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      Icon(
+                        Icons.edit_rounded,
+                        size: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Hedefleri düzenle',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -161,17 +175,27 @@ class ProfileDailyGoalsCard extends StatelessWidget {
             Icon(icon, size: 16, color: color),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: FittedBox(
+                alignment: Alignment.centerLeft,
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 4),
             Text(
               value,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               maxLines: 1,
             ),
           ],

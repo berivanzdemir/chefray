@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 
 class BodyAnalysisCard extends StatelessWidget {
   final double bmi;
@@ -54,27 +53,44 @@ class BodyAnalysisCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'BMI (Vücut Kitle İndeksi)',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Kilonuzun boyunuza göre oranını gösterir. Kategoriler:',
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               '• <18.5: Zayıf\n• 18.5 - 24.9: Normal\n• 25.0 - 29.9: Fazla Kilolu\n• 30.0+: Obez',
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'BMR & Günlük Kalori',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'BMR (Bazal Metabolizma Hızı), dinlenme halindeki enerji harcamanızdır. Mifflin-St Jeor formülü ile hesaplanmıştır. Günlük kalori ihtiyacınız, BMR değerinizin aktivite faktörünüz ile çarpılmasıyla bulunur.',
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             Container(
@@ -85,12 +101,19 @@ class BodyAnalysisCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.menu_book_rounded, color: Colors.blue, size: 20),
+                  const Icon(
+                    Icons.menu_book_rounded,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Hesaplamalarımız Dünya Sağlık Örgütü (WHO) ve Hastalık Kontrol ve Önleme Merkezleri (CDC) standartlarına göre yapılmaktadır.',
-                      style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade800,
+                      ),
                     ),
                   ),
                 ],
@@ -126,7 +149,11 @@ class BodyAnalysisCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.monitor_weight_outlined, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.monitor_weight_outlined,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Vücut Analizi',
@@ -143,7 +170,11 @@ class BodyAnalysisCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
-                  child: Icon(Icons.info_outline, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -180,7 +211,8 @@ class BodyAnalysisCard extends StatelessWidget {
               Expanded(
                 child: _BodyMetricItem(
                   label: 'İdeal Kilo\nAralığı',
-                  value: '${idealRange.min.toInt()} - ${idealRange.max.toInt()}',
+                  value:
+                      '${idealRange.min.toInt()} - ${idealRange.max.toInt()}',
                   subValue: 'kg',
                 ),
               ),
@@ -195,31 +227,16 @@ class BodyAnalysisCard extends StatelessWidget {
                 Text(
                   'Vücut Durumu',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : const Color(0xFF0B3D35),
                   ),
                 ),
-                const SizedBox(height: 12),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _BodyStatusBar(bmiStatus: bmiStatus, bmi: bmi),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    bmiStatus,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryDark,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -319,133 +336,176 @@ class _BodyStatusBar extends StatelessWidget {
 
   const _BodyStatusBar({required this.bmiStatus, required this.bmi});
 
-  /// Maps a BMI value to a bar position [0.0, 1.0] using category segments:
-  /// 0.00 – 0.20 → Underweight  (BMI < 18.5)
-  /// 0.20 – 0.55 → Normal       (18.5 ≤ BMI < 25)
-  /// 0.55 – 0.75 → Overweight   (25 ≤ BMI < 30)
-  /// 0.75 – 1.00 → Obese        (BMI ≥ 30)
-  double _getBmiPosition(double bmi) {
-    if (bmi < 18.5) {
-      return _mapRange(bmi.clamp(15.0, 18.5), 15.0, 18.5, 0.0, 0.20);
-    } else if (bmi < 25.0) {
-      return _mapRange(bmi, 18.5, 25.0, 0.20, 0.55);
-    } else if (bmi < 30.0) {
-      return _mapRange(bmi, 25.0, 30.0, 0.55, 0.75);
-    } else {
-      return _mapRange(bmi.clamp(30.0, 40.0), 30.0, 40.0, 0.75, 1.0);
-    }
-  }
-
-  double _mapRange(
-      double value, double inMin, double inMax, double outMin, double outMax) {
-    return outMin + ((value - inMin) / (inMax - inMin)) * (outMax - outMin);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final double position = _getBmiPosition(bmi).clamp(0.0, 1.0);
+    // Toplam görsel bar aralığı 16 - 40 olarak düşünüldü (toplam 24 birim)
+    final double clampedBmi = bmi.clamp(16.0, 40.0);
+    final double positionPercent = (clampedBmi - 16.0) / 24.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final double barWidth = constraints.maxWidth;
-        // Centered pin width is 12px, half is 6
-        final double pinLeft =
-            ((barWidth * position) - 6).clamp(0.0, barWidth - 12.0);
+        final double pinLeft = positionPercent * barWidth;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 18,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    left: pinLeft,
-                    bottom: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            shape: BoxShape.circle,
-                            border:
-                                Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 2,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                        ),
-                        CustomPaint(
-                          size: const Size(6, 4),
-                          painter: _TrianglePainter(color: Theme.of(context).colorScheme.primary),
-                        ),
-                      ],
-                    ),
+        return Padding(
+          padding: const EdgeInsets.only(top: 65, bottom: 10),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // 1. BMI Segmentli Bar
+              Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Row(
+                    children: [
+                      // Zayıf: 16 - 18.5 (2.5 birim = ~10.4%) -> 25 flex
+                      Expanded(
+                        flex: 25,
+                        child: Container(color: const Color(0xFF64B5F6)),
+                      ),
+                      Container(width: 1.5, color: Colors.white),
+                      // Normal: 18.5 - 25 (6.5 birim = ~27.1%) -> 65 flex
+                      Expanded(
+                        flex: 65,
+                        child: Container(color: const Color(0xFF5BCB75)),
+                      ),
+                      Container(width: 1.5, color: Colors.white),
+                      // Fazla Kilolu: 25 - 30 (5 birim = ~20.8%) -> 50 flex
+                      Expanded(
+                        flex: 50,
+                        child: Container(color: const Color(0xFFF6D65B)),
+                      ),
+                      Container(width: 1.5, color: Colors.white),
+                      // Obez I: 30 - 35 (5 birim = ~20.8%) -> 50 flex
+                      Expanded(
+                        flex: 50,
+                        child: Container(color: const Color(0xFFFF9F43)),
+                      ),
+                      Container(width: 1.5, color: Colors.white),
+                      // Obez II: 35 - 40 (5 birim = ~20.8%) -> 50 flex
+                      Expanded(
+                        flex: 50,
+                        child: Container(color: const Color(0xFFF45B5B)),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 2),
-            // Gradient stops aligned to segment boundaries:
-            // 0.00 = red (underweight start)
-            // 0.20 = orange (underweight end / normal start transition)
-            // 0.375 = green (mid-normal)
-            // 0.55 = orange (normal end / overweight start transition)
-            // 0.75 = red (overweight end / obese start)
-            // 1.00 = dark red (obese)
-            Container(
-              height: 6,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFE53935), // deep red — underweight
-                    Color(0xFFFF7043), // orange — underweight boundary
-                    Color(0xFF66BB6A), // green — normal zone
-                    Color(0xFF66BB6A), // green — normal zone
-                    Color(0xFFFF7043), // orange — overweight boundary
-                    Color(0xFFE53935), // deep red — obese
-                  ],
-                  stops: [0.0, 0.20, 0.30, 0.55, 0.75, 1.0],
                 ),
               ),
-            ),
-          ],
+
+              // 2. Alt Ölçekler (Tick ve yazılar)
+              _buildScaleTick(0.0, '16', barWidth),
+              _buildScaleTick(2.5 / 24.0, '18.5', barWidth),
+              _buildScaleTick(9.0 / 24.0, '25', barWidth),
+              _buildScaleTick(14.0 / 24.0, '30', barWidth),
+              _buildScaleTick(19.0 / 24.0, '35+', barWidth),
+
+              // 3. Pin Marker ve Etiket
+              Positioned(
+                left: pinLeft - 40, // 80 genisligindeki widgeti ortala
+                bottom: 14, // Barın üstüne yerleşsin
+                child: SizedBox(
+                  width: 80,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Durum Etiketi
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F8EE),
+                          border: Border.all(color: const Color(0xFFBFEACF)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            bmiStatus,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF22A65A),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // BMI Marker Pin
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF22C55E),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF16A34A,
+                              ).withValues(alpha: 0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          bmi.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      // Noktalı/Kesik dikey çizgi
+                      Container(
+                        width: 2,
+                        height: 6,
+                        margin: const EdgeInsets.only(top: 2),
+                        color: const Color(0xFF6BBF7A),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
   }
-}
 
-class _TrianglePainter extends CustomPainter {
-  final Color color;
-
-  const _TrianglePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width / 2, size.height);
-    path.close();
-
-    canvas.drawPath(path, paint);
+  Widget _buildScaleTick(double percent, String label, double barWidth) {
+    return Positioned(
+      left: (percent * barWidth) - 15,
+      top: 14, // bar height (12) + gap
+      child: SizedBox(
+        width: 30,
+        child: Column(
+          children: [
+            Container(width: 1, height: 4, color: const Color(0xFFDDE7E4)),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 10,
+                color: Color(0xFF7A8B87),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

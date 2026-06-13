@@ -7,10 +7,7 @@ import '../../../widgets/common/soft_card.dart';
 class HealthStatusCard extends StatelessWidget {
   final List<String> healthConditions;
 
-  const HealthStatusCard({
-    super.key,
-    required this.healthConditions,
-  });
+  const HealthStatusCard({super.key, required this.healthConditions});
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +24,16 @@ class HealthStatusCard extends StatelessWidget {
           // Header with heart icon
           Row(
             children: [
-              Icon(Icons.favorite_rounded,
-                  size: 16, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                Icons.favorite_rounded,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 6),
-              Text('Sağlık Durumu',
-                  style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Sağlık Durumu',
+                style: AppTextStyles.h3.copyWith(fontSize: 13),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -40,22 +42,28 @@ class HealthStatusCard extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: filtered
-                  .map((item) => Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
+                  .map(
+                    (item) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        item,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
                         ),
-                        child: Text(
-                          item,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ))
+                      ),
+                    ),
+                  )
                   .toList(),
             )
           else
@@ -76,9 +84,12 @@ class HealthStatusCard extends StatelessWidget {
         children: [
           Icon(Icons.info_outline, size: 14, color: AppColors.textHint),
           const SizedBox(width: 8),
-          Text(text,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            text,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

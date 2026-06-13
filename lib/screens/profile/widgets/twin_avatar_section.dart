@@ -25,8 +25,10 @@ class TwinAvatarSection extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           // Avatar fills ~78% of available height
-          final double avatarH =
-              (constraints.maxHeight * 0.78).clamp(230.0, 285.0);
+          final double avatarH = (constraints.maxHeight * 0.78).clamp(
+            230.0,
+            285.0,
+          );
           // Aura proportional to avatar: ~1.15x width, ~1.05x height
           final double auraW = avatarH * 0.52; // roughly body width * 1.15
           final double auraH = avatarH * 0.85; // slightly taller than torso

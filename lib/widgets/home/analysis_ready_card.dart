@@ -39,17 +39,26 @@ class AnalysisReadyCard extends StatelessWidget {
             Expanded(
               flex: 35,
               child: Padding(
-                padding: const EdgeInsets.only(left: 14, top: 20, bottom: 20, right: 8),
+                padding: const EdgeInsets.only(
+                  left: 14,
+                  top: 20,
+                  bottom: 20,
+                  right: 8,
+                ),
                 child: Image.asset(
                   'assets/analiz.png',
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.analytics_rounded, color: AppColors.primary, size: 48),
+                    child: Icon(
+                      Icons.analytics_rounded,
+                      color: AppColors.primary,
+                      size: 48,
+                    ),
                   ),
                 ),
               ),
             ),
-            
+
             // Sağ alan
             Expanded(
               flex: 65,
@@ -97,19 +106,22 @@ class AnalysisReadyCard extends StatelessWidget {
                         child: Row(
                           children: [
                             _AnalysisChip(
-                                icon: Icons.water_drop_rounded,
-                                label: 'Kan Analizi',
-                                color: Colors.red.shade400),
+                              icon: Icons.water_drop_rounded,
+                              label: 'Kan Analizi',
+                              color: Colors.red.shade400,
+                            ),
                             const SizedBox(width: 4),
                             _AnalysisChip(
-                                icon: Icons.person_rounded,
-                                label: 'Diyet Profili',
-                                color: Colors.green.shade500),
+                              icon: Icons.person_rounded,
+                              label: 'Diyet Profili',
+                              color: Colors.green.shade500,
+                            ),
                             const SizedBox(width: 4),
                             _AnalysisChip(
-                                icon: Icons.favorite_rounded,
-                                label: 'Tercihler',
-                                color: Colors.purple.shade400),
+                              icon: Icons.favorite_rounded,
+                              label: 'Tercihler',
+                              color: Colors.purple.shade400,
+                            ),
                           ],
                         ),
                       ),
@@ -126,7 +138,9 @@ class AnalysisReadyCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(26),
                         ),
                         child: ElevatedButton(
-                          onPressed: isAnalysisReady ? onCreateDietPlan : onUploadTap,
+                          onPressed: isAnalysisReady
+                              ? onCreateDietPlan
+                              : onUploadTap,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -163,9 +177,10 @@ class AnalysisReadyCard extends StatelessWidget {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 15,
-                                    color: Colors.white),
+                                  Icons.arrow_forward_rounded,
+                                  size: 15,
+                                  color: Colors.white,
+                                ),
                               ),
                             ],
                           ),
@@ -182,7 +197,9 @@ class AnalysisReadyCard extends StatelessWidget {
                             'Analiz Özeti  >',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -205,8 +222,11 @@ class _AnalysisChip extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _AnalysisChip(
-      {required this.icon, required this.label, required this.color});
+  const _AnalysisChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +234,7 @@ class _AnalysisChip extends StatelessWidget {
       height: 26,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark 
+        color: Theme.of(context).brightness == Brightness.dark
             ? Theme.of(context).colorScheme.surfaceContainerHighest
             : color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(13),

@@ -1,5 +1,3 @@
-
-
 class UploadedDocumentModel {
   final String id;
   final String userId;
@@ -7,7 +5,8 @@ class UploadedDocumentModel {
   final String fileName;
   final String? filePath;
   final String? fileUrl;
-  final String status; // 'uploaded', 'verified', 'rejected', 'processed', 'error'
+  final String
+  status; // 'uploaded', 'verified', 'rejected', 'processed', 'error'
   final String? ocrText;
   final Map<String, dynamic>? parsedData;
   final Map<String, dynamic>? validationResult;

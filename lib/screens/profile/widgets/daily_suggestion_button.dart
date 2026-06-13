@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Full-width green gradient CTA button. Text NEVER truncates.
 class DailySuggestionButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -27,7 +26,9 @@ class DailySuggestionButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.25),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -37,8 +38,11 @@ class DailySuggestionButton extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome_rounded,
-                      color: Theme.of(context).colorScheme.surface, size: 16),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Theme.of(context).colorScheme.surface,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Bugünkü önerimi ver',

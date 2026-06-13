@@ -3,7 +3,8 @@ import 'package:crypto/crypto.dart';
 import '../../models/ai/analysis_results.dart';
 
 class AnalysisCacheManager {
-  static final AnalysisCacheManager _instance = AnalysisCacheManager._internal();
+  static final AnalysisCacheManager _instance =
+      AnalysisCacheManager._internal();
   factory AnalysisCacheManager() => _instance;
   AnalysisCacheManager._internal();
 
@@ -16,7 +17,11 @@ class AnalysisCacheManager {
     return sha256.convert(bytes).toString();
   }
 
-  void cacheValidation(String hash, UploadType type, DocumentValidationResult result) {
+  void cacheValidation(
+    String hash,
+    UploadType type,
+    DocumentValidationResult result,
+  ) {
     _validationCache['$hash-${type.name}'] = result;
   }
 

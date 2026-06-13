@@ -62,7 +62,9 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
 
       if (product == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bu ürün Open Food Facts veritabanında bulunamadı.')),
+          const SnackBar(
+            content: Text('Bu ürün Open Food Facts veritabanında bulunamadı.'),
+          ),
         );
         setState(() => _isScanning = true);
         _controller.start();
@@ -104,7 +106,10 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             child: Text(
               'Paketli ürünlerin barkodunu okutarak senin için ne kadar sağlıklı olduğunu anında öğren.',
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
           ),
           // Camera preview area
@@ -113,7 +118,10 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: Theme.of(context).colorScheme.surface, width: 6),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.surface,
+                  width: 6,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withValues(alpha: 0.15),
@@ -136,7 +144,9 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                       Container(
                         color: Colors.black87,
                         child: const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     // Scanner Overlay Graphic
@@ -145,7 +155,10 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                         width: 220,
                         height: 140,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 3),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            width: 3,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
@@ -186,7 +199,12 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                     const Expanded(child: Divider(color: AppColors.divider)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Veya', style: AppTextStyles.labelMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      child: Text(
+                        'Veya',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                     const Expanded(child: Divider(color: AppColors.divider)),
                   ],
@@ -199,14 +217,24 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                         controller: _textController,
                         decoration: InputDecoration(
                           hintText: 'Ürün adıyla veya barkodla ara',
-                          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textLight),
+                          hintStyle: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textLight,
+                          ),
                           filled: true,
-                          fillColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.white,
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest
+                              : Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                         ),
                         keyboardType: TextInputType.text,
                         onSubmitted: (_) => _onManualSubmit(),
@@ -229,7 +257,10 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.search_rounded, color: Colors.white),
+                        child: const Icon(
+                          Icons.search_rounded,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],

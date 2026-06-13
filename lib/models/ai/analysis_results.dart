@@ -8,7 +8,8 @@ enum UploadType { dietPdf, bloodPdf }
 
 class DocumentValidationResult {
   final bool isValid;
-  final String detectedType; // diet_list | blood_test | unknown | unreadable | unsupported
+  final String
+  detectedType; // diet_list | blood_test | unknown | unreadable | unsupported
   final double confidence;
   final String extractedTextSummary;
   final String reason;
@@ -26,24 +27,26 @@ class DocumentValidationResult {
   String get extractedText => extractedTextSummary;
   String get summary => extractedTextSummary;
 
-  factory DocumentValidationResult.invalid(String message, {String reason = ''}) =>
-      DocumentValidationResult(
-        isValid: false,
-        detectedType: 'unknown',
-        confidence: 0.0,
-        extractedTextSummary: '',
-        reason: reason,
-        userMessage: message,
-      );
+  factory DocumentValidationResult.invalid(
+    String message, {
+    String reason = '',
+  }) => DocumentValidationResult(
+    isValid: false,
+    detectedType: 'unknown',
+    confidence: 0.0,
+    extractedTextSummary: '',
+    reason: reason,
+    userMessage: message,
+  );
 
   Map<String, dynamic> toJson() => {
-        'isValid': isValid,
-        'detectedType': detectedType,
-        'confidence': confidence,
-        'extractedTextSummary': extractedTextSummary,
-        'reason': reason,
-        'userMessage': userMessage,
-      };
+    'isValid': isValid,
+    'detectedType': detectedType,
+    'confidence': confidence,
+    'extractedTextSummary': extractedTextSummary,
+    'reason': reason,
+    'userMessage': userMessage,
+  };
 }
 
 // ── Diet Analysis ────────────────────────────────────────────────────────────
@@ -84,24 +87,43 @@ class DietAnalysisResult {
     this.rawExtractedText = '',
   });
 
-  factory DietAnalysisResult.empty() => const DietAnalysisResult(
-        dietSummary: 'Diyet belgesi analiz edilemedi.',
-      );
+  factory DietAnalysisResult.empty() =>
+      const DietAnalysisResult(dietSummary: 'Diyet belgesi analiz edilemedi.');
 
   Map<String, dynamic> toJson() => {
-        'dailyCalorieTarget': dailyCalorieTarget,
-        'breakfast': breakfast != null ? {'name': breakfast!.name, 'items': breakfast!.items, 'calories': breakfast!.calories} : null,
-        'lunch': lunch != null ? {'name': lunch!.name, 'items': lunch!.items, 'calories': lunch!.calories} : null,
-        'dinner': dinner != null ? {'name': dinner!.name, 'items': dinner!.items, 'calories': dinner!.calories} : null,
-        'snacks': snacks.map((s) => {'name': s.name, 'items': s.items, 'calories': s.calories}).toList(),
-        'proteinGrams': proteinGrams,
-        'carbsGrams': carbsGrams,
-        'fatGrams': fatGrams,
-        'avoidedFoods': avoidedFoods,
-        'dietSummary': dietSummary,
-        'nutritionNotes': nutritionNotes,
-        'rawExtractedText': rawExtractedText,
-      };
+    'dailyCalorieTarget': dailyCalorieTarget,
+    'breakfast': breakfast != null
+        ? {
+            'name': breakfast!.name,
+            'items': breakfast!.items,
+            'calories': breakfast!.calories,
+          }
+        : null,
+    'lunch': lunch != null
+        ? {
+            'name': lunch!.name,
+            'items': lunch!.items,
+            'calories': lunch!.calories,
+          }
+        : null,
+    'dinner': dinner != null
+        ? {
+            'name': dinner!.name,
+            'items': dinner!.items,
+            'calories': dinner!.calories,
+          }
+        : null,
+    'snacks': snacks
+        .map((s) => {'name': s.name, 'items': s.items, 'calories': s.calories})
+        .toList(),
+    'proteinGrams': proteinGrams,
+    'carbsGrams': carbsGrams,
+    'fatGrams': fatGrams,
+    'avoidedFoods': avoidedFoods,
+    'dietSummary': dietSummary,
+    'nutritionNotes': nutritionNotes,
+    'rawExtractedText': rawExtractedText,
+  };
 }
 
 // ── Blood Analysis ───────────────────────────────────────────────────────────
@@ -138,22 +160,26 @@ class BloodAnalysisResult {
   });
 
   factory BloodAnalysisResult.empty() => const BloodAnalysisResult(
-        generalNote: 'Kan değerleri belgesi analiz edilemedi.',
-      );
+    generalNote: 'Kan değerleri belgesi analiz edilemedi.',
+  );
 
   Map<String, dynamic> toJson() => {
-        'markers': markers.map((m) => {
-          'name': m.name,
-          'value': m.value,
-          'unit': m.unit,
-          'referenceRange': m.referenceRange,
-          'status': m.status,
-          'nutritionNote': m.nutritionNote,
-        }).toList(),
-        'generalNote': generalNote,
-        'safetyWarning': safetyWarning,
-        'rawExtractedText': rawExtractedText,
-      };
+    'markers': markers
+        .map(
+          (m) => {
+            'name': m.name,
+            'value': m.value,
+            'unit': m.unit,
+            'referenceRange': m.referenceRange,
+            'status': m.status,
+            'nutritionNote': m.nutritionNote,
+          },
+        )
+        .toList(),
+    'generalNote': generalNote,
+    'safetyWarning': safetyWarning,
+    'rawExtractedText': rawExtractedText,
+  };
 }
 
 // ── Combined Analysis ────────────────────────────────────────────────────────
@@ -173,17 +199,23 @@ class CombinedHealthAnalysis {
     this.safetyNotes = const [],
   });
 
-  factory CombinedHealthAnalysis.empty() => const CombinedHealthAnalysis(
-        combinedSummary: 'Analiz tamamlanamadı.',
-      );
+  factory CombinedHealthAnalysis.empty() =>
+      const CombinedHealthAnalysis(combinedSummary: 'Analiz tamamlanamadı.');
 
   factory CombinedHealthAnalysis.fromJson(Map<String, dynamic> j) =>
       CombinedHealthAnalysis(
-        combinedSummary: (j['generalSummary'] as String?) ?? (j['combinedSummary'] as String?) ?? '',
+        combinedSummary:
+            (j['generalSummary'] as String?) ??
+            (j['combinedSummary'] as String?) ??
+            '',
         nutritionPriorities: List<String>.from(j['nutritionPriorities'] ?? []),
         avoidOrLimit: List<String>.from(j['avoidOrLimit'] ?? []),
-        recommendedMealFocus: List<String>.from(j['recommendedMealFocus'] ?? []),
-        safetyNotes: List<String>.from(j['safetyNotes'] ?? j['additionalHealthTips'] ?? []),
+        recommendedMealFocus: List<String>.from(
+          j['recommendedMealFocus'] ?? [],
+        ),
+        safetyNotes: List<String>.from(
+          j['safetyNotes'] ?? j['additionalHealthTips'] ?? [],
+        ),
       );
 }
 

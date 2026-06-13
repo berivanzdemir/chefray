@@ -6,17 +6,10 @@ class AvatarGlow extends StatelessWidget {
   final Color glowColor;
   final Widget child;
 
-  const AvatarGlow({
-    super.key,
-    required this.glowColor,
-    required this.child,
-  });
+  const AvatarGlow({super.key, required this.glowColor, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return BreathingAura(
-      auraColor: glowColor,
-      child: child,
-    );
+    return BreathingAura(auraColor: glowColor, child: child);
   }
 }

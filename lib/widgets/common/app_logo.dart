@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 
-
 /// ChefRay Logo Widget — minimal, Apple-level clean.
 /// 72×72 rounded container, single soft shadow, no glow.
 class AppLogo extends StatelessWidget {
   final double size;
   final bool showText;
 
-  const AppLogo({
-    super.key,
-    this.size = 72,
-    this.showText = true,
-  });
+  const AppLogo({super.key, this.size = 72, this.showText = true});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +21,10 @@ class AppLogo extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(size * 0.24),
-            border: Border.all(color: Theme.of(context).dividerColor, width: 0.8),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 0.8,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),

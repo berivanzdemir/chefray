@@ -20,14 +20,14 @@ class BloodValidationResult {
   });
 
   Map<String, dynamic> toJson() => {
-        'is_blood_test': isBloodTest,
-        'confidence': confidence,
-        'message': message,
-        'matched_signals': matchedSignals,
-        'lab_signal_count': labSignalCount,
-        'numeric_value_count': numericValueCount,
-        'negative_signal_count': negativeSignalCount,
-      };
+    'is_blood_test': isBloodTest,
+    'confidence': confidence,
+    'message': message,
+    'matched_signals': matchedSignals,
+    'lab_signal_count': labSignalCount,
+    'numeric_value_count': numericValueCount,
+    'negative_signal_count': negativeSignalCount,
+  };
 }
 
 class BloodTextValidator {
@@ -36,47 +36,129 @@ class BloodTextValidator {
   BloodTextValidator._();
 
   static const _positiveLabSignals = [
-    'hemogram', 'biyokimya', 'laboratuvar', 'laboratory',
-    'referans aralığı', 'referans araligi', 'reference range',
-    'sonuç', 'sonuc', 'birim', 'unit',
-    'glukoz', 'glucose', 'açlık glukoz', 'aclik glukoz', 'fasting glucose',
-    'hba1c', 'a1c', 'hemoglobin a1c',
-    'ldl', 'hdl', 'total kolesterol', 'total cholesterol',
-    'trigliserid', 'triglyceride',
-    'b12', 'b 12', 'vitamin b12',
-    'vitamin d', 'd vitamini', '25-oh', '25 oh',
-    'ferritin', 'demir', 'iron', 'serum demir',
-    'tsh', 'tiroid', 'thyroid',
-    'alt', 'ast', 'sgpt', 'sgot',
-    'kreatinin', 'creatinine',
-    'üre', 'ure', 'bun',
-    'crp', 'c-reaktif', 'c reactive',
-    'hemoglobin', 'hgb', 'hb',
-    'wbc', 'lökosit', 'leukocyte', 'beyaz küre',
-    'rbc', 'eritrosit', 'erythrocyte', 'kırmızı küre',
-    'plt', 'trombosit', 'platelet',
-    'mcv', 'mch', 'mchc', 'rdw',
-    'hematokrit', 'hematocrit', 'hct',
-    'sedimentasyon', 'sedimentation', 'esh',
-    'total protein', 'albümin', 'albumin',
-    'kalsiyum', 'calcium', 'magnezyum', 'magnesium',
-    'sodyum', 'sodium', 'potasyum', 'potassium',
-    'klor', 'chloride', 'fosfor', 'phosphorus',
-    'ürük asit', 'uric acid',
-    'ggt', 'alp', 'total bilirubin', 'direkt bilirubin',
-    'hdl kolesterol', 'ldl kolesterol', 'hdl cholesterol', 'ldl cholesterol',
+    'hemogram',
+    'biyokimya',
+    'laboratuvar',
+    'laboratory',
+    'referans aralığı',
+    'referans araligi',
+    'reference range',
+    'sonuç',
+    'sonuc',
+    'birim',
+    'unit',
+    'glukoz',
+    'glucose',
+    'açlık glukoz',
+    'aclik glukoz',
+    'fasting glucose',
+    'hba1c',
+    'a1c',
+    'hemoglobin a1c',
+    'ldl',
+    'hdl',
+    'total kolesterol',
+    'total cholesterol',
+    'trigliserid',
+    'triglyceride',
+    'b12',
+    'b 12',
+    'vitamin b12',
+    'vitamin d',
+    'd vitamini',
+    '25-oh',
+    '25 oh',
+    'ferritin',
+    'demir',
+    'iron',
+    'serum demir',
+    'tsh',
+    'tiroid',
+    'thyroid',
+    'alt',
+    'ast',
+    'sgpt',
+    'sgot',
+    'kreatinin',
+    'creatinine',
+    'üre',
+    'ure',
+    'bun',
+    'crp',
+    'c-reaktif',
+    'c reactive',
+    'hemoglobin',
+    'hgb',
+    'hb',
+    'wbc',
+    'lökosit',
+    'leukocyte',
+    'beyaz küre',
+    'rbc',
+    'eritrosit',
+    'erythrocyte',
+    'kırmızı küre',
+    'plt',
+    'trombosit',
+    'platelet',
+    'mcv',
+    'mch',
+    'mchc',
+    'rdw',
+    'hematokrit',
+    'hematocrit',
+    'hct',
+    'sedimentasyon',
+    'sedimentation',
+    'esh',
+    'total protein',
+    'albümin',
+    'albumin',
+    'kalsiyum',
+    'calcium',
+    'magnezyum',
+    'magnesium',
+    'sodyum',
+    'sodium',
+    'potasyum',
+    'potassium',
+    'klor',
+    'chloride',
+    'fosfor',
+    'phosphorus',
+    'ürük asit',
+    'uric acid',
+    'ggt',
+    'alp',
+    'total bilirubin',
+    'direkt bilirubin',
+    'hdl kolesterol',
+    'ldl kolesterol',
+    'hdl cholesterol',
+    'ldl cholesterol',
   ];
 
   static const _negativeDietSignals = [
-    'kahvalti', 'ogle', 'aksam',
-    'ara ogun', 'diyet listesi', 'diyetisyen',
-    'porsiyon', 'tarif', 'yemek listesi',
-    'ogun', 'yemek kasigi', 'su bardagi',
-    'hasta', 'tablo', 'beslenme',
+    'kahvalti',
+    'ogle',
+    'aksam',
+    'ara ogun',
+    'diyet listesi',
+    'diyetisyen',
+    'porsiyon',
+    'tarif',
+    'yemek listesi',
+    'ogun',
+    'yemek kasigi',
+    'su bardagi',
+    'hasta',
+    'tablo',
+    'beslenme',
   ];
 
   String _normalizeTurkishChars(String text) {
-    return text.toLowerCase()
+    return text
+        .toLowerCase()
         .replaceAll('ı', 'i')
         .replaceAll('i̇', 'i')
         .replaceAll('ş', 's')
@@ -93,7 +175,8 @@ class BloodTextValidator {
       return const BloodValidationResult(
         isBloodTest: false,
         confidence: 0.0,
-        message: 'Kan değeri belgesinden okunabilir metin çıkarılamadı. '
+        message:
+            'Kan değeri belgesinden okunabilir metin çıkarılamadı. '
             'Lütfen daha net bir belge yükleyin.',
         matchedSignals: [],
         labSignalCount: 0,
@@ -169,7 +252,8 @@ class BloodTextValidator {
       return BloodValidationResult(
         isBloodTest: false,
         confidence: confidence * 0.3,
-        message: 'Bu dosya kan değeri belgesi gibi görünmüyor. '
+        message:
+            'Bu dosya kan değeri belgesi gibi görünmüyor. '
             'Diyet listesi sinyalleri tespit edildi. '
             'Lütfen laboratuvar sonucu içeren bir belge yükleyin.',
         matchedSignals: matchedSignals,
@@ -183,7 +267,8 @@ class BloodTextValidator {
       return BloodValidationResult(
         isBloodTest: false,
         confidence: confidence,
-        message: 'Bu dosya kan değeri belgesi gibi görünmüyor. '
+        message:
+            'Bu dosya kan değeri belgesi gibi görünmüyor. '
             'Lütfen laboratuvar sonucu içeren bir belge yükleyin.',
         matchedSignals: matchedSignals,
         labSignalCount: labSignalCount,
@@ -196,7 +281,8 @@ class BloodTextValidator {
       return BloodValidationResult(
         isBloodTest: true,
         confidence: confidence,
-        message: 'Belge algılandı ancak bazı değerler okunamadı. '
+        message:
+            'Belge algılandı ancak bazı değerler okunamadı. '
             'Yine de devam edebilirsiniz.',
         matchedSignals: matchedSignals,
         labSignalCount: labSignalCount,

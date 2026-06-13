@@ -18,7 +18,13 @@ class DailyNutritionTotals {
   });
 
   factory DailyNutritionTotals.zero() {
-    return DailyNutritionTotals(calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0);
+    return DailyNutritionTotals(
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      fiber: 0,
+    );
   }
 }
 
@@ -26,23 +32,34 @@ class DailyNutritionService {
   static final _supabase = Supabase.instance.client;
 
   /// Log a completed recipe to daily_nutrition_logs
-  static Future<bool> logCompletedRecipe(RecipeModel recipe, double servingMultiplier) async {
+  static Future<bool> logCompletedRecipe(
+    RecipeModel recipe,
+    double servingMultiplier,
+  ) async {
     final user = _supabase.auth.currentUser;
     if (user == null) return false;
 
     try {
-      final calories = (double.tryParse(recipe.calories.toString()) ?? 0.0) * servingMultiplier;
-      final protein = (double.tryParse(recipe.protein.toString()) ?? 0.0) * servingMultiplier;
-      final carbs = (double.tryParse(recipe.carbs.toString()) ?? 0.0) * servingMultiplier;
-      final fat = (double.tryParse(recipe.fat.toString()) ?? 0.0) * servingMultiplier;
-      
+      final calories =
+          (double.tryParse(recipe.calories.toString()) ?? 0.0) *
+          servingMultiplier;
+      final protein =
+          (double.tryParse(recipe.protein.toString()) ?? 0.0) *
+          servingMultiplier;
+      final carbs =
+          (double.tryParse(recipe.carbs.toString()) ?? 0.0) * servingMultiplier;
+      final fat =
+          (double.tryParse(recipe.fat.toString()) ?? 0.0) * servingMultiplier;
+
       // We don't have fiber in basic recipe model usually, assume 0 if null
       final fiber = 0.0; // Extend RecipeModel if you have fiber_g
 
       await _supabase.from('daily_nutrition_logs').insert({
         'user_id': user.id,
         'recipe_id': recipe.id,
-        'log_date': DateTime.now().toIso8601String().split('T')[0], // YYYY-MM-DD
+        'log_date': DateTime.now().toIso8601String().split(
+          'T',
+        )[0], // YYYY-MM-DD
         'source': 'recipe_completion',
         'meal_type': recipe.mealType.isNotEmpty ? recipe.mealType : 'healthy',
         'servings': servingMultiplier,
@@ -66,13 +83,13 @@ class DailyNutritionService {
 
     try {
       final today = DateTime.now().toIso8601String().split('T')[0];
-      
+
       final response = await _supabase
           .from('daily_nutrition_logs')
           .select('calories_kcal, protein_g, carbs_g, fat_g, fiber_g')
           .eq('user_id', user.id)
           .eq('log_date', today);
-          
+
       if (response.isEmpty) return DailyNutritionTotals.zero();
 
       double totalCalories = 0;
@@ -109,13 +126,15 @@ class DailyNutritionService {
       debugPrint('Rating save skipped: user not authenticated');
       return false;
     }
-    
+
     if (recipeId.isEmpty) {
       debugPrint('Rating save failed: recipeId is null/empty');
       return false;
     }
 
-    debugPrint('Rating save started:\n- userId: ${user.id}\n- recipeId: $recipeId\n- rating: $rating\n- tableName: recipe_ratings');
+    debugPrint(
+      'Rating save started:\n- userId: ${user.id}\n- recipeId: $recipeId\n- rating: $rating\n- tableName: recipe_ratings',
+    );
 
     try {
       await _supabase.from('recipe_ratings').upsert({
@@ -124,23 +143,27 @@ class DailyNutritionService {
         'rating': rating,
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id,recipe_id');
-      
-      debugPrint('Rating save response:\n- success: true\n- errorCode: null\n- errorMessage: null\n- errorDetails: null\n- errorHint: null\n- upsertUsed: true');
+
+      debugPrint(
+        'Rating save response:\n- success: true\n- errorCode: null\n- errorMessage: null\n- errorDetails: null\n- errorHint: null\n- upsertUsed: true',
+      );
       return true;
     } catch (e) {
       String errCode = 'unknown';
       String errMsg = e.toString();
       String errDetails = '';
       String errHint = '';
-      
+
       if (e is PostgrestException) {
         errCode = e.code ?? 'unknown';
         errMsg = e.message;
         errDetails = e.details?.toString() ?? '';
         errHint = e.hint ?? '';
       }
-      
-      debugPrint('Rating save response:\n- success: false\n- errorCode: $errCode\n- errorMessage: $errMsg\n- errorDetails: $errDetails\n- errorHint: $errHint\n- upsertUsed: true');
+
+      debugPrint(
+        'Rating save response:\n- success: false\n- errorCode: $errCode\n- errorMessage: $errMsg\n- errorDetails: $errDetails\n- errorHint: $errHint\n- upsertUsed: true',
+      );
       return false;
     }
   }

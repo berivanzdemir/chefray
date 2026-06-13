@@ -32,7 +32,8 @@ class GeminiService {
     if (apiKey.trim().isEmpty) return [];
 
     final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey');
+      'https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey',
+    );
 
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
@@ -42,11 +43,15 @@ class GeminiService {
         final List<GeminiModelInfo> models = [];
         for (var item in list) {
           final modelName = item['name'] as String? ?? '';
-          final methods = List<String>.from(item['supportedGenerationMethods'] ?? []);
-          models.add(GeminiModelInfo(
-            name: modelName,
-            supportedGenerationMethods: methods,
-          ));
+          final methods = List<String>.from(
+            item['supportedGenerationMethods'] ?? [],
+          );
+          models.add(
+            GeminiModelInfo(
+              name: modelName,
+              supportedGenerationMethods: methods,
+            ),
+          );
         }
         return models;
       }
@@ -63,13 +68,18 @@ class GeminiService {
     try {
       final models = await listAvailableModels();
       final candidates = models
-          .where((m) => m.supportedGenerationMethods.contains('generateContent'))
+          .where(
+            (m) => m.supportedGenerationMethods.contains('generateContent'),
+          )
           .map((m) => m.name)
           .toList();
 
       if (candidates.isNotEmpty) {
         for (int i = 0; i < _priorityModels.length; i++) {
-          final priorityModelStripped = _priorityModels[i].replaceFirst('models/', '');
+          final priorityModelStripped = _priorityModels[i].replaceFirst(
+            'models/',
+            '',
+          );
           for (var cand in candidates) {
             final strippedCand = cand.replaceFirst('models/', '');
             if (strippedCand == priorityModelStripped) {
@@ -88,7 +98,10 @@ class GeminiService {
     return _cachedBestModel!;
   }
 
-  Future<String> _postGenerateContent(String modelName, Map<String, dynamic> requestBody) async {
+  Future<String> _postGenerateContent(
+    String modelName,
+    Map<String, dynamic> requestBody,
+  ) async {
     final apiKey = AppConfig.geminiApiKey;
     if (apiKey.trim().isEmpty) {
       throw Exception('Gemini API Key is missing in environment.');
@@ -101,14 +114,17 @@ class GeminiService {
     cleanModel = 'models/$cleanModel';
 
     final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/$cleanModel:generateContent?key=$apiKey');
+      'https://generativelanguage.googleapis.com/v1beta/$cleanModel:generateContent?key=$apiKey',
+    );
 
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(requestBody),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -150,18 +166,16 @@ class GeminiService {
   //  NEVER send raw health documents, PDFs, or personal data to this method.
   //  Only send anonymized JSON summaries.
 
-  Future<String> generateText({
-    required String prompt,
-  }) async {
+  Future<String> generateText({required String prompt}) async {
     final modelName = await resolveBestModel();
     final body = {
       "contents": [
         {
           "parts": [
-            {"text": prompt}
-          ]
-        }
-      ]
+            {"text": prompt},
+          ],
+        },
+      ],
     };
     return await _postGenerateContent(modelName, body);
   }
@@ -187,7 +201,9 @@ class GeminiService {
 
       final firstBracket = clean.indexOf('[');
       final lastBracket = clean.lastIndexOf(']');
-      if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
+      if (firstBracket != -1 &&
+          lastBracket != -1 &&
+          lastBracket > firstBracket) {
         clean = clean.substring(firstBracket, lastBracket + 1);
       }
 

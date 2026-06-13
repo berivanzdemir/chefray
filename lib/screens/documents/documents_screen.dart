@@ -30,9 +30,11 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   Future<void> _loadState() async {
     try {
-      final dietDoc = await DocumentHistoryService.instance.getLatestDocumentByType('diet');
-      final bloodDoc = await DocumentHistoryService.instance.getLatestDocumentByType('blood');
-      
+      final dietDoc = await DocumentHistoryService.instance
+          .getLatestDocumentByType('diet');
+      final bloodDoc = await DocumentHistoryService.instance
+          .getLatestDocumentByType('blood');
+
       if (mounted) {
         setState(() {
           _hasValidDietPlan = dietDoc != null;
@@ -48,7 +50,12 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   void _onDietTap() async {
     if (_hasValidDietPlan) {
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentDetailScreen(documentType: 'diet')));
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const DocumentDetailScreen(documentType: 'diet'),
+        ),
+      );
     } else {
       await context.push('/diet-upload?uploadType=dietPdf');
     }
@@ -57,7 +64,12 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   void _onBloodTap() async {
     if (_hasValidBloodValues) {
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentDetailScreen(documentType: 'blood')));
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const DocumentDetailScreen(documentType: 'blood'),
+        ),
+      );
     } else {
       await context.push('/diet-upload?uploadType=bloodPdf');
     }
@@ -90,14 +102,20 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   GestureDetector(
                     onTap: () => context.pop(),
                     child: Container(
-                      width: 42, height: 42,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).dividerColor),
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor,
+                        ),
                       ),
-                      child: Icon(Icons.arrow_back_rounded,
-                          color: Theme.of(context).colorScheme.onSurface, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -114,69 +132,87 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Belgelerim', style: AppTextStyles.displayMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                child: Text(
+                  'Belgelerim',
+                  style: AppTextStyles.displayMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 20),
 
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
                   : !_hasValidDietPlan && !_hasValidBloodValues
-                      ? _buildEmptyState()
-                      : SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            children: [
-                              _DocumentCard(
-                                title: 'Diyet Listesi',
-                                statusLabel: _dietStatusLabel,
-                                isLoaded: _hasValidDietPlan,
-                                onTap: _onDietTap,
-                              ),
-                              const SizedBox(height: 16),
-                              _DocumentCard(
-                                title: 'Kan Tahlili',
-                                statusLabel: _bloodStatusLabel,
-                                isLoaded: _hasValidBloodValues,
-                                onTap: _onBloodTap,
-                              ),
-                              const SizedBox(height: 32),
-
-                              // "Birlikte Analiz Et" button with proper conditions
-                              if (_canAnalyzeTogether)
-                                PrimaryButton(
-                                  text: 'Birlikte Analiz Et',
-                                  trailingIcon: Icons.auto_awesome,
-                                  onPressed: () => context.push('/processing'),
-                                )
-                              else
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.info_outline_rounded, color: AppColors.primary),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          _buildDisabledMessage(),
-                                          style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              const SizedBox(height: 16),
-
-                              // Conditions checklist
-                              if (!_canAnalyzeTogether) _buildConditionsChecklist(),
-                            ],
+                  ? _buildEmptyState()
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          _DocumentCard(
+                            title: 'Diyet Listesi',
+                            statusLabel: _dietStatusLabel,
+                            isLoaded: _hasValidDietPlan,
+                            onTap: _onDietTap,
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          _DocumentCard(
+                            title: 'Kan Tahlili',
+                            statusLabel: _bloodStatusLabel,
+                            isLoaded: _hasValidBloodValues,
+                            onTap: _onBloodTap,
+                          ),
+                          const SizedBox(height: 32),
+
+                          // "Birlikte Analiz Et" button with proper conditions
+                          if (_canAnalyzeTogether)
+                            PrimaryButton(
+                              text: 'Birlikte Analiz Et',
+                              trailingIcon: Icons.auto_awesome,
+                              onPressed: () => context.push('/processing'),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline_rounded,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _buildDisabledMessage(),
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(height: 16),
+
+                          // Conditions checklist
+                          if (!_canAnalyzeTogether) _buildConditionsChecklist(),
+                        ],
+                      ),
+                    ),
             ),
           ],
         ),
@@ -204,34 +240,48 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                   ),
                 ],
               ),
-              child: Icon(Icons.folder_open_rounded, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              child: Icon(
+                Icons.folder_open_rounded,
+                size: 64,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Henüz yüklenmiş belgen yok.', 
-              style: AppTextStyles.h2.copyWith(fontSize: 20, color: Theme.of(context).colorScheme.onSurface), 
+              'Henüz yüklenmiş belgen yok.',
+              style: AppTextStyles.h2.copyWith(
+                fontSize: 20,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Diyet listesi veya kan tahlili yükleyerek belgelerini burada görüntüleyebilirsin.',
-              style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            PrimaryButton(
-              text: 'Diyet Yükle',
-              onPressed: _onDietTap,
-            ),
+            PrimaryButton(text: 'Diyet Yükle', onPressed: _onDietTap),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: _onBloodTap,
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 side: const BorderSide(color: AppColors.primary, width: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text('Kan Tahlili Yükle', style: AppTextStyles.labelLarge.copyWith(color: AppColors.primary)),
+              child: Text(
+                'Kan Tahlili Yükle',
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
             ),
           ],
         ),
@@ -263,19 +313,30 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Birlikte analiz için gerekenler:',
-              style: AppTextStyles.h3.copyWith(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+          Text(
+            'Birlikte analiz için gerekenler:',
+            style: AppTextStyles.h3.copyWith(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           _conditionItem(
-            icon: _hasValidDietPlan ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+            icon: _hasValidDietPlan
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked,
             color: _hasValidDietPlan ? AppColors.primary : AppColors.textLight,
             text: 'Diyet listesi OCR ile okunmalı ve doğrulanmalı',
             done: _hasValidDietPlan,
           ),
           const SizedBox(height: 8),
           _conditionItem(
-            icon: _hasValidBloodValues ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
-            color: _hasValidBloodValues ? AppColors.primary : AppColors.textLight,
+            icon: _hasValidBloodValues
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked,
+            color: _hasValidBloodValues
+                ? AppColors.primary
+                : AppColors.textLight,
             text: 'Kan değerleri OCR ile okunmalı ve doğrulanmalı',
             done: _hasValidBloodValues,
           ),
@@ -298,7 +359,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           child: Text(
             text,
             style: AppTextStyles.bodySmall.copyWith(
-              color: done ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurfaceVariant,
+              color: done
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: done ? FontWeight.w500 : FontWeight.w400,
             ),
           ),
@@ -331,7 +394,9 @@ class _DocumentCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isLoaded ? AppColors.primary.withValues(alpha: 0.1) : AppColors.divider,
+              color: isLoaded
+                  ? AppColors.primary.withValues(alpha: 0.1)
+                  : AppColors.divider,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
@@ -345,7 +410,12 @@ class _DocumentCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.h3.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                Text(
+                  title,
+                  style: AppTextStyles.h3.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   statusLabel,
@@ -361,18 +431,28 @@ class _DocumentCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isLoaded ? Theme.of(context).scaffoldBackgroundColor : AppColors.primary,
+                backgroundColor: isLoaded
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : AppColors.primary,
                 foregroundColor: isLoaded ? AppColors.primary : Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 0,
+                ),
                 minimumSize: const Size(80, 36),
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
                   isLoaded ? 'Detay' : 'Yükle',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

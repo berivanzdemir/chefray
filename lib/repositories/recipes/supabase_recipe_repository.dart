@@ -28,7 +28,8 @@ class SupabaseRecipeRepository {
     int pageSize = 20,
   }) async {
     try {
-      final columns = 'id, title, display_title, description, image_url, category, prep_time, cook_time, total_time_min, calories_kcal, protein_g, meal_type, meal_type_v2, dish_type, dish_type_v2, is_recommendable, is_diet_friendly, is_gluten_free, is_high_protein, is_low_calorie, gluten_status, calorie_status, protein_status, recommendation_ready, blocked_reason, exclude_reason_v2, servings, source_url, created_at';
+      final columns =
+          'id, title, display_title, description, image_url, category, prep_time, cook_time, total_time_min, calories_kcal, protein_g, meal_type, meal_type_v2, dish_type, dish_type_v2, is_recommendable, is_diet_friendly, is_gluten_free, is_high_protein, is_low_calorie, gluten_status, calorie_status, protein_status, recommendation_ready, blocked_reason, exclude_reason_v2, servings, source_url, created_at';
 
       var query = _client
           .from('recipes')
@@ -37,7 +38,7 @@ class SupabaseRecipeRepository {
           .eq('is_recommendable', true)
           .eq('is_diet_friendly', true)
           .eq('meal_type', selectedMealType);
-          
+
       if (sortFilter == 'Yüksek Protein' || sortFilter == 'En Yüksek Protein') {
         query = query.eq('protein_status', 'high');
       } else if (sortFilter == 'Düşük Kalori') {
@@ -51,13 +52,13 @@ class SupabaseRecipeRepository {
 
       final rangeStart = page * pageSize;
       final rangeEnd = rangeStart + pageSize - 1;
-      
+
       final response = await query.range(rangeStart, rangeEnd);
 
       final recipes = (response as List)
           .map((json) => RecipeModel.fromSupabaseJson(json))
           .toList();
-          
+
       return recipes;
     } catch (e) {
       debugPrint('Recipe query error in getRecommendedRecipes: $e');
@@ -68,9 +69,10 @@ class SupabaseRecipeRepository {
   Future<List<RecipeModel>> getRecipesByMealType(String mealType) async {
     try {
       final all = await getAllRecipes();
-      return all.where((r) => r.mealType.toLowerCase() == mealType.toLowerCase()).toList();
+      return all
+          .where((r) => r.mealType.toLowerCase() == mealType.toLowerCase())
+          .toList();
     } catch (e) {
-      debugPrint('Error filtering recipes by mealType: $e');
       return [];
     }
   }
@@ -88,6 +90,38 @@ class SupabaseRecipeRepository {
           .toList();
     } catch (e) {
       debugPrint('Error searching recipes in Supabase: $e');
+      return [];
+    }
+  }
+
+  Future<List<RecipeModel>> searchRecipesDetailed(
+    String query,
+    String selectedMealType,
+  ) async {
+    if (query.trim().isEmpty) return [];
+    try {
+      var q = _client
+          .from('recipes')
+          .select('*, ingredients_text')
+          .eq('recommendation_ready', true)
+          .eq('is_recommendable', true)
+          .eq('is_diet_friendly', true)
+          .eq('meal_type', selectedMealType);
+
+      final qStr = '%$query%';
+      q = q.or(
+        'title.ilike.$qStr,description.ilike.$qStr,category.ilike.$qStr',
+      );
+
+      q = q.or('blocked_reason.is.null,blocked_reason.eq.');
+
+      final response = await q.limit(50);
+
+      return (response as List)
+          .map((json) => RecipeModel.fromSupabaseJson(json))
+          .toList();
+    } catch (e) {
+      debugPrint('Error searching detailed recipes in Supabase: $e');
       return [];
     }
   }

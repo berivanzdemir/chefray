@@ -25,7 +25,10 @@ class DocumentValidationService {
       final msg = uploadType == UploadType.dietPdf
           ? 'Diyet listesinden okunabilir metin çıkarılamadı. Lütfen daha net bir fotoğraf veya PDF yükleyin.'
           : 'Kan değeri belgesinden okunabilir metin çıkarılamadı. Lütfen daha net bir belge yükleyin.';
-      return DocumentValidationResult.invalid(msg, reason: ocrResult.error ?? 'OCR failed');
+      return DocumentValidationResult.invalid(
+        msg,
+        reason: ocrResult.error ?? 'OCR failed',
+      );
     }
 
     debugPrint('OCR text length: ${ocrResult.rawText.length}');
@@ -35,7 +38,9 @@ class DocumentValidationService {
       final validator = DietTextValidator();
       final result = validator.validate(ocrResult);
 
-      debugPrint('Diet validation: isDiet=${result.isDiet} confidence=${result.confidence}');
+      debugPrint(
+        'Diet validation: isDiet=${result.isDiet} confidence=${result.confidence}',
+      );
       debugPrint('Diet meal signals: ${result.mealSignalCount}');
       debugPrint('Diet food signals: ${result.foodSignalCount}');
       debugPrint('Diet negative signals: ${result.negativeSignalCount}');
@@ -61,14 +66,20 @@ class DocumentValidationService {
         final ext = fileName.split('.').last.toLowerCase();
         debugPrint('Dosya Adı: $fileName');
         debugPrint('Dosya Uzantısı: $ext');
-        debugPrint('MIME Type Tahmini: image/$ext (Eğer pdf ise application/pdf)');
-        debugPrint('Format: ${ext == "pdf" ? "PDF (1 sayfa işlendi)" : "Görsel (Image OCR)"}');
-        
+        debugPrint(
+          'MIME Type Tahmini: image/$ext (Eğer pdf ise application/pdf)',
+        );
+        debugPrint(
+          'Format: ${ext == "pdf" ? "PDF (1 sayfa işlendi)" : "Görsel (Image OCR)"}',
+        );
+
         final rawTxt = ocrResult.rawText;
         debugPrint('OCR raw text (ilk 1000 karakter):');
         debugPrint(rawTxt.length > 1000 ? rawTxt.substring(0, 1000) : rawTxt);
-        
-        debugPrint('Validation Sonucu: isBlood=${result.isBloodTest}, Confidence=${result.confidence}');
+
+        debugPrint(
+          'Validation Sonucu: isBlood=${result.isBloodTest}, Confidence=${result.confidence}',
+        );
         debugPrint('Matched Signals: ${result.matchedSignals.join(", ")}');
         debugPrint('Numeric Value Count: ${result.numericValueCount}');
         debugPrint('Final Status: ${result.message}');

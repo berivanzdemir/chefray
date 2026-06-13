@@ -19,16 +19,28 @@ class AnalysisHistoryDetailScreen extends StatefulWidget {
   const AnalysisHistoryDetailScreen({super.key, this.historyItem});
 
   @override
-  State<AnalysisHistoryDetailScreen> createState() => _AnalysisHistoryDetailScreenState();
+  State<AnalysisHistoryDetailScreen> createState() =>
+      _AnalysisHistoryDetailScreenState();
 }
 
-class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScreen> {
+class _AnalysisHistoryDetailScreenState
+    extends State<AnalysisHistoryDetailScreen> {
   bool _isRankingRecipes = false;
 
   String _formatDate(DateTime dt) {
     final months = [
-      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
@@ -44,14 +56,22 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
 
       // 1. Fetch user health profile
       final profileRepo = UserHealthProfileRepository.instance;
-      UserHealthProfile? userProfile = await profileRepo.getCurrentUserHealthProfile();
+      UserHealthProfile? userProfile = await profileRepo
+          .getCurrentUserHealthProfile();
       userProfile ??= const UserHealthProfile(
-        age: 25, gender: 'Erkek', heightCm: 175, weightKg: 70, goalType: 'Sağlıklı Yaşam'
+        age: 25,
+        gender: 'Erkek',
+        heightCm: 175,
+        weightKg: 70,
+        goalType: 'Sağlıklı Yaşam',
       );
 
       // 2. Fetch recipes from Spoonacular
       final spoonService = SpoonacularService();
-      final candidateRecipes = await spoonService.getRecipes(query: 'healthy', number: 10);
+      final candidateRecipes = await spoonService.getRecipes(
+        query: 'healthy',
+        number: 10,
+      );
 
       // 3. Rank them using CombinedAnalysisService
       final recommendations = await CombinedAnalysisService().rankRecipes(
@@ -59,7 +79,8 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
         userHealthProfile: userProfile,
         dietAnalysis: item.dietAnalysis!,
         bloodAnalysis: item.bloodAnalysis ?? BloodAnalysisResult.empty(),
-        combinedAnalysis: item.combinedAnalysis ?? CombinedHealthAnalysis.empty(),
+        combinedAnalysis:
+            item.combinedAnalysis ?? CombinedHealthAnalysis.empty(),
       );
 
       // 4. Build RecommendedRecipeViewModels
@@ -71,8 +92,16 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
             id: rec.recipeId,
             title: rec.recipeTitle,
             description: rec.matchReason,
-            calories: 0, protein: 0, carbs: 0, fat: 0, imageUrl: null,
-            timeMinutes: 20, ingredients: [], steps: [], tags: [], mealType: 'Diğer'
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            imageUrl: null,
+            timeMinutes: 20,
+            ingredients: [],
+            steps: [],
+            tags: [],
+            mealType: 'Diğer',
           ),
         );
         if (rec.isSafeForUser) {
@@ -81,7 +110,10 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
           );
         }
       }
-      recommendedVMs.sort((a, b) => b.recommendation.matchScore.compareTo(a.recommendation.matchScore));
+      recommendedVMs.sort(
+        (a, b) =>
+            b.recommendation.matchScore.compareTo(a.recommendation.matchScore),
+      );
 
       if (mounted) {
         context.push('/recipe-list', extra: recommendedVMs);
@@ -91,7 +123,9 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Tarif önerileri hazırlanırken bir sorun oluştu. Lütfen tekrar deneyiniz.'),
+            content: const Text(
+              'Tarif önerileri hazırlanırken bir sorun oluştu. Lütfen tekrar deneyiniz.',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -112,7 +146,10 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
       return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(
-          child: Text('Analiz detayı bulunamadı.', style: AppTextStyles.bodyMedium),
+          child: Text(
+            'Analiz detayı bulunamadı.',
+            style: AppTextStyles.bodyMedium,
+          ),
         ),
       );
     }
@@ -120,16 +157,27 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
     final hasDiet = item.dietAnalysis != null;
     final hasBlood = item.bloodAnalysis != null;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageBg = isDark ? const Color(0xFF0F241E) : AppColors.background;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+    final borderColor = isDark ? const Color(0xFF2B4A40) : AppColors.divider;
+    final appBarBg = isDark ? const Color(0xFF0F241E) : Colors.white;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: pageBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: appBarBg,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back_rounded, color: titleColor),
           onPressed: () => context.pop(),
         ),
-        title: Text('Analiz Detayı', style: AppTextStyles.h2),
+        title: Text(
+          'Analiz Detayı',
+          style: AppTextStyles.h2.copyWith(color: titleColor),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -141,12 +189,16 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
               // ── Date & Status Header ─────────────────────
               Row(
                 children: [
-                  const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textLight),
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
+                    color: descColor,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     _formatDate(item.createdAt),
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textMedium,
+                      color: descColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -164,35 +216,55 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
 
               // ── Nutrition Priorities ─────────────────────
               if (item.nutritionPriorities.isNotEmpty) ...[
-                Text('Beslenme Önceliklerin', style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                Text(
+                  'Beslenme Önceliklerin',
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: 14,
+                    color: titleColor,
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: item.nutritionPriorities.map((p) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      p,
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                  )).toList(),
+                  children: item.nutritionPriorities
+                      .map(
+                        (p) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            p,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
                 const SizedBox(height: 24),
               ],
 
               // ── Diet Analysis Details ────────────────────
               if (hasDiet) ...[
-                Text('Diyet Analiz Detayları', style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                Text(
+                  'Diyet Analiz Detayları',
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: 14,
+                    color: titleColor,
+                  ),
+                ),
                 const SizedBox(height: 10),
                 SoftCard(
+                  backgroundColor: cardBg,
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,42 +272,88 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                       if (item.dietAnalysis!.dailyCalorieTarget != null) ...[
                         Row(
                           children: [
-                            const Icon(Icons.local_fire_department_rounded, size: 18, color: AppColors.primary),
+                            const Icon(
+                              Icons.local_fire_department_rounded,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 8),
-                            Text('Günlük Kalori Hedefi: ', style: AppTextStyles.bodySmall),
-                            Text('${item.dietAnalysis!.dailyCalorieTarget} kcal', 
-                                style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            Text(
+                              'Günlük Kalori Hedefi: ',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: descColor,
+                              ),
+                            ),
+                            Text(
+                              '${item.dietAnalysis!.dailyCalorieTarget} kcal',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ],
                         ),
-                        const Divider(height: 20, color: AppColors.divider),
+                        Divider(height: 20, color: borderColor),
                       ],
-                      
+
                       // Macros Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _macroItem('Protein', '${item.dietAnalysis!.proteinGrams ?? 0}g', AppColors.protein),
-                          _macroItem('K.hidrat', '${item.dietAnalysis!.carbsGrams ?? 0}g', AppColors.carbs),
-                          _macroItem('Yağ', '${item.dietAnalysis!.fatGrams ?? 0}g', AppColors.fat),
+                          _macroItem(
+                            'Protein',
+                            '${item.dietAnalysis!.proteinGrams ?? 0}g',
+                            AppColors.protein,
+                            descColor,
+                          ),
+                          _macroItem(
+                            'K.hidrat',
+                            '${item.dietAnalysis!.carbsGrams ?? 0}g',
+                            AppColors.carbs,
+                            descColor,
+                          ),
+                          _macroItem(
+                            'Yağ',
+                            '${item.dietAnalysis!.fatGrams ?? 0}g',
+                            AppColors.fat,
+                            descColor,
+                          ),
                         ],
                       ),
 
                       if (item.dietAnalysis!.avoidedFoods.isNotEmpty) ...[
-                        const Divider(height: 20, color: AppColors.divider),
-                        Text('Sınırlanması Gereken Besinler:', 
-                            style: AppTextStyles.labelSmall.copyWith(color: AppColors.textDark, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        ...item.dietAnalysis!.avoidedFoods.map((food) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.remove_circle_outline_rounded, size: 12, color: AppColors.error),
-                              const SizedBox(width: 6),
-                              Text(food, style: AppTextStyles.bodySmall.copyWith(fontSize: 12)),
-                            ],
+                        Divider(height: 20, color: borderColor),
+                        Text(
+                          'Sınırlanması Gereken Besinler:',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: titleColor,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )),
-                      ]
+                        ),
+                        const SizedBox(height: 6),
+                        ...item.dietAnalysis!.avoidedFoods.map(
+                          (food) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.remove_circle_outline_rounded,
+                                  size: 12,
+                                  color: AppColors.error,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  food,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    fontSize: 12,
+                                    color: descColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -244,18 +362,30 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
 
               // ── Blood Test Markers Details ────────────────
               if (hasBlood && item.bloodAnalysis!.markers.isNotEmpty) ...[
-                Text('Kan Tahlili Önemli Değerleri', style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                Text(
+                  'Kan Tahlili Önemli Değerleri',
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: 14,
+                    color: titleColor,
+                  ),
+                ),
                 const SizedBox(height: 10),
                 SoftCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  backgroundColor: cardBg,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   child: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: item.bloodAnalysis!.markers.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.divider),
+                    separatorBuilder: (_, _) =>
+                        Divider(height: 1, color: borderColor),
                     itemBuilder: (context, idx) {
                       final m = item.bloodAnalysis!.markers[idx];
-                      final isIrregular = m.status == 'low' || m.status == 'high';
+                      final isIrregular =
+                          m.status == 'low' || m.status == 'high';
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Row(
@@ -265,9 +395,22 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(m.name, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.bold, fontSize: 12)),
+                                  Text(
+                                    m.name,
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: titleColor,
+                                    ),
+                                  ),
                                   if (m.referenceRange != null)
-                                    Text('Ref: ${m.referenceRange}', style: TextStyle(fontSize: 9, color: AppColors.textLight)),
+                                    Text(
+                                      'Ref: ${m.referenceRange}',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: descColor,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -278,11 +421,15 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                                 style: AppTextStyles.bodySmall.copyWith(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
+                                  color: titleColor,
                                 ),
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: isIrregular
                                     ? AppColors.error.withValues(alpha: 0.1)
@@ -290,13 +437,17 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                m.status == 'low' 
-                                    ? 'Düşük 📉' 
-                                    : (m.status == 'high' ? 'Yüksek 📈' : 'Normal ✅'),
+                                m.status == 'low'
+                                    ? 'Düşük 📉'
+                                    : (m.status == 'high'
+                                          ? 'Yüksek 📈'
+                                          : 'Normal ✅'),
                                 style: TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
-                                  color: isIrregular ? AppColors.error : AppColors.primary,
+                                  color: isIrregular
+                                      ? AppColors.error
+                                      : AppColors.primary,
                                 ),
                               ),
                             ),
@@ -311,34 +462,48 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
 
               // ── Safety Warnings ──────────────────────────
               if (item.safetyNotes.isNotEmpty) ...[
-                Text('Dikkat Edilmesi Gerekenler ⚠️', style: AppTextStyles.h3.copyWith(fontSize: 14)),
-                const SizedBox(height: 10),
-                ...item.safetyNotes.map((note) => Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
+                Text(
+                  'Dikkat Edilmesi Gerekenler ⚠️',
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: 14,
+                    color: titleColor,
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.info_outline_rounded, color: AppColors.warning, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          note,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontSize: 11,
-                            color: AppColors.warning,
-                            fontWeight: FontWeight.w500,
+                ),
+                const SizedBox(height: 10),
+                ...item.safetyNotes.map(
+                  (note) => Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.warning.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          color: AppColors.warning,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            note,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              fontSize: 11,
+                              color: AppColors.warning,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )),
+                ),
                 const SizedBox(height: 24),
               ],
 
@@ -350,7 +515,13 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                           children: [
                             CircularProgressIndicator(),
                             SizedBox(height: 12),
-                            Text('Tarifleriniz analizine göre sıralanıyor...', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                            Text(
+                              'Tarifleriniz analizine göre sıralanıyor...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMedium,
+                              ),
+                            ),
                           ],
                         ),
                       )
@@ -363,7 +534,7 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
                 Center(
                   child: Text(
                     'Bu analiz için kayıtlı tarif önerisi bulunamadı.',
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
+                    style: AppTextStyles.bodySmall.copyWith(color: descColor),
                   ),
                 ),
               ],
@@ -375,7 +546,7 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
     );
   }
 
-  Widget _macroItem(String label, String value, Color color) {
+  Widget _macroItem(String label, String value, Color color, Color descColor) {
     return Column(
       children: [
         Container(
@@ -384,10 +555,23 @@ class _AnalysisHistoryDetailScreenState extends State<AnalysisHistoryDetailScree
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(value, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
+          child: Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 9, color: AppColors.textLight)),
+        Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            fontSize: 9,
+            color: descColor,
+          ),
+        ),
       ],
     );
   }

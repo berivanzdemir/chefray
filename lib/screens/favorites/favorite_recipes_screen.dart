@@ -28,10 +28,12 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
       duration: const Duration(milliseconds: 800),
     );
     _loadFavorites();
+    FavoriteService.favoriteUpdateNotifier.addListener(_loadFavorites);
   }
 
   @override
   void dispose() {
+    FavoriteService.favoriteUpdateNotifier.removeListener(_loadFavorites);
     _fadeCtrl.dispose();
     super.dispose();
   }
@@ -63,7 +65,7 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
 
   Future<void> _removeFavorite(RecipeModel recipe) async {
     final recipeId = recipe.id;
-    
+
     // Optimistic UI update
     setState(() {
       _favoriteRecipes.removeWhere((r) => r.id == recipeId);
@@ -73,9 +75,9 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
       await FavoriteService.removeFavorite(recipeId);
       if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Favorilerden çıkarıldı')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Favorilerden çıkarıldı')));
       }
     } catch (e) {
       // Revert if error
@@ -100,16 +102,31 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
                   GestureDetector(
                     onTap: () => context.pop(),
                     child: Container(
-                      width: 42, height: 42,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface, shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35)),
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.35),
+                        ),
                       ),
-                      child: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  Text('Favorilerim', style: AppTextStyles.h2.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    'Favorilerim',
+                    style: AppTextStyles.h2.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   const Spacer(),
                   const SizedBox(width: 42),
                 ],
@@ -119,7 +136,12 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Kaydettiğin tarifleri burada görebilirsin. ', style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(
+                  'Kaydettiğin tarifleri burada görebilirsin. ',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 const Text('❤️', style: TextStyle(fontSize: 12)),
               ],
             ),
@@ -130,39 +152,40 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error.isNotEmpty
-                      ? Center(child: Text(_error))
-                      : _favoriteRecipes.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-                              itemCount: _favoriteRecipes.length,
-                              separatorBuilder: (_, i) => const SizedBox(height: 10),
-                              itemBuilder: (_, i) {
-                                final start = (i * 0.15).clamp(0.0, 0.7);
-                                final end = (start + 0.4).clamp(0.0, 1.0);
-                                final curve = CurvedAnimation(
-                                  parent: _fadeCtrl,
-                                  curve: Interval(start, end, curve: Curves.easeOut),
-                                );
-                                final recipe = _favoriteRecipes[i];
-                                return AnimatedBuilder(
-                                  animation: curve,
-                                  builder: (ctx, ch) => Opacity(
-                                    opacity: curve.value,
-                                    child: Transform.translate(
-                                      offset: Offset(0, 16 * (1 - curve.value)),
-                                      child: ch,
-                                    ),
-                                  ),
-                                  child: RecipeCard(
-                                    recipe: recipe,
-                                    isFavorite: true,
-                                    onFavoriteTap: () => _removeFavorite(recipe),
-                                    onTap: () => context.push('/recipe-show', extra: recipe),
-                                  ),
-                                );
-                              },
+                  ? Center(child: Text(_error))
+                  : _favoriteRecipes.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                      itemCount: _favoriteRecipes.length,
+                      separatorBuilder: (_, i) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        final start = (i * 0.15).clamp(0.0, 0.7);
+                        final end = (start + 0.4).clamp(0.0, 1.0);
+                        final curve = CurvedAnimation(
+                          parent: _fadeCtrl,
+                          curve: Interval(start, end, curve: Curves.easeOut),
+                        );
+                        final recipe = _favoriteRecipes[i];
+                        return AnimatedBuilder(
+                          animation: curve,
+                          builder: (ctx, ch) => Opacity(
+                            opacity: curve.value,
+                            child: Transform.translate(
+                              offset: Offset(0, 16 * (1 - curve.value)),
+                              child: ch,
                             ),
+                          ),
+                          child: RecipeCard(
+                            recipe: recipe,
+                            isFavorite: true,
+                            onFavoriteTap: () => _removeFavorite(recipe),
+                            onTap: () =>
+                                context.push('/recipe-show', extra: recipe),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -178,19 +201,34 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80, height: 80,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.favorite_outline_rounded, size: 40, color: AppColors.primary),
+              child: const Icon(
+                Icons.favorite_outline_rounded,
+                size: 40,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(height: 20),
-            Text('Henüz favori tarifin yok', 
-                 style: AppTextStyles.h3.copyWith(color: Theme.of(context).colorScheme.onSurface), textAlign: TextAlign.center),
+            Text(
+              'Henüz favori tarifin yok',
+              style: AppTextStyles.h3.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            Text('Beğendiğin tariflerde kalp ikonuna dokunarak onları buraya ekleyebilirsin.', 
-                 style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
+            Text(
+              'Beğendiğin tariflerde kalp ikonuna dokunarak onları buraya ekleyebilirsin.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => context.pop(),
@@ -198,10 +236,18 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen>
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
-              child: const Text('Tariflere Göz At', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text(
+                'Tariflere Göz At',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 40),
           ],

@@ -37,10 +37,10 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   late final AnimationController _staggerCtrl;
 
   bool get _hasCalories => _dietResult.dailyCalorieTarget != null;
-  
-  bool get _hasMacros => 
-      _dietResult.proteinGrams != null || 
-      _dietResult.carbsGrams != null || 
+
+  bool get _hasMacros =>
+      _dietResult.proteinGrams != null ||
+      _dietResult.carbsGrams != null ||
       _dietResult.fatGrams != null;
 
   int? _parseCal(String? calStr) {
@@ -52,24 +52,33 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   @override
   void initState() {
     super.initState();
-    
+
     final extra = widget.analysisData;
     if (extra != null) {
-      _dietResult = extra['dietAnalysisResult'] as DietAnalysisResult? ?? DietAnalysisResult.empty();
+      _dietResult =
+          extra['dietAnalysisResult'] as DietAnalysisResult? ??
+          DietAnalysisResult.empty();
       _bloodResult = extra['bloodAnalysisResult'] as BloodAnalysisResult?;
-      _combinedResult = extra['combinedAnalysisResult'] as CombinedHealthAnalysis?;
-      _profile = extra['userHealthProfile'] as UserHealthProfile? ?? const UserHealthProfile();
+      _combinedResult =
+          extra['combinedAnalysisResult'] as CombinedHealthAnalysis?;
+      _profile =
+          extra['userHealthProfile'] as UserHealthProfile? ??
+          const UserHealthProfile();
 
-      final candidates = List<RecipeModel>.from(extra['candidateRecipes'] ?? []);
-      
+      final candidates = List<RecipeModel>.from(
+        extra['candidateRecipes'] ?? [],
+      );
+
       final rawRecs = extra['recommendedRecipes'] as List? ?? [];
       final List<RecommendedRecipeViewModel> tempVMs = [];
-      
+
       if (rawRecs.isNotEmpty) {
         if (rawRecs.first is RecommendedRecipeViewModel) {
           tempVMs.addAll(List<RecommendedRecipeViewModel>.from(rawRecs));
         } else if (rawRecs.first is RecipeRecommendationResult) {
-          final recommendations = List<RecipeRecommendationResult>.from(rawRecs);
+          final recommendations = List<RecipeRecommendationResult>.from(
+            rawRecs,
+          );
           for (final rec in recommendations) {
             final recipe = candidates.firstWhere(
               (r) => r.id.toString() == rec.recipeId.toString(),
@@ -86,22 +95,24 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                 ingredients: [],
                 steps: [],
                 tags: [],
-                mealType: rec.suggestedMealType.isNotEmpty ? rec.suggestedMealType : 'Diğer',
+                mealType: rec.suggestedMealType.isNotEmpty
+                    ? rec.suggestedMealType
+                    : 'Diğer',
               ),
             );
             if (rec.isSafeForUser) {
               tempVMs.add(
-                RecommendedRecipeViewModel(
-                  recipe: recipe,
-                  recommendation: rec,
-                ),
+                RecommendedRecipeViewModel(recipe: recipe, recommendation: rec),
               );
             }
           }
         }
       }
       _recommendedRecipes = tempVMs;
-      _recommendedRecipes.sort((a, b) => b.recommendation.matchScore.compareTo(a.recommendation.matchScore));
+      _recommendedRecipes.sort(
+        (a, b) =>
+            b.recommendation.matchScore.compareTo(a.recommendation.matchScore),
+      );
     } else {
       _dietResult = DietAnalysisResult.empty();
       _bloodResult = null;
@@ -146,19 +157,32 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   Widget build(BuildContext context) {
     // Calculate current calories from meals if available
     int currentCal = 0;
-    if (_dietResult.breakfast != null) currentCal += _parseCal(_dietResult.breakfast!.calories) ?? 350;
-    if (_dietResult.lunch != null) currentCal += _parseCal(_dietResult.lunch!.calories) ?? 550;
-    if (_dietResult.dinner != null) currentCal += _parseCal(_dietResult.dinner!.calories) ?? 600;
+    if (_dietResult.breakfast != null)
+      currentCal += _parseCal(_dietResult.breakfast!.calories) ?? 350;
+    if (_dietResult.lunch != null)
+      currentCal += _parseCal(_dietResult.lunch!.calories) ?? 550;
+    if (_dietResult.dinner != null)
+      currentCal += _parseCal(_dietResult.dinner!.calories) ?? 600;
     for (var snack in _dietResult.snacks) {
       currentCal += _parseCal(snack.calories) ?? 150;
     }
 
     final targetCal = _dietResult.dailyCalorieTarget ?? 0;
     final remainingCal = math.max(0, targetCal - currentCal);
-    final calPct = targetCal > 0 ? (currentCal / targetCal).clamp(0.0, 1.0) : 0.0;
+    final calPct = targetCal > 0
+        ? (currentCal / targetCal).clamp(0.0, 1.0)
+        : 0.0;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageBg = isDark ? const Color(0xFF0F241E) : AppColors.background;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+    final borderColor = isDark ? const Color(0xFF2B4A40) : AppColors.divider;
+    final headerBtnBg = isDark ? const Color(0xFF1E3A31) : Colors.white;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: pageBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -170,28 +194,41 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                   GestureDetector(
                     onTap: () => context.go('/home'),
                     child: Container(
-                      width: 42, height: 42,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: Colors.white, shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.divider),
+                        color: headerBtnBg,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: borderColor),
                       ),
-                      child: const Icon(Icons.arrow_back_rounded,
-                          color: AppColors.textDark, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: titleColor,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  Text('Analiz Sonucu', style: AppTextStyles.h2),
+                  Text(
+                    'Analiz Sonucu',
+                    style: AppTextStyles.h2.copyWith(color: titleColor),
+                  ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () {},
                     child: Container(
-                      width: 42, height: 42,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: Colors.white, shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.divider),
+                        color: headerBtnBg,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: borderColor),
                       ),
-                      child: const Icon(Icons.ios_share_rounded,
-                          color: AppColors.textDark, size: 20),
+                      child: Icon(
+                        Icons.ios_share_rounded,
+                        color: titleColor,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -208,11 +245,19 @@ class _AnalysisScreenState extends State<AnalysisScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primary),
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 6),
-                  Text('Diyet başarıyla analiz edildi!',
-                      style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.primary, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Diyet başarıyla analiz edildi!',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -226,124 +271,159 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                   children: [
                     // Hero calorie card
                     if (_hasCalories)
-                      _staggered(0, ProgressCard(
-                        current: currentCal,
-                        target: targetCal,
-                        percentage: calPct,
-                        remaining: remainingCal,
-                      ))
+                      _staggered(
+                        0,
+                        ProgressCard(
+                          current: currentCal,
+                          target: targetCal,
+                          percentage: calPct,
+                          remaining: remainingCal,
+                        ),
+                      )
                     else
-                      _staggered(0, Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(22),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xFF0F3D2E), Color(0xFF1A5C3F)],
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF0F3D2E).withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                      _staggered(
+                        0,
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF0F3D2E), Color(0xFF1A5C3F)],
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, color: Colors.white, size: 24),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Günlük Kalori Özeti',
-                                    style: AppTextStyles.labelMedium.copyWith(
-                                      color: Colors.white.withValues(alpha: 0.7),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Belgede kalori hedefi belirtilmemiş.',
-                                    style: AppTextStyles.h3.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF0F3D2E,
+                                ).withValues(alpha: 0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Günlük Kalori Özeti',
+                                      style: AppTextStyles.labelMedium.copyWith(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Belgede kalori hedefi belirtilmemiş.',
+                                      style: AppTextStyles.h3.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      )),
+                      ),
                     const SizedBox(height: 20),
 
                     // Grid: Makro + Hedef
-                    _staggered(1, Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: _hasMacros 
-                              ? _buildMacroCard() 
-                              : Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(color: AppColors.divider),
+                    _staggered(
+                      1,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _hasMacros
+                                ? _buildMacroCard()
+                                : Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: cardBg,
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(color: borderColor),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.donut_small_rounded,
+                                              size: 16,
+                                              color: descColor,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Makro Dağılımı',
+                                              style: AppTextStyles.h3.copyWith(
+                                                fontSize: 13,
+                                                color: descColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Makro bilgisi belgede net olarak bulunamadı.',
+                                          style: AppTextStyles.bodySmall
+                                              .copyWith(color: descColor),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(Icons.donut_small_rounded, size: 16, color: AppColors.textMedium),
-                                          const SizedBox(width: 6),
-                                          Text('Makro Dağılımı', style: AppTextStyles.h3.copyWith(fontSize: 13, color: AppColors.textMedium)),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        'Makro bilgisi belgede net olarak bulunamadı.',
-                                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildGoalCard()),
-                      ],
-                    )),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: _buildGoalCard()),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 12),
 
                     // Grid: Öğün + Alerjen
-                    _staggered(2, Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _buildDistributionCard(currentCal)),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildAllergenCard()),
-                      ],
-                    )),
+                    _staggered(
+                      2,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _buildDistributionCard(currentCal)),
+                          const SizedBox(width: 12),
+                          Expanded(child: _buildAllergenCard()),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 24),
 
                     // Detected meals
-                    _staggered(3, Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SectionHeader(
-                          title: 'Tespit Edilen Öğünler',
-                          actionText: 'Tümünü Gör',
-                          onAction: () {},
-                        ),
-                        const SizedBox(height: 14),
-                        ..._buildMealResultCards(),
-                      ],
-                    )),
+                    _staggered(
+                      3,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SectionHeader(
+                            title: 'Tespit Edilen Öğünler',
+                            actionText: 'Tümünü Gör',
+                            onAction: () {},
+                          ),
+                          const SizedBox(height: 14),
+                          ..._buildMealResultCards(),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 16),
 
                     // AI Comment
@@ -355,16 +435,28 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                       text: 'Tarif Önerilerini Gör',
                       trailingIcon: Icons.arrow_forward_rounded,
                       onPressed: () {
-                        context.push('/recipe-list', extra: _recommendedRecipes);
+                        context.push(
+                          '/recipe-list',
+                          extra: _recommendedRecipes,
+                        );
                       },
                     ),
                     const SizedBox(height: 14),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.schedule_rounded, size: 13, color: AppColors.textLight),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 13,
+                          color: descColor,
+                        ),
                         const SizedBox(width: 5),
-                        Text('Son analiz: Bugün', style: AppTextStyles.bodySmall),
+                        Text(
+                          'Son analiz: Bugün',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: descColor,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -380,6 +472,10 @@ class _AnalysisScreenState extends State<AnalysisScreen>
 
   // ── Macro Distribution Card ────────────────────────────
   Widget _buildMacroCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+
     final List<MacroModel> macros = [
       MacroModel(
         name: 'Protein',
@@ -405,27 +501,40 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     const macroLetters = ['P', 'K', 'Y'];
 
     return SoftCard(
+      backgroundColor: cardBg,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.donut_small_rounded, size: 16,
-                  color: AppColors.primary.withValues(alpha: 0.6)),
+              Icon(
+                Icons.donut_small_rounded,
+                size: 16,
+                color: AppColors.primary.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: 6),
-              Text('Makro Dağılımı', style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Makro Dağılımı',
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: 13,
+                  color: titleColor,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
-          ...List.generate(macros.length, (i) => MacroChip(
-            letter: macroLetters[i],
-            color: macroColors[i],
-            name: macros[i].name,
-            current: macros[i].current,
-            target: macros[i].target,
-            percentage: (macros[i].percentage * 100).toInt(),
-          )),
+          ...List.generate(
+            macros.length,
+            (i) => MacroChip(
+              letter: macroLetters[i],
+              color: macroColors[i],
+              name: macros[i].name,
+              current: macros[i].current,
+              target: macros[i].target,
+              percentage: (macros[i].percentage * 100).toInt(),
+            ),
+          ),
         ],
       ),
     );
@@ -433,98 +542,141 @@ class _AnalysisScreenState extends State<AnalysisScreen>
 
   // ── Goal Compliance Card ───────────────────────────────
   Widget _buildGoalCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+
     final List<GoalStatus> goals = [];
-    
+
     if (_profile.allergies.isNotEmpty) {
-      goals.add(GoalStatus(
-        name: 'Alerjen Filtresi',
-        status: 'uygun',
-        label: '${_profile.allergies.length} Alerjen elendi',
-      ));
+      goals.add(
+        GoalStatus(
+          name: 'Alerjen Filtresi',
+          status: 'uygun',
+          label: '${_profile.allergies.length} Alerjen elendi',
+        ),
+      );
     } else {
-      goals.add(const GoalStatus(
-        name: 'Alerjen Filtresi',
-        status: 'uygun',
-        label: 'Riskli besin bulunmuyor',
-      ));
+      goals.add(
+        const GoalStatus(
+          name: 'Alerjen Filtresi',
+          status: 'uygun',
+          label: 'Riskli besin bulunmuyor',
+        ),
+      );
     }
 
     if (_dietResult.avoidedFoods.isNotEmpty) {
-      goals.add(GoalStatus(
-        name: 'Diyet Kısıtları',
-        status: 'kismen',
-        label: '${_dietResult.avoidedFoods.length} besin sınırlı',
-      ));
+      goals.add(
+        GoalStatus(
+          name: 'Diyet Kısıtları',
+          status: 'kismen',
+          label: '${_dietResult.avoidedFoods.length} besin sınırlı',
+        ),
+      );
     }
 
     if (_bloodResult != null && _bloodResult.markers.isNotEmpty) {
-      final abnormal = _bloodResult.markers.where((m) => m.status == 'low' || m.status == 'high').length;
+      final abnormal = _bloodResult.markers
+          .where((m) => m.status == 'low' || m.status == 'high')
+          .length;
       if (abnormal > 0) {
-        goals.add(GoalStatus(
-          name: 'Kan Tahlili',
-          status: 'kismen',
-          label: '$abnormal değer uyumsuz',
-        ));
+        goals.add(
+          GoalStatus(
+            name: 'Kan Tahlili',
+            status: 'kismen',
+            label: '$abnormal değer uyumsuz',
+          ),
+        );
       } else {
-        goals.add(const GoalStatus(
-          name: 'Kan Tahlili',
-          status: 'uygun',
-          label: 'Kan değerleriyle uyumlu',
-        ));
+        goals.add(
+          const GoalStatus(
+            name: 'Kan Tahlili',
+            status: 'uygun',
+            label: 'Kan değerleriyle uyumlu',
+          ),
+        );
       }
     } else {
-      goals.add(const GoalStatus(
-        name: 'Kan Tahlili',
-        status: 'kismen',
-        label: 'Tahlil eklenmedi',
-      ));
+      goals.add(
+        const GoalStatus(
+          name: 'Kan Tahlili',
+          status: 'kismen',
+          label: 'Tahlil eklenmedi',
+        ),
+      );
     }
 
     return SoftCard(
+      backgroundColor: cardBg,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.flag_rounded, size: 16,
-                  color: AppColors.primary.withValues(alpha: 0.6)),
+              Icon(
+                Icons.flag_rounded,
+                size: 16,
+                color: AppColors.primary.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: 6),
-              Text('Hedef Uyumu', style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Hedef Uyumu',
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: 13,
+                  color: titleColor,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
-          ...goals.map((g) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              children: [
-                Icon(
-                  g.status == 'uygun'
-                      ? Icons.check_circle_rounded
-                      : g.status == 'kismen'
-                          ? Icons.warning_rounded
-                          : Icons.cancel_rounded,
-                  size: 18,
-                  color: g.status == 'uygun'
-                      ? AppColors.primary
-                      : g.status == 'kismen'
-                          ? AppColors.warning
-                          : AppColors.error,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(g.name, style: AppTextStyles.labelMedium.copyWith(
-                          fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.w600)),
-                      Text(g.label, style: AppTextStyles.labelSmall.copyWith(fontSize: 10)),
-                    ],
+          ...goals.map(
+            (g) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    g.status == 'uygun'
+                        ? Icons.check_circle_rounded
+                        : g.status == 'kismen'
+                        ? Icons.warning_rounded
+                        : Icons.cancel_rounded,
+                    size: 18,
+                    color: g.status == 'uygun'
+                        ? AppColors.primary
+                        : g.status == 'kismen'
+                        ? AppColors.warning
+                        : AppColors.error,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          g.name,
+                          style: AppTextStyles.labelMedium.copyWith(
+                            fontSize: 12,
+                            color: titleColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          g.label,
+                          style: AppTextStyles.labelSmall.copyWith(
+                            fontSize: 10,
+                            color: descColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -532,6 +684,11 @@ class _AnalysisScreenState extends State<AnalysisScreen>
 
   // ── Meal Distribution Card ─────────────────────────────
   Widget _buildDistributionCard(int totalCal) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+
     int breakfastCal = _parseCal(_dietResult.breakfast?.calories) ?? 300;
     int lunchCal = _parseCal(_dietResult.lunch?.calories) ?? 500;
     int dinnerCal = _parseCal(_dietResult.dinner?.calories) ?? 550;
@@ -539,7 +696,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     for (var snack in _dietResult.snacks) {
       snackCal += _parseCal(snack.calories) ?? 150;
     }
-    
+
     int sum = breakfastCal + lunchCal + dinnerCal + snackCal;
     if (sum == 0) sum = 1;
 
@@ -549,25 +706,41 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     final snackPct = (snackCal * 100 ~/ sum).clamp(5, 95);
 
     return SoftCard(
+      backgroundColor: cardBg,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.pie_chart_rounded, size: 16,
-                  color: AppColors.primary.withValues(alpha: 0.6)),
+              Icon(
+                Icons.pie_chart_rounded,
+                size: 16,
+                color: AppColors.primary.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: 6),
-              Text('Öğün Dağılımı', style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Öğün Dağılımı',
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: 13,
+                  color: titleColor,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
           Center(
             child: SizedBox(
-              width: 70, height: 70,
+              width: 70,
+              height: 70,
               child: CustomPaint(
                 painter: _DonutPainter(
-                  values: [breakfastPct / 100, lunchPct / 100, dinnerPct / 100, snackPct / 100],
+                  values: [
+                    breakfastPct / 100,
+                    lunchPct / 100,
+                    dinnerPct / 100,
+                    snackPct / 100,
+                  ],
                   colors: const [
                     AppColors.primary,
                     Color(0xFF5BC0EB),
@@ -579,25 +752,67 @@ class _AnalysisScreenState extends State<AnalysisScreen>
             ),
           ),
           const SizedBox(height: 12),
-          _distRow('●', 'Kahvaltı', '%$breakfastPct', AppColors.primary),
-          _distRow('●', 'Öğle Yemeği', '%$lunchPct', const Color(0xFF5BC0EB)),
-          _distRow('●', 'Akşam Yemeği', '%$dinnerPct', AppColors.carbs),
-          _distRow('●', 'Ara Öğün', '%$snackPct', AppColors.fat),
+          _distRow(
+            '●',
+            'Kahvaltı',
+            '%$breakfastPct',
+            AppColors.primary,
+            descColor,
+          ),
+          _distRow(
+            '●',
+            'Öğle Yemeği',
+            '%$lunchPct',
+            const Color(0xFF5BC0EB),
+            descColor,
+          ),
+          _distRow(
+            '●',
+            'Akşam Yemeği',
+            '%$dinnerPct',
+            AppColors.carbs,
+            descColor,
+          ),
+          _distRow('●', 'Ara Öğün', '%$snackPct', AppColors.fat, descColor),
         ],
       ),
     );
   }
 
-  Widget _distRow(String dot, String label, String pct, Color color) {
+  Widget _distRow(
+    String dot,
+    String label,
+    String pct,
+    Color color,
+    Color descColor,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
           const SizedBox(width: 6),
-          Expanded(child: Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 10))),
-          Text(pct, style: AppTextStyles.labelSmall.copyWith(
-              fontSize: 10, fontWeight: FontWeight.w700, color: color)),
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                fontSize: 10,
+                color: descColor,
+              ),
+            ),
+          ),
+          Text(
+            pct,
+            style: AppTextStyles.labelSmall.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -605,6 +820,11 @@ class _AnalysisScreenState extends State<AnalysisScreen>
 
   // ── Allergen Card ──────────────────────────────────────
   Widget _buildAllergenCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+
     final List<AllergenStatus> allergens = [];
 
     // Checked profile allergies
@@ -629,43 +849,70 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     }
 
     return SoftCard(
+      backgroundColor: cardBg,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.warning_amber_rounded, size: 16,
-                  color: AppColors.error.withValues(alpha: 0.6)),
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 16,
+                color: AppColors.error.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: 6),
-              Text('Alerjen & Riskler', style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Alerjen & Riskler',
+                style: AppTextStyles.h3.copyWith(
+                  fontSize: 13,
+                  color: titleColor,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
-          ...allergens.map((a) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              children: [
-                Icon(
-                  a.detected ? Icons.cancel_rounded : Icons.check_circle_rounded,
-                  size: 18,
-                  color: a.detected ? AppColors.error : AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(a.name, style: AppTextStyles.labelMedium.copyWith(
-                          fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.w600)),
-                      Text(a.detected ? 'Riskli/Gözetim altında' : 'Risk tespit edilmedi',
-                          style: AppTextStyles.labelSmall.copyWith(fontSize: 10)),
-                    ],
+          ...allergens.map(
+            (a) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    a.detected
+                        ? Icons.cancel_rounded
+                        : Icons.check_circle_rounded,
+                    size: 18,
+                    color: a.detected ? AppColors.error : AppColors.primary,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          a.name,
+                          style: AppTextStyles.labelMedium.copyWith(
+                            fontSize: 12,
+                            color: titleColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          a.detected
+                              ? 'Riskli/Gözetim altında'
+                              : 'Risk tespit edilmedi',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            fontSize: 10,
+                            color: descColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -674,54 +921,62 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   // ── Build Detected Meal Cards ─────────────────────────────
   List<Widget> _buildMealResultCards() {
     final List<MealModel> mealsList = [];
-    
+
     if (_dietResult.breakfast != null) {
-      mealsList.add(MealModel(
-        name: 'Kahvaltı',
-        time: '08:30',
-        mealType: _dietResult.breakfast!.items.join(', '),
-        calories: _parseCal(_dietResult.breakfast!.calories) ?? 350,
-        protein: 15,
-        carbs: 40,
-        fat: 12,
-      ));
+      mealsList.add(
+        MealModel(
+          name: 'Kahvaltı',
+          time: '08:30',
+          mealType: _dietResult.breakfast!.items.join(', '),
+          calories: _parseCal(_dietResult.breakfast!.calories) ?? 350,
+          protein: 15,
+          carbs: 40,
+          fat: 12,
+        ),
+      );
     }
-    
+
     if (_dietResult.lunch != null) {
-      mealsList.add(MealModel(
-        name: 'Öğle Yemeği',
-        time: '13:00',
-        mealType: _dietResult.lunch!.items.join(', '),
-        calories: _parseCal(_dietResult.lunch!.calories) ?? 550,
-        protein: 30,
-        carbs: 55,
-        fat: 15,
-      ));
+      mealsList.add(
+        MealModel(
+          name: 'Öğle Yemeği',
+          time: '13:00',
+          mealType: _dietResult.lunch!.items.join(', '),
+          calories: _parseCal(_dietResult.lunch!.calories) ?? 550,
+          protein: 30,
+          carbs: 55,
+          fat: 15,
+        ),
+      );
     }
-    
+
     if (_dietResult.dinner != null) {
-      mealsList.add(MealModel(
-        name: 'Akşam Yemeği',
-        time: '19:30',
-        mealType: _dietResult.dinner!.items.join(', '),
-        calories: _parseCal(_dietResult.dinner!.calories) ?? 600,
-        protein: 35,
-        carbs: 50,
-        fat: 16,
-      ));
+      mealsList.add(
+        MealModel(
+          name: 'Akşam Yemeği',
+          time: '19:30',
+          mealType: _dietResult.dinner!.items.join(', '),
+          calories: _parseCal(_dietResult.dinner!.calories) ?? 600,
+          protein: 35,
+          carbs: 50,
+          fat: 16,
+        ),
+      );
     }
-    
+
     int index = 1;
     for (var snack in _dietResult.snacks) {
-      mealsList.add(MealModel(
-        name: 'Ara Öğün $index',
-        time: '16:30',
-        mealType: snack.items.join(', '),
-        calories: _parseCal(snack.calories) ?? 150,
-        protein: 5,
-        carbs: 20,
-        fat: 4,
-      ));
+      mealsList.add(
+        MealModel(
+          name: 'Ara Öğün $index',
+          time: '16:30',
+          mealType: snack.items.join(', '),
+          calories: _parseCal(snack.calories) ?? 150,
+          protein: 5,
+          carbs: 20,
+          fat: 4,
+        ),
+      );
       index++;
     }
 
@@ -730,16 +985,23 @@ class _AnalysisScreenState extends State<AnalysisScreen>
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Text('Öğün bilgisi bulunamadı.', style: AppTextStyles.bodySmall),
+            child: Text(
+              'Öğün bilgisi bulunamadı.',
+              style: AppTextStyles.bodySmall,
+            ),
           ),
-        )
+        ),
       ];
     }
 
-    return mealsList.map((m) => Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: _MealResultCard(meal: m),
-    )).toList();
+    return mealsList
+        .map(
+          (m) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _MealResultCard(meal: m),
+          ),
+        )
+        .toList();
   }
 
   // ── AI Comment Card ────────────────────────────────────
@@ -749,7 +1011,9 @@ class _AnalysisScreenState extends State<AnalysisScreen>
       children: [
         RayMessageCard(
           title: "Ray'in Yorumu",
-          message: comment.isNotEmpty ? comment : "Diyet listenizin ve sağlık profilinizin analizi başarıyla tamamlandı. Hedeflerinize uygun tarifleri inceleyebilirsiniz.",
+          message: comment.isNotEmpty
+              ? comment
+              : "Diyet listenizin ve sağlık profilinizin analizi başarıyla tamamlandı. Hedeflerinize uygun tarifleri inceleyebilirsiniz.",
           imagePath: 'assets/mascot/ray_default.png',
         ),
         if (_bloodResult != null && _bloodResult.safetyWarning.isNotEmpty) ...[
@@ -759,11 +1023,17 @@ class _AnalysisScreenState extends State<AnalysisScreen>
             decoration: BoxDecoration(
               color: AppColors.warning.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.healing_rounded, color: AppColors.warning, size: 20),
+                const Icon(
+                  Icons.healing_rounded,
+                  color: AppColors.warning,
+                  size: 20,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -776,8 +1046,8 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                 ),
               ],
             ),
-          )
-        ]
+          ),
+        ],
       ],
     );
   }
@@ -790,32 +1060,50 @@ class _MealResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF17332B) : Colors.white;
+    final titleColor = isDark ? const Color(0xFFF3FFF9) : AppColors.textDark;
+    final descColor = isDark ? const Color(0xFFB7CCC5) : AppColors.textMedium;
+
     return SoftCard(
+      backgroundColor: cardBg,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
           Container(
-            width: 56, height: 56,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.restaurant_rounded,
-                color: AppColors.primary, size: 24),
+            child: const Icon(
+              Icons.restaurant_rounded,
+              color: AppColors.primary,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(meal.name,
-                    style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textDark, fontWeight: FontWeight.w600, fontSize: 13),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  meal.name,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: titleColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(meal.mealType,
-                    style: AppTextStyles.labelSmall.copyWith(fontSize: 10),
-                    maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(
+                  meal.mealType,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontSize: 10,
+                    color: descColor,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 4,
@@ -830,7 +1118,11 @@ class _MealResultCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 20),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: isDark ? const Color(0xFFB7CCC5) : AppColors.textHint,
+            size: 20,
+          ),
         ],
       ),
     );
@@ -843,8 +1135,14 @@ class _MealResultCard extends StatelessWidget {
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(text,
-          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: color)),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -867,7 +1165,10 @@ class _DonutPainter extends CustomPainter {
       final sweep = values[i] * 2 * math.pi - gap;
       if (sweep <= 0) continue;
       canvas.drawArc(
-        Rect.fromCircle(center: c, radius: r), start, sweep, false,
+        Rect.fromCircle(center: c, radius: r),
+        start,
+        sweep,
+        false,
         Paint()
           ..color = colors[i]
           ..style = PaintingStyle.stroke

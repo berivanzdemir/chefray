@@ -30,7 +30,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       step: '2 / 3',
       title: 'Akıllı ',
       titleHighlight: 'Analiz',
-      subtitle: 'Kalori, makro, kısıtlar ve hedeflerin\nsenin için analiz edilir.',
+      subtitle:
+          'Kalori, makro, kısıtlar ve hedeflerin\nsenin için analiz edilir.',
       bottomIcon: Icons.bar_chart_rounded,
       bottomText: 'Verilere dayalı önerilerle\n',
       bottomHighlight: 'en doğru tarifleri',
@@ -41,7 +42,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       step: '3 / 3',
       title: 'Yemeğini ',
       titleHighlight: 'Gör',
-      subtitle: 'Tariflerinin her bileşenini keşfet,\nne yediğini gerçekten öğren.',
+      subtitle:
+          'Tariflerinin her bileşenini keşfet,\nne yediğini gerçekten öğren.',
       bottomIcon: Icons.restaurant_rounded,
       bottomText: 'Daha bilinçli seçimler yap,\n',
       bottomHighlight: 'hedeflerine',
@@ -52,7 +54,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _nextPage() {
     if (_currentPage < 2) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
     } else {
       context.go('/auth');
     }
@@ -60,7 +65,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _prevPage() {
     if (_currentPage > 0) {
-      _pageController.previousPage(duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -99,8 +107,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(height: 12),
                     TextButton(
                       onPressed: () => context.go('/auth'),
-                      child: Text('Şimdi değil',
-                          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textLight)),
+                      child: Text(
+                        'Şimdi değil',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textLight,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -120,7 +132,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                     // Dots
                     Row(
-                      children: List.generate(3, (i) => _Dot(isActive: i == _currentPage)),
+                      children: List.generate(
+                        3,
+                        (i) => _Dot(isActive: i == _currentPage),
+                      ),
                     ),
                     // Forward button
                     _CircleNavButton(
@@ -180,22 +195,39 @@ class _OnboardingPage extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(data.step,
-                style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+            child: Text(
+              data.step,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           // Title
           RichText(
             textAlign: TextAlign.center,
-            text: TextSpan(children: [
-              TextSpan(text: data.title, style: AppTextStyles.onboardingTitle),
-              TextSpan(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: data.title,
+                  style: AppTextStyles.onboardingTitle,
+                ),
+                TextSpan(
                   text: data.titleHighlight,
-                  style: AppTextStyles.onboardingTitle.copyWith(color: AppColors.primary)),
-            ]),
+                  style: AppTextStyles.onboardingTitle.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
-          Text(data.subtitle, textAlign: TextAlign.center, style: AppTextStyles.bodyLarge),
+          Text(
+            data.subtitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyLarge,
+          ),
           const SizedBox(height: 32),
           // Visual area
           _buildVisual(data.visualType),
@@ -213,13 +245,20 @@ class _OnboardingPage extends StatelessWidget {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textMedium),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textMedium,
+              ),
               children: [
                 TextSpan(text: data.bottomText),
                 TextSpan(
-                    text: data.bottomHighlight,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
-                if (data.bottomSuffix != null) TextSpan(text: data.bottomSuffix),
+                  text: data.bottomHighlight,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (data.bottomSuffix != null)
+                  TextSpan(text: data.bottomSuffix),
               ],
             ),
           ),
@@ -252,7 +291,9 @@ class _ScanVisual extends StatelessWidget {
         children: [
           // Background card (tilted)
           Positioned(
-            left: 40, right: 40, top: 10,
+            left: 40,
+            right: 40,
+            top: 10,
             child: Transform.rotate(
               angle: 0.04,
               child: Container(
@@ -272,37 +313,80 @@ class _ScanVisual extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('DİYET LİSTESİ', style: AppTextStyles.labelMedium.copyWith(letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+                Text(
+                  'DİYET LİSTESİ',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 16),
-                _mealSection('🔥', 'KAHVALTI', ['2 dilim tam buğday ekmeği', '1 haşlanmış yumurta', '5 adet zeytin']),
+                _mealSection('🔥', 'KAHVALTI', [
+                  '2 dilim tam buğday ekmeği',
+                  '1 haşlanmış yumurta',
+                  '5 adet zeytin',
+                ]),
                 const SizedBox(height: 12),
-                _mealSection('🍽️', 'ÖĞLE YEMEĞİ', ['150g ızgara tavuk', '4 yemek kaşığı bulgur pilavı', 'Salata']),
+                _mealSection('🍽️', 'ÖĞLE YEMEĞİ', [
+                  '150g ızgara tavuk',
+                  '4 yemek kaşığı bulgur pilavı',
+                  'Salata',
+                ]),
                 const SizedBox(height: 12),
-                _mealSection('🌙', 'AKŞAM YEMEĞİ', ['150g somon', '1 kase yeşil salata']),
+                _mealSection('🌙', 'AKŞAM YEMEĞİ', [
+                  '150g somon',
+                  '1 kase yeşil salata',
+                ]),
               ],
             ),
           ),
           // Scan corners
-          Positioned(top: 15, left: 30, child: _ScanCorner(isTop: true, isLeft: true)),
-          Positioned(top: 15, right: 30, child: _ScanCorner(isTop: true, isLeft: false)),
-          Positioned(bottom: 5, left: 30, child: _ScanCorner(isTop: false, isLeft: true)),
-          Positioned(bottom: 5, right: 30, child: _ScanCorner(isTop: false, isLeft: false)),
+          Positioned(
+            top: 15,
+            left: 30,
+            child: _ScanCorner(isTop: true, isLeft: true),
+          ),
+          Positioned(
+            top: 15,
+            right: 30,
+            child: _ScanCorner(isTop: true, isLeft: false),
+          ),
+          Positioned(
+            bottom: 5,
+            left: 30,
+            child: _ScanCorner(isTop: false, isLeft: true),
+          ),
+          Positioned(
+            bottom: 5,
+            right: 30,
+            child: _ScanCorner(isTop: false, isLeft: false),
+          ),
           // Green scan line
           Positioned(
-            left: 36, right: 36, top: 100,
+            left: 36,
+            right: 36,
+            top: 100,
             child: Container(
               height: 2,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  AppColors.primary.withValues(alpha: 0),
-                  AppColors.primary.withValues(alpha: 0.6),
-                  AppColors.primary.withValues(alpha: 0),
-                ]),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0),
+                    AppColors.primary.withValues(alpha: 0.6),
+                    AppColors.primary.withValues(alpha: 0),
+                  ],
+                ),
               ),
             ),
           ),
@@ -315,16 +399,30 @@ class _ScanVisual extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [
-          Text(emoji, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 6),
-          Text(title, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.textDark, letterSpacing: 0.5)),
-        ]),
+        Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 14)),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: AppTextStyles.labelSmall.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 4),
-        ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(left: 24, top: 2),
-              child: Text('• $item', style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
-            )),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(left: 24, top: 2),
+            child: Text(
+              '• $item',
+              style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -337,8 +435,11 @@ class _ScanCorner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 20, height: 20,
-      child: CustomPaint(painter: _CornerPainter(isTop: isTop, isLeft: isLeft)),
+      width: 20,
+      height: 20,
+      child: CustomPaint(
+        painter: _CornerPainter(isTop: isTop, isLeft: isLeft),
+      ),
     );
   }
 }
@@ -389,7 +490,15 @@ class _AnalysisVisual extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _miniCard('🔥', 'Günlük Kalori', '1500', 'kcal', 'Hedefe uygun')),
+              Expanded(
+                child: _miniCard(
+                  '🔥',
+                  'Günlük Kalori',
+                  '1500',
+                  'kcal',
+                  'Hedefe uygun',
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(child: _macroCard()),
             ],
@@ -397,9 +506,21 @@ class _AnalysisVisual extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _listCard('🎯', 'Hedefler', ['Yüksek Protein', 'Glutensiz', 'Düşük Şeker'])),
+              Expanded(
+                child: _listCard('🎯', 'Hedefler', [
+                  'Yüksek Protein',
+                  'Glutensiz',
+                  'Düşük Şeker',
+                ]),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _listCard('⚠️', 'Yasaklı / Alerjenler', ['Gluten', 'Fındık', 'Laktoz'])),
+              Expanded(
+                child: _listCard('⚠️', 'Yasaklı / Alerjenler', [
+                  'Gluten',
+                  'Fındık',
+                  'Laktoz',
+                ]),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -409,33 +530,70 @@ class _AnalysisVisual extends StatelessWidget {
     );
   }
 
-  static Widget _miniCard(String emoji, String title, String value, String unit, String badge) {
+  static Widget _miniCard(
+    String emoji,
+    String title,
+    String value,
+    String unit,
+    String badge,
+  ) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Text(emoji, style: const TextStyle(fontSize: 14)),
-            const SizedBox(width: 6),
-            Expanded(child: Text(title, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark))),
-          ]),
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
-          RichText(text: TextSpan(children: [
-            TextSpan(text: value, style: AppTextStyles.h1.copyWith(fontSize: 28)),
-            TextSpan(text: ' $unit', style: AppTextStyles.bodySmall),
-          ])),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: AppTextStyles.h1.copyWith(fontSize: 28),
+                ),
+                TextSpan(text: ' $unit', style: AppTextStyles.bodySmall),
+              ],
+            ),
+          ),
           const SizedBox(height: 4),
-          Row(children: [
-            Icon(Icons.check_circle, size: 12, color: AppColors.primary),
-            const SizedBox(width: 4),
-            Text(badge, style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontSize: 10)),
-          ]),
+          Row(
+            children: [
+              Icon(Icons.check_circle, size: 12, color: AppColors.primary),
+              const SizedBox(width: 4),
+              Text(
+                badge,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -447,17 +605,30 @@ class _AnalysisVisual extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Makro Dağılımı', style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark)),
+          Text(
+            'Makro Dağılımı',
+            style: AppTextStyles.labelSmall.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
               SizedBox(
-                width: 44, height: 44,
+                width: 44,
+                height: 44,
                 child: CustomPaint(painter: _DonutPainter()),
               ),
               const SizedBox(width: 10),
@@ -484,13 +655,26 @@ class _AnalysisVisual extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 9), overflow: TextOverflow.ellipsis),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 4),
-          Text(value, style: AppTextStyles.labelSmall.copyWith(fontSize: 9, fontWeight: FontWeight.w700)),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(fontSize: 9),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            value,
+            style: AppTextStyles.labelSmall.copyWith(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -502,25 +686,56 @@ class _AnalysisVisual extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Text(emoji, style: const TextStyle(fontSize: 14)),
-            const SizedBox(width: 6),
-            Expanded(child: Text(title, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 11))),
-          ]),
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: Row(children: [
-                  Container(width: 5, height: 5, decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Row(
+                children: [
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                   const SizedBox(width: 6),
-                  Text(item, style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
-                ]),
-              )),
+                  Text(
+                    item,
+                    style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -532,13 +747,25 @@ class _AnalysisVisual extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Text('🍽️', style: const TextStyle(fontSize: 14)),
           const SizedBox(width: 8),
-          Text('Öğün Dağılımı', style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark)),
+          Text(
+            'Öğün Dağılımı',
+            style: AppTextStyles.labelSmall.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
+          ),
           const Spacer(),
           _mealDot('Kahvaltı', '%25'),
           const SizedBox(width: 12),
@@ -556,7 +783,14 @@ class _AnalysisVisual extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 9)),
-        Text(pct, style: AppTextStyles.labelSmall.copyWith(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primary)),
+        Text(
+          pct,
+          style: AppTextStyles.labelSmall.copyWith(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
+          ),
+        ),
       ],
     );
   }
@@ -568,15 +802,48 @@ class _DonutPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final r = size.width / 2 - 4;
     const sw = 6.0;
-    final bg = Paint()..color = AppColors.divider..style = PaintingStyle.stroke..strokeWidth = sw;
+    final bg = Paint()
+      ..color = AppColors.divider
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = sw;
     canvas.drawCircle(center, r, bg);
     final rect = Rect.fromCircle(center: center, radius: r);
     // Protein 35%
-    canvas.drawArc(rect, -1.57, 2.2, false, Paint()..color = AppColors.protein..style = PaintingStyle.stroke..strokeWidth = sw..strokeCap = StrokeCap.round);
+    canvas.drawArc(
+      rect,
+      -1.57,
+      2.2,
+      false,
+      Paint()
+        ..color = AppColors.protein
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = sw
+        ..strokeCap = StrokeCap.round,
+    );
     // Carbs 40%
-    canvas.drawArc(rect, 0.63, 2.51, false, Paint()..color = AppColors.carbs..style = PaintingStyle.stroke..strokeWidth = sw..strokeCap = StrokeCap.round);
+    canvas.drawArc(
+      rect,
+      0.63,
+      2.51,
+      false,
+      Paint()
+        ..color = AppColors.carbs
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = sw
+        ..strokeCap = StrokeCap.round,
+    );
     // Fat 25%
-    canvas.drawArc(rect, 3.14, 1.57, false, Paint()..color = AppColors.fat..style = PaintingStyle.stroke..strokeWidth = sw..strokeCap = StrokeCap.round);
+    canvas.drawArc(
+      rect,
+      3.14,
+      1.57,
+      false,
+      Paint()
+        ..color = AppColors.fat
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = sw
+        ..strokeCap = StrokeCap.round,
+    );
   }
 
   @override
@@ -603,7 +870,7 @@ class _ExplodedVisual extends StatelessWidget {
               Positioned(
                 top: 108, // (320 - 104) / 2
                 child: Container(
-                  width: 104, 
+                  width: 104,
                   height: 104,
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
@@ -611,13 +878,15 @@ class _ExplodedVisual extends StatelessWidget {
                     border: Border.all(color: Colors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04), 
-                        blurRadius: 10, 
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
-                  child: const Center(child: Text('🥗', style: TextStyle(fontSize: 48))),
+                  child: const Center(
+                    child: Text('🥗', style: TextStyle(fontSize: 48)),
+                  ),
                 ),
               ),
 
@@ -660,10 +929,10 @@ class _ExplodedVisual extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05), 
-            blurRadius: 10, 
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
@@ -676,8 +945,22 @@ class _ExplodedVisual extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(name, style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 11)),
-              Text(kcal, style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 10)),
+              Text(
+                name,
+                style: AppTextStyles.labelSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                kcal,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
+                ),
+              ),
             ],
           ),
         ],
@@ -699,7 +982,9 @@ class _Dot extends StatelessWidget {
       width: isActive ? 10 : 8,
       height: isActive ? 10 : 8,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.primary.withValues(alpha: 0.2),
+        color: isActive
+            ? AppColors.primary
+            : AppColors.primary.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
     );
@@ -712,7 +997,11 @@ class _CircleNavButton extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isPrimary;
 
-  const _CircleNavButton({required this.icon, this.onTap, this.isPrimary = false});
+  const _CircleNavButton({
+    required this.icon,
+    this.onTap,
+    this.isPrimary = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -720,13 +1009,24 @@ class _CircleNavButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 52, height: 52,
+        width: 52,
+        height: 52,
         decoration: BoxDecoration(
-          color: isPrimary && enabled ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
+          color: isPrimary && enabled
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: enabled ? AppColors.divider : AppColors.divider.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: enabled
+                ? AppColors.divider
+                : AppColors.divider.withValues(alpha: 0.5),
+          ),
         ),
-        child: Icon(icon, color: enabled ? AppColors.textDark : AppColors.textHint, size: 22),
+        child: Icon(
+          icon,
+          color: enabled ? AppColors.textDark : AppColors.textHint,
+          size: 22,
+        ),
       ),
     );
   }

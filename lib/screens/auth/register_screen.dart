@@ -45,23 +45,30 @@ class _RegisterScreenState extends State<RegisterScreen>
   void initState() {
     super.initState();
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 700));
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.06),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
 
-    final initialSessionExists = SupabaseAuthService.instance.currentSession != null;
+    final initialSessionExists =
+        SupabaseAuthService.instance.currentSession != null;
     if (kDebugMode) {
       debugPrint('Session exists: $initialSessionExists');
     }
 
-    _authStateSub = SupabaseAuthService.instance.authStateChanges.listen((data) async {
+    _authStateSub = SupabaseAuthService.instance.authStateChanges.listen((
+      data,
+    ) async {
       if (!mounted) return;
-      
+
       final sessionExists = data.session != null;
       if (kDebugMode) {
         debugPrint('Session exists: $sessionExists');
@@ -71,7 +78,8 @@ class _RegisterScreenState extends State<RegisterScreen>
         if (_socialLoading != null) {
           setState(() => _socialLoading = null);
         }
-        final isSetupComplete = await UserHealthProfileRepository.instance.isProfileSetupCompleted();
+        final isSetupComplete = await UserHealthProfileRepository.instance
+            .isProfileSetupCompleted();
         if (!mounted) return;
         if (isSetupComplete) {
           context.go('/home');
@@ -144,7 +152,10 @@ class _RegisterScreenState extends State<RegisterScreen>
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: isError
             ? const Color(0xFFFF4D6A).withValues(alpha: 0.95)
@@ -164,7 +175,9 @@ class _RegisterScreenState extends State<RegisterScreen>
       builder: (ctx) => PopScope(
         canPop: false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(28),
             child: Column(
@@ -184,10 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'E-postanı Doğrula',
-                  style: AppTextStyles.h2,
-                ),
+                Text('E-postanı Doğrula', style: AppTextStyles.h2),
                 const SizedBox(height: 10),
                 Text(
                   'Hesabın oluşturuldu! Giriş yapmadan önce e-posta adresine '
@@ -246,11 +256,14 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
 
     if (!mounted) return;
-    
+
     // Eğer işlem başarısızsa loading'i kaldırıp hatayı göster
     if (result != null && !result.isSuccess) {
       setState(() => _socialLoading = null);
-      _showSnackbar(result.errorMessage ?? '$provider girişi başarısız.', isError: true);
+      _showSnackbar(
+        result.errorMessage ?? '$provider girişi başarısız.',
+        isError: true,
+      );
     }
   }
 
@@ -279,11 +292,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                           // ── Back button + Logo row ─────────────────────
                           Row(
                             children: [
-                              _BackButton(
-                                  onTap: () => context.go('/auth')),
+                              _BackButton(onTap: () => context.go('/auth')),
                               const Spacer(),
-                              const AppLogo(
-                                  size: 40, showText: false),
+                              const AppLogo(size: 40, showText: false),
                               const Spacer(),
                               const SizedBox(width: 40),
                             ],
@@ -351,7 +362,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                             suffixWidget: _VisibilityToggle(
                               isObscured: _obscureConfirm,
                               onTap: () => setState(
-                                  () => _obscureConfirm = !_obscureConfirm),
+                                () => _obscureConfirm = !_obscureConfirm,
+                              ),
                             ),
                             onFieldSubmitted: (_) => _handleRegister(),
                           ),
@@ -456,8 +468,7 @@ class _HeroTextBlock extends StatelessWidget {
       children: [
         Text(title, style: AppTextStyles.displayMedium),
         const SizedBox(height: 8),
-        Text(subtitle,
-            style: AppTextStyles.bodyLarge.copyWith(height: 1.6)),
+        Text(subtitle, style: AppTextStyles.bodyLarge.copyWith(height: 1.6)),
       ],
     );
   }
@@ -479,8 +490,11 @@ class _BackButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.divider),
         ),
-        child: const Icon(Icons.arrow_back_ios_new_rounded,
-            size: 16, color: AppColors.textDark),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          size: 16,
+          color: AppColors.textDark,
+        ),
       ),
     );
   }
@@ -489,8 +503,7 @@ class _BackButton extends StatelessWidget {
 class _StepIndicator extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
-  const _StepIndicator(
-      {required this.currentStep, required this.totalSteps});
+  const _StepIndicator({required this.currentStep, required this.totalSteps});
 
   @override
   Widget build(BuildContext context) {
@@ -508,8 +521,9 @@ class _StepIndicator extends StatelessWidget {
               value: currentStep / totalSteps,
               minHeight: 4,
               backgroundColor: AppColors.divider,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
           ),
         ),
@@ -547,17 +561,18 @@ class _TermsRow extends StatelessWidget {
                 ),
               ),
               child: value
-                  ? const Icon(Icons.check_rounded,
-                      size: 13, color: AppColors.textDark)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 13,
+                      color: AppColors.textDark,
+                    )
                   : null,
             ),
           ),
         ),
         const SizedBox(width: 10),
         // Rich text with tappable links
-        Expanded(
-          child: _TermsRichText(onToggle: () => onChanged(!value)),
-        ),
+        Expanded(child: _TermsRichText(onToggle: () => onChanged(!value))),
       ],
     );
   }
@@ -580,8 +595,10 @@ class _TermsRichText extends StatelessWidget {
           onTap: onToggle,
           child: Text(
             'Okudum ve kabul ediyorum: ',
-            style: AppTextStyles.bodySmall
-                .copyWith(color: AppColors.textMedium, height: 1.5),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textMedium,
+              height: 1.5,
+            ),
           ),
         ),
         Row(
@@ -603,8 +620,10 @@ class _TermsRichText extends StatelessWidget {
               onTap: onToggle,
               child: Text(
                 ' ve ',
-                style: AppTextStyles.bodySmall
-                    .copyWith(color: AppColors.textMedium, height: 1.5),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textMedium,
+                  height: 1.5,
+                ),
               ),
             ),
             GestureDetector(
@@ -658,17 +677,21 @@ class _AuthSwitchRow extends StatelessWidget {
   final String question;
   final String actionText;
   final VoidCallback onTap;
-  const _AuthSwitchRow(
-      {required this.question, required this.actionText, required this.onTap});
+  const _AuthSwitchRow({
+    required this.question,
+    required this.actionText,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(question,
-            style: AppTextStyles.bodySmall
-                .copyWith(color: AppColors.textMedium)),
+        Text(
+          question,
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium),
+        ),
         GestureDetector(
           onTap: onTap,
           child: Text(

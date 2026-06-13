@@ -28,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _navIndex = 0;
   bool _isLoadingLatest = true;
+  int _unreadCount = 0;
 
   @override
   void initState() {
@@ -35,6 +36,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadLatestAnalysis();
     _initNotifications();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final count = await NotificationService().getUnreadNotificationCount();
+    if (mounted) {
+      setState(() {
+        _unreadCount = count;
+      });
+    }
   }
 
   @override
@@ -52,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         goals: provider.todayGoals,
         healthProfile: provider.healthProfile,
       );
+      _loadUnreadCount();
     }
   }
 
@@ -59,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final service = NotificationService();
     await service.init();
     await service.requestPermissions();
-    
+
     // Uygulama açılışında veriler yüklendikten sonra karar motorunu çalıştır
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
@@ -83,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _addWater(int amount) async {
     final provider = context.read<UserProfileProvider>();
     DailyGoals? goals = provider.todayGoals;
-    
+
     if (goals != null) {
       final newConsumed = (goals.waterConsumed + amount).clamp(0.0, 99999.0);
       final updatedGoals = goals.copyWith(waterConsumed: newConsumed);
@@ -137,15 +149,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               right: 0,
               height: 300,
               child: Opacity(
-                opacity: Theme.of(context).brightness == Brightness.dark ? 0.03 : 0.08,
+                opacity: Theme.of(context).brightness == Brightness.dark
+                    ? 0.03
+                    : 0.08,
                 child: ShaderMask(
                   shaderCallback: (rect) => LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white,
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
+                    colors: [Colors.white, Colors.white.withValues(alpha: 0.0)],
                     stops: const [0.4, 1.0],
                   ).createShader(rect),
                   blendMode: BlendMode.dstIn,
@@ -157,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
-            
+
             Consumer<UserProfileProvider>(
               builder: (context, provider, child) {
                 final goals = provider.todayGoals;
@@ -165,7 +176,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 final targetWaterMl = goals?.waterTarget.toInt() ?? 2500;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 16, left: 20, right: 20, top: 12),
+                  padding: const EdgeInsets.only(
+                    bottom: 16,
+                    left: 20,
+                    right: 20,
+                    top: 12,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -173,30 +189,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       HomeHeader(
                         displayName: _displayName,
                         avatarInitial: _avatarInitial,
+                        unreadCount: _unreadCount,
+                        onNotificationTap: () async {
+                          await context.push('/notifications');
+                          _loadUnreadCount();
+                        },
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // 2. Analiz durum kartı
                       if (_isLoadingLatest)
                         SizedBox(
                           height: 200,
-                          child: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                         )
                       else
                         AnalysisReadyCard(
                           isAnalysisReady: true,
-                          onCreateDietPlan: () => context.push('/personal-diet'),
-                          onUploadTap: () => context.push('/diet-upload?uploadType=dietPdf'),
+                          onCreateDietPlan: () =>
+                              context.push('/personal-diet'),
+                          onUploadTap: () =>
+                              context.push('/diet-upload?uploadType=dietPdf'),
                           onSummaryTap: () => context.push('/analysis-history'),
                         ),
-                      
+
                       const SizedBox(height: 28),
-                      
+
                       // 3. Hızlı İşlemler
                       const QuickActionsSection(),
-                      
+
                       const SizedBox(height: 22),
-                      
+
                       // 4. Su Tüketimi widget
                       HydrationCard(
                         currentMl: currentWaterMl,
@@ -206,14 +233,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         onDecreaseSmall: () => _addWater(-250),
                         onDecreaseLarge: () => _addWater(-500),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // 5. Sana Özel Öneriler
                       const RecipeRecommendationsSection(),
-                      
+
                       const SizedBox(height: 22),
-                      
+
                       // 6. Paketli Ürün Analizi
                       const PackagedProductCard(),
                     ],
@@ -222,6 +249,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               },
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/ray-assistant'),
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.15),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Image.asset(
+              'assets/mascot/ray_thinking.png',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(
+                Icons.smart_toy_rounded,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: ChefRayBottomNavBar(
@@ -264,24 +321,40 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 24, offset: const Offset(0, 10)),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
                   ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _floatingMenuItem(Icons.description_rounded, 'Diyet Yükleme Alanı', () {
-                      Navigator.pop(context);
-                      context.push('/diet-upload?uploadType=dietPdf');
-                    }),
-                    _floatingMenuItem(Icons.vaccines_rounded, 'Kan Tahlili Yükleme Alanı', () {
-                      Navigator.pop(context);
-                      context.push('/diet-upload?uploadType=bloodPdf');
-                    }),
-                    _floatingMenuItem(Icons.qr_code_scanner_rounded, 'Ürün Tara', () {
-                      Navigator.pop(context);
-                      context.push('/product-scan');
-                    }),
+                    _floatingMenuItem(
+                      Icons.description_rounded,
+                      'Diyet Yükleme Alanı',
+                      () {
+                        Navigator.pop(context);
+                        context.push('/diet-upload?uploadType=dietPdf');
+                      },
+                    ),
+                    _floatingMenuItem(
+                      Icons.vaccines_rounded,
+                      'Kan Tahlili Yükleme Alanı',
+                      () {
+                        Navigator.pop(context);
+                        context.push('/diet-upload?uploadType=bloodPdf');
+                      },
+                    ),
+                    _floatingMenuItem(
+                      Icons.qr_code_scanner_rounded,
+                      'Ürün Tara',
+                      () {
+                        Navigator.pop(context);
+                        context.push('/product-scan');
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -293,7 +366,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return FadeTransition(
           opacity: anim1,
           child: SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(anim1),
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.1),
+              end: Offset.zero,
+            ).animate(anim1),
             child: child,
           ),
         );
@@ -313,13 +389,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                title, 
+                title,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface, 
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                   fontFamily: 'SF Pro Display',
-                )
+                ),
               ),
             ),
           ],

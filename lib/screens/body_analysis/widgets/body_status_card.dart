@@ -33,9 +33,7 @@ class BodyStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SoftCard(
-        child: _hasData ? _buildContent() : _buildEmptyState(),
-      ),
+      child: SoftCard(child: _hasData ? _buildContent() : _buildEmptyState()),
     );
   }
 
@@ -93,10 +91,7 @@ class BodyStatusCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Güncel Kilo',
-                    style: AppTextStyles.labelSmall,
-                  ),
+                  Text('Güncel Kilo', style: AppTextStyles.labelSmall),
                   const SizedBox(height: 4),
                   Text(
                     '${weight.toStringAsFixed(1)} kg',
@@ -109,16 +104,11 @@ class BodyStatusCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'İdeal Kilo Aralığı',
-                    style: AppTextStyles.labelSmall,
-                  ),
+                  Text('İdeal Kilo Aralığı', style: AppTextStyles.labelSmall),
                   const SizedBox(height: 4),
                   Text(
                     '${range.min.toStringAsFixed(1)} - ${range.max.toStringAsFixed(1)} kg',
-                    style: AppTextStyles.h3.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTextStyles.h3.copyWith(color: AppColors.primary),
                   ),
                 ],
               ),
@@ -163,8 +153,7 @@ class BodyStatusCard extends StatelessWidget {
 
         // Current weight dot position (clamped to bar bounds)
         final clampedWeight = weight.clamp(barMin, barMax);
-        final dotPosition =
-            ((clampedWeight - barMin) / totalSpan) * barWidth;
+        final dotPosition = ((clampedWeight - barMin) / totalSpan) * barWidth;
 
         return SizedBox(
           height: 40,
@@ -230,10 +219,7 @@ class BodyStatusCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: _indicatorColor,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: _indicatorColor.withValues(alpha: 0.3),
@@ -258,17 +244,11 @@ class BodyStatusCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 12),
-        Icon(
-          Icons.monitor_heart_outlined,
-          size: 48,
-          color: AppColors.textHint,
-        ),
+        Icon(Icons.monitor_heart_outlined, size: 48, color: AppColors.textHint),
         const SizedBox(height: 12),
         Text(
           'Vücut durumunuzu görmek için\nbilgilerinizi girin',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textLight,
-          ),
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),

@@ -59,7 +59,6 @@ dependencies:
   provider: ^6.1.5+1
   crypto: ^3.0.7
   pdfx: ^2.9.2
-  google_sign_in: ^7.2.0
   sign_in_with_apple: ^8.0.0
   pdf: ^3.12.0
   printing: ^5.14.3
@@ -69,6 +68,7 @@ dependencies:
   cached_network_image: ^3.4.1
   share_plus: ^10.0.0
   flutter_tts: ^4.2.5
+  confetti: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -102,12 +102,13 @@ flutter:
     - assets/analiz.png
     - assets/background.jpeg
     - assets/subardagi.png
-    - assets/barkod.jpeg
+    - assets/barkod.png
     - assets/ikon.png
     - assets/kadin.png
     - assets/erkek.png
     - assets/tarti.png
     - assets/yildiz.png
+    - assets/confeti.png
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

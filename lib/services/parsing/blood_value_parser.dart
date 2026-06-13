@@ -20,13 +20,13 @@ class ParsedBloodValue {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'value': value,
-        'unit': unit,
-        'status': status,
-        'reference_range_low': referenceRangeLow,
-        'reference_range_high': referenceRangeHigh,
-      };
+    'name': name,
+    'value': value,
+    'unit': unit,
+    'status': status,
+    'reference_range_low': referenceRangeLow,
+    'reference_range_high': referenceRangeHigh,
+  };
 }
 
 class ParsedBloodValues {
@@ -34,7 +34,8 @@ class ParsedBloodValues {
   final double confidence;
   final String message;
   final List<String> matchedSignals;
-  final Map<String, ParsedBloodValue> values; // key: normalized name (b12, ldl, etc.)
+  final Map<String, ParsedBloodValue>
+  values; // key: normalized name (b12, ldl, etc.)
 
   const ParsedBloodValues({
     required this.isBloodTest,
@@ -45,12 +46,12 @@ class ParsedBloodValues {
   });
 
   Map<String, dynamic> toJson() => {
-        'is_valid': isBloodTest,
-        'confidence': confidence,
-        'message': message,
-        'blood_values': values.map((k, v) => MapEntry(k, v.toJson())),
-        'matched_signals': matchedSignals,
-      };
+    'is_valid': isBloodTest,
+    'confidence': confidence,
+    'message': message,
+    'blood_values': values.map((k, v) => MapEntry(k, v.toJson())),
+    'matched_signals': matchedSignals,
+  };
 
   bool get hasValues => values.isNotEmpty;
 }
@@ -62,30 +63,74 @@ class BloodValueParser {
 
   /// Maps from Turkish/English names to normalized keys.
   static const Map<String, String> _markerNames = {
-    'b12': 'b12', 'b 12': 'b12', 'vitamin b12': 'b12', 'vit b12': 'b12',
-    'vitamin d': 'vitamin_d', 'd vitamini': 'vitamin_d', '25-oh vitamin d': 'vitamin_d',
-    '25 oh vitamin d': 'vitamin_d', '25-oh d': 'vitamin_d',
+    'b12': 'b12',
+    'b 12': 'b12',
+    'vitamin b12': 'b12',
+    'vit b12': 'b12',
+    'vitamin d': 'vitamin_d',
+    'd vitamini': 'vitamin_d',
+    '25-oh vitamin d': 'vitamin_d',
+    '25 oh vitamin d': 'vitamin_d',
+    '25-oh d': 'vitamin_d',
     'ferritin': 'ferritin',
-    'demir': 'iron', 'iron': 'iron', 'serum demir': 'iron', 'serum demiri': 'iron', 'fe': 'iron',
-    'ldl': 'ldl', 'ldl kolesterol': 'ldl', 'ldl cholesterol': 'ldl',
-    'hdl': 'hdl', 'hdl kolesterol': 'hdl', 'hdl cholesterol': 'hdl',
-    'total kolesterol': 'total_cholesterol', 'total cholesterol': 'total_cholesterol',
-    'kolesterol': 'total_cholesterol', 'cholesterol': 'total_cholesterol',
-    'trigliserid': 'triglyceride', 'trigliserit': 'triglyceride',
-    'triglyceride': 'triglyceride', 'tg': 'triglyceride',
-    'glukoz': 'glucose', 'glucose': 'glucose', 'aclik glukoz': 'glucose',
-    'aclik kan sekeri': 'glucose', 'fasting glucose': 'glucose', 'aks': 'glucose', 'glu': 'glucose',
-    'hba1c': 'hba1c', 'a1c': 'hba1c', 'hemoglobin a1c': 'hba1c',
-    'tsh': 'tsh', 'tiroid': 'tsh',
-    'alt': 'alt', 'sgpt': 'alt',
-    'ast': 'ast', 'sgot': 'ast',
-    'kreatinin': 'creatinine', 'kreatin': 'creatinine', 'creatinine': 'creatinine',
-    'ure': 'urea', 'bun': 'urea', 'urea': 'urea',
-    'crp': 'crp', 'c-reaktif protein': 'crp', 'c reactive protein': 'crp',
-    'hemoglobin': 'hemoglobin', 'hgb': 'hemoglobin', 'hb': 'hemoglobin',
-    'wbc': 'wbc', 'lokosit': 'wbc', 'leukocyte': 'wbc', 'beyaz kure': 'wbc',
-    'rbc': 'rbc', 'eritrosit': 'rbc', 'erythrocyte': 'rbc', 'kirmizi kure': 'rbc',
-    'plt': 'plt', 'trombosit': 'plt', 'platelet': 'plt',
+    'demir': 'iron',
+    'iron': 'iron',
+    'serum demir': 'iron',
+    'serum demiri': 'iron',
+    'fe': 'iron',
+    'ldl': 'ldl',
+    'ldl kolesterol': 'ldl',
+    'ldl cholesterol': 'ldl',
+    'hdl': 'hdl',
+    'hdl kolesterol': 'hdl',
+    'hdl cholesterol': 'hdl',
+    'total kolesterol': 'total_cholesterol',
+    'total cholesterol': 'total_cholesterol',
+    'kolesterol': 'total_cholesterol',
+    'cholesterol': 'total_cholesterol',
+    'trigliserid': 'triglyceride',
+    'trigliserit': 'triglyceride',
+    'triglyceride': 'triglyceride',
+    'tg': 'triglyceride',
+    'glukoz': 'glucose',
+    'glucose': 'glucose',
+    'aclik glukoz': 'glucose',
+    'aclik kan sekeri': 'glucose',
+    'fasting glucose': 'glucose',
+    'aks': 'glucose',
+    'glu': 'glucose',
+    'hba1c': 'hba1c',
+    'a1c': 'hba1c',
+    'hemoglobin a1c': 'hba1c',
+    'tsh': 'tsh',
+    'tiroid': 'tsh',
+    'alt': 'alt',
+    'sgpt': 'alt',
+    'ast': 'ast',
+    'sgot': 'ast',
+    'kreatinin': 'creatinine',
+    'kreatin': 'creatinine',
+    'creatinine': 'creatinine',
+    'ure': 'urea',
+    'bun': 'urea',
+    'urea': 'urea',
+    'crp': 'crp',
+    'c-reaktif protein': 'crp',
+    'c reactive protein': 'crp',
+    'hemoglobin': 'hemoglobin',
+    'hgb': 'hemoglobin',
+    'hb': 'hemoglobin',
+    'wbc': 'wbc',
+    'lokosit': 'wbc',
+    'leukocyte': 'wbc',
+    'beyaz kure': 'wbc',
+    'rbc': 'rbc',
+    'eritrosit': 'rbc',
+    'erythrocyte': 'rbc',
+    'kirmizi kure': 'rbc',
+    'plt': 'plt',
+    'trombosit': 'plt',
+    'platelet': 'plt',
   };
 
   /// Reference ranges for determining status (approximate, not diagnostic).
@@ -112,7 +157,8 @@ class BloodValueParser {
     'plt': _RefRange(150, 450, 'K/µL'),
   };
   String _normalizeTurkishChars(String text) {
-    return text.toLowerCase()
+    return text
+        .toLowerCase()
         .replaceAll('ı', 'i')
         .replaceAll('i̇', 'i')
         .replaceAll('ş', 's')
@@ -123,6 +169,7 @@ class BloodValueParser {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
   }
+
   ParsedBloodValues parse(OcrResult ocrResult, List<String> matchedSignals) {
     if (!ocrResult.success || ocrResult.isEmpty) {
       return ParsedBloodValues(
@@ -133,13 +180,13 @@ class BloodValueParser {
     }
 
     final text = _normalizeTurkishChars(ocrResult.rawText);
-    
+
     if (kDebugMode) {
       debugPrint('--- KAN TAHLİLİ DEBUG LOGLARI (PARSER) ---');
       debugPrint('Normalize OCR Text (ilk 1000 karakter):');
       debugPrint(text.length > 1000 ? text.substring(0, 1000) : text);
     }
-    
+
     final values = <String, ParsedBloodValue>{};
 
     // Strategy: look for marker name near a numeric value

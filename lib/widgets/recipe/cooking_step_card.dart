@@ -27,7 +27,11 @@ class CookingStepCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
@@ -35,25 +39,37 @@ class CookingStepCard extends StatelessWidget {
         children: [
           // Step number
           Container(
-            width: 30, height: 30,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
-              child: Text('$stepNumber',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+              child: Text(
+                '$stepNumber',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
           // Step image placeholder
           Container(
-            width: 52, height: 52,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.restaurant_rounded, color: AppColors.primary, size: 22),
+            child: const Icon(
+              Icons.restaurant_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           // Content
@@ -63,10 +79,12 @@ class CookingStepCard extends StatelessWidget {
               children: [
                 Text(title, style: AppTextStyles.h3.copyWith(fontSize: 14)),
                 const SizedBox(height: 4),
-                Text(description,
-                    style: AppTextStyles.bodySmall.copyWith(height: 1.4),
-                    maxLines: isExpanded ? 10 : 2,
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  description,
+                  style: AppTextStyles.bodySmall.copyWith(height: 1.4),
+                  maxLines: isExpanded ? 10 : 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
@@ -75,9 +93,16 @@ class CookingStepCard extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.schedule_rounded, size: 12, color: AppColors.textLight),
+              Icon(
+                Icons.schedule_rounded,
+                size: 12,
+                color: AppColors.textLight,
+              ),
               const SizedBox(width: 3),
-              Text(duration, style: AppTextStyles.labelSmall.copyWith(fontSize: 10)),
+              Text(
+                duration,
+                style: AppTextStyles.labelSmall.copyWith(fontSize: 10),
+              ),
             ],
           ),
         ],

@@ -114,7 +114,9 @@ class DietAnalysisService {
         fatGrams: null,
         avoidedFoods: const [],
         dietSummary: 'Diyet listesi analiz edilemedi.',
-        nutritionNotes: const ['Teknik bir sorun oluştu. Lütfen tekrar deneyin.'],
+        nutritionNotes: const [
+          'Teknik bir sorun oluştu. Lütfen tekrar deneyin.',
+        ],
         rawExtractedText: '',
       );
     }

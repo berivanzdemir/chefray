@@ -40,8 +40,11 @@ class HealthScoreSummaryCard extends StatelessWidget {
           // Title row
           Row(
             children: [
-              Icon(Icons.monitor_heart_rounded,
-                  size: 13, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                Icons.monitor_heart_rounded,
+                size: 13,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 4),
               Text(
                 'Sağlık Skoru',
@@ -73,7 +76,8 @@ class HealthScoreSummaryCard extends StatelessWidget {
                         strokeCap: StrokeCap.round,
                         backgroundColor: const Color(0xFFF0F0F0),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).colorScheme.primary),
+                          Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                     Column(
@@ -93,7 +97,9 @@ class HealthScoreSummaryCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w500,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             height: 1.0,
                           ),
                         ),
@@ -106,8 +112,10 @@ class HealthScoreSummaryCard extends StatelessWidget {
               // Status badge
               Expanded(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.backgroundMint,
                     borderRadius: BorderRadius.circular(12),
@@ -115,8 +123,11 @@ class HealthScoreSummaryCard extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.sentiment_satisfied_rounded,
-                          color: Theme.of(context).colorScheme.primary, size: 18),
+                      Icon(
+                        Icons.sentiment_satisfied_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 18,
+                      ),
                       const SizedBox(height: 3),
                       Text(
                         'Bugünkü durumun',

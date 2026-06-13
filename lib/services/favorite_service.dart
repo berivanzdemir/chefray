@@ -35,7 +35,7 @@ class FavoriteService {
           .from('favorites')
           .select('recipe_id')
           .eq('user_id', user.id);
-      
+
       final ids = (response as List)
           .map((row) => row['recipe_id']?.toString())
           .whereType<String>()
@@ -104,7 +104,7 @@ class FavoriteService {
           .select('recipe_id, created_at, recipes(*)')
           .eq('user_id', user.id)
           .order('created_at', ascending: false);
-      
+
       final List<RecipeModel> recipes = [];
       for (var row in response as List) {
         final recipeData = row['recipes'];
@@ -112,32 +112,40 @@ class FavoriteService {
           if (recipeData is Map<String, dynamic>) {
             recipes.add(RecipeModel.fromSupabaseJson(recipeData));
           } else if (recipeData is List && recipeData.isNotEmpty) {
-            recipes.add(RecipeModel.fromSupabaseJson(recipeData.first as Map<String, dynamic>));
+            recipes.add(
+              RecipeModel.fromSupabaseJson(
+                recipeData.first as Map<String, dynamic>,
+              ),
+            );
           }
         }
       }
-      
+
       if (recipes.isNotEmpty) return recipes;
-      
+
       // Fallback if nested select returns empty but IDs exist
       final ids = (response)
           .map((row) => row['recipe_id']?.toString())
           .whereType<String>()
           .toList();
-          
+
       if (ids.isEmpty) return [];
 
       final recipesResponse = await _supabase
           .from('recipes')
           .select()
           .inFilter('id', ids);
-          
+
       final List<RecipeModel> fallbackRecipes = (recipesResponse as List)
-          .map((row) => RecipeModel.fromSupabaseJson(row as Map<String, dynamic>))
+          .map(
+            (row) => RecipeModel.fromSupabaseJson(row as Map<String, dynamic>),
+          )
           .toList();
-          
+
       // Sort by the order in the favorites list
-      fallbackRecipes.sort((a, b) => ids.indexOf(a.id).compareTo(ids.indexOf(b.id)));
+      fallbackRecipes.sort(
+        (a, b) => ids.indexOf(a.id).compareTo(ids.indexOf(b.id)),
+      );
       return fallbackRecipes;
     } catch (e) {
       debugPrint('Error getting favorite recipes: $e');

@@ -35,9 +35,12 @@ class AnalysisException implements Exception {
 typedef AnalysisStepCallback = void Function(int stepIndex, String message);
 
 class FullAnalysisOrchestrator {
-  final RecipeRecommendationService _recipeRecommendationService = RecipeRecommendationService();
-  final SupabaseRecipeRepository _supabaseRecipeRepository = SupabaseRecipeRepository();
-  final AnalysisHistoryRepository _analysisHistoryRepository = AnalysisHistoryRepository.instance;
+  final RecipeRecommendationService _recipeRecommendationService =
+      RecipeRecommendationService();
+  final SupabaseRecipeRepository _supabaseRecipeRepository =
+      SupabaseRecipeRepository();
+  final AnalysisHistoryRepository _analysisHistoryRepository =
+      AnalysisHistoryRepository.instance;
   final OcrService _ocrService = OcrService();
   final HealthRuleEngine _ruleEngine = HealthRuleEngine();
   final DietPlanParser _dietPlanParser = DietPlanParser();
@@ -45,7 +48,9 @@ class FullAnalysisOrchestrator {
   final DietTextValidator _dietValidator = DietTextValidator();
   final BloodTextValidator _bloodValidator = BloodTextValidator();
 
-  DietAnalysisResult fallbackDietAnalysis(DocumentValidationResult? validationResult) {
+  DietAnalysisResult fallbackDietAnalysis(
+    DocumentValidationResult? validationResult,
+  ) {
     return DietAnalysisResult(
       dailyCalorieTarget: null,
       breakfast: null,
@@ -56,8 +61,11 @@ class FullAnalysisOrchestrator {
       carbsGrams: null,
       fatGrams: null,
       avoidedFoods: const [],
-      dietSummary: 'Diyet listesi doğrulandı ancak detayların bir kısmı net okunamadı.',
-      nutritionNotes: const ['Diyet listesi kural tabanlı doğrulandı. Tarif önerileri profil ve kan değerleriyle birlikte genel uyuma göre hazırlanacaktır.'],
+      dietSummary:
+          'Diyet listesi doğrulandı ancak detayların bir kısmı net okunamadı.',
+      nutritionNotes: const [
+        'Diyet listesi kural tabanlı doğrulandı. Tarif önerileri profil ve kan değerleriyle birlikte genel uyuma göre hazırlanacaktır.',
+      ],
       rawExtractedText: validationResult?.extractedTextSummary ?? '',
     );
   }
@@ -94,13 +102,19 @@ class FullAnalysisOrchestrator {
         debugPrint('Using pre-computed diet analysis');
       } else {
         if (dietFile == null) {
-          throw AnalysisException('missing_diet_file', 'Diyet dosyası bulunamadı.');
+          throw AnalysisException(
+            'missing_diet_file',
+            'Diyet dosyası bulunamadı.',
+          );
         }
 
         // Run OCR
         final dietOcr = await _ocrService.extractText(dietFile);
         if (!dietOcr.success) {
-          throw AnalysisException('diet_ocr_failed', 'Diyet listesinden metin çıkarılamadı.');
+          throw AnalysisException(
+            'diet_ocr_failed',
+            'Diyet listesinden metin çıkarılamadı.',
+          );
         }
 
         // Validate
@@ -111,7 +125,10 @@ class FullAnalysisOrchestrator {
         debugPrint('Diet validation: confidence=${dietValidation.confidence}');
 
         // Parse diet plan
-        final parsedDiet = _dietPlanParser.parse(dietOcr, dietValidation.matchedSignals);
+        final parsedDiet = _dietPlanParser.parse(
+          dietOcr,
+          dietValidation.matchedSignals,
+        );
 
         // Build DietAnalysisResult from parsed data
         DietMeal? breakfast;
@@ -120,7 +137,10 @@ class FullAnalysisOrchestrator {
         final List<DietMeal> snacks = [];
 
         for (final entry in parsedDiet.meals.entries) {
-          final meal = DietMeal(name: _mealTypeToName(entry.key), items: entry.value);
+          final meal = DietMeal(
+            name: _mealTypeToName(entry.key),
+            items: entry.value,
+          );
           switch (entry.key) {
             case 'breakfast':
               breakfast = meal;
@@ -149,7 +169,9 @@ class FullAnalysisOrchestrator {
           dietSummary: parsedDiet.hasContent
               ? 'Diyet listesinde ${parsedDiet.meals.length} öğün ve ${parsedDiet.detectedFoodItems.length} besin tespit edildi.'
               : 'Diyet listesi okundu ancak öğün yapısı net değil.',
-          nutritionNotes: const ['Bu analiz kural tabanlı yapılmıştır. Tıbbi tavsiye niteliği taşımaz.'],
+          nutritionNotes: const [
+            'Bu analiz kural tabanlı yapılmıştır. Tıbbi tavsiye niteliği taşımaz.',
+          ],
           rawExtractedText: dietOcr.rawText,
         );
       }
@@ -171,7 +193,10 @@ class FullAnalysisOrchestrator {
         // Run OCR
         final bloodOcr = await _ocrService.extractText(bloodFile);
         if (!bloodOcr.success) {
-          throw AnalysisException('blood_ocr_failed', 'Kan değerlerinden metin çıkarılamadı.');
+          throw AnalysisException(
+            'blood_ocr_failed',
+            'Kan değerlerinden metin çıkarılamadı.',
+          );
         }
 
         // Validate
@@ -179,24 +204,32 @@ class FullAnalysisOrchestrator {
         if (!bloodValidation.isBloodTest) {
           throw AnalysisException('invalid_blood', bloodValidation.message);
         }
-        debugPrint('Blood validation: confidence=${bloodValidation.confidence}');
+        debugPrint(
+          'Blood validation: confidence=${bloodValidation.confidence}',
+        );
 
         // Parse blood values
-        parsedBloodValues = _bloodValueParser.parse(bloodOcr, bloodValidation.matchedSignals);
+        parsedBloodValues = _bloodValueParser.parse(
+          bloodOcr,
+          bloodValidation.matchedSignals,
+        );
 
         // Convert to BloodAnalysisResult
         final List<BloodMarker> markers = [];
         for (final entry in parsedBloodValues.values.entries) {
           final pv = entry.value;
-          markers.add(BloodMarker(
-            name: pv.name,
-            value: pv.value?.toString(),
-            unit: pv.unit,
-            referenceRange: pv.referenceRangeLow != null && pv.referenceRangeHigh != null
-                ? '${pv.referenceRangeLow} - ${pv.referenceRangeHigh}'
-                : null,
-            status: pv.status,
-          ));
+          markers.add(
+            BloodMarker(
+              name: pv.name,
+              value: pv.value?.toString(),
+              unit: pv.unit,
+              referenceRange:
+                  pv.referenceRangeLow != null && pv.referenceRangeHigh != null
+                  ? '${pv.referenceRangeLow} - ${pv.referenceRangeHigh}'
+                  : null,
+              status: pv.status,
+            ),
+          );
         }
 
         final attention = markers
@@ -209,11 +242,15 @@ class FullAnalysisOrchestrator {
           generalNote: markers.isNotEmpty
               ? '${markers.length} kan değeri tespit edildi.${attention.isNotEmpty ? ' Dikkat edilmesi gerekenler: ${attention.join(", ")}.' : ''}'
               : 'Kan değerleri okundu.',
-          safetyWarning: 'Bu değerlendirme yalnızca beslenme kişiselleştirmesi içindir. Kesin değerlendirme için sağlık uzmanına danışın.',
+          safetyWarning:
+              'Bu değerlendirme yalnızca beslenme kişiselleştirmesi içindir. Kesin değerlendirme için sağlık uzmanına danışın.',
           rawExtractedText: bloodOcr.rawText,
         );
       } else {
-        throw AnalysisException('missing_blood', 'Kan değeri belgesi bulunamadı.');
+        throw AnalysisException(
+          'missing_blood',
+          'Kan değeri belgesi bulunamadı.',
+        );
       }
       debugPrint('[1] Blood OCR + validation + parsing done');
 
@@ -228,17 +265,22 @@ class FullAnalysisOrchestrator {
         final dietOcr = await _ocrService.extractText(dietFile);
         if (dietOcr.success) {
           final dv = _dietValidator.validate(dietOcr);
-          parsedDietForEngine = _dietPlanParser.parse(dietOcr, dv.matchedSignals);
+          parsedDietForEngine = _dietPlanParser.parse(
+            dietOcr,
+            dv.matchedSignals,
+          );
         }
       }
 
       // Parse blood for rule engine if not already done
-      ParsedBloodValues bpvForEngine = parsedBloodValues ?? ParsedBloodValues(
-        isBloodTest: true,
-        confidence: 0.8,
-        message: 'From previous analysis',
-        values: {},
-      );
+      ParsedBloodValues bpvForEngine =
+          parsedBloodValues ??
+          ParsedBloodValues(
+            isBloodTest: true,
+            confidence: 0.8,
+            message: 'From previous analysis',
+            values: {},
+          );
 
       // If we used previous blood analysis, try parsing from its markers
       if (parsedBloodValues == null && previousBloodAnalysis != null) {
@@ -282,7 +324,11 @@ class FullAnalysisOrchestrator {
 
       // Combined analysis uses rule engine results instead of raw AI
       final combinedAnalysis = CombinedHealthAnalysis(
-        combinedSummary: _buildCombinedSummary(finalDietAnalysis, finalBloodAnalysis, ruleResult),
+        combinedSummary: _buildCombinedSummary(
+          finalDietAnalysis,
+          finalBloodAnalysis,
+          ruleResult,
+        ),
         nutritionPriorities: ruleResult.recipeTags,
         avoidOrLimit: ruleResult.avoidTags,
         recommendedMealFocus: ruleResult.dietGaps,
@@ -318,7 +364,9 @@ class FullAnalysisOrchestrator {
           final recipeTagSet = r.tags.map((t) => t.toLowerCase()).toSet();
           for (final tag in ruleResult.recipeTags) {
             final normalTag = tag.toLowerCase().replaceAll('_', ' ');
-            if (recipeTagSet.any((rt) => rt.contains(normalTag) || normalTag.contains(rt))) {
+            if (recipeTagSet.any(
+              (rt) => rt.contains(normalTag) || normalTag.contains(rt),
+            )) {
               return true;
             }
           }
@@ -327,7 +375,8 @@ class FullAnalysisOrchestrator {
             final ingLower = ing.name.toLowerCase();
             for (final tag in ruleResult.recipeTags) {
               final normalTag = tag.toLowerCase().replaceAll('_', ' ');
-              if (ingLower.contains(normalTag) || normalTag.contains(ingLower)) {
+              if (ingLower.contains(normalTag) ||
+                  normalTag.contains(ingLower)) {
                 return true;
               }
             }
@@ -394,18 +443,28 @@ class FullAnalysisOrchestrator {
       if (e is AnalysisException) {
         rethrow;
       } else {
-        throw AnalysisException('unknown_error', 'Bilinmeyen analiz hatası', originalError: e, stackTrace: st);
+        throw AnalysisException(
+          'unknown_error',
+          'Bilinmeyen analiz hatası',
+          originalError: e,
+          stackTrace: st,
+        );
       }
     }
   }
 
   String _mealTypeToName(String type) {
     switch (type) {
-      case 'breakfast': return 'Kahvaltı';
-      case 'lunch': return 'Öğle Yemeği';
-      case 'dinner': return 'Akşam Yemeği';
-      case 'snack': return 'Ara Öğün';
-      default: return 'Öğün';
+      case 'breakfast':
+        return 'Kahvaltı';
+      case 'lunch':
+        return 'Öğle Yemeği';
+      case 'dinner':
+        return 'Akşam Yemeği';
+      case 'snack':
+        return 'Ara Öğün';
+      default:
+        return 'Öğün';
     }
   }
 
@@ -415,7 +474,9 @@ class FullAnalysisOrchestrator {
     HealthRuleEngineResult rules,
   ) {
     final parts = <String>[];
-    parts.add('Diyet listeniz ve sağlık profiliniz kural tabanlı olarak analiz edildi.');
+    parts.add(
+      'Diyet listeniz ve sağlık profiliniz kural tabanlı olarak analiz edildi.',
+    );
 
     if (diet.breakfast != null || diet.lunch != null || diet.dinner != null) {
       final mealCount = [
@@ -427,19 +488,27 @@ class FullAnalysisOrchestrator {
     }
 
     if (blood != null && blood.markers.isNotEmpty) {
-      final abnormal = blood.markers.where((m) => m.status == 'low' || m.status == 'high').length;
+      final abnormal = blood.markers
+          .where((m) => m.status == 'low' || m.status == 'high')
+          .length;
       if (abnormal > 0) {
-        parts.add('Kan değerlerinizde $abnormal değer referans aralığı dışında.');
+        parts.add(
+          'Kan değerlerinizde $abnormal değer referans aralığı dışında.',
+        );
       } else {
         parts.add('Kan değerleriniz referans aralığında görünüyor.');
       }
     }
 
     if (rules.recipeTags.isNotEmpty) {
-      parts.add('Size özel önerilen beslenme odağı: ${rules.recipeTags.take(3).join(", ")}.');
+      parts.add(
+        'Size özel önerilen beslenme odağı: ${rules.recipeTags.take(3).join(", ")}.',
+      );
     }
 
-    parts.add('Bu değerlendirme tıbbi tavsiye niteliği taşımaz. Lütfen doktorunuza danışın.');
+    parts.add(
+      'Bu değerlendirme tıbbi tavsiye niteliği taşımaz. Lütfen doktorunuza danışın.',
+    );
 
     return parts.join(' ');
   }
@@ -447,15 +516,20 @@ class FullAnalysisOrchestrator {
   String? _normalizeMarkerName(String name) {
     final lower = name.toLowerCase().trim();
     const map = {
-      'b12': 'b12', 'b 12': 'b12', 'vitamin b12': 'b12',
-      'vitamin d': 'vitamin_d', 'd vitamini': 'vitamin_d',
+      'b12': 'b12',
+      'b 12': 'b12',
+      'vitamin b12': 'b12',
+      'vitamin d': 'vitamin_d',
+      'd vitamini': 'vitamin_d',
       'ferritin': 'ferritin',
-      'demir': 'iron', 'iron': 'iron',
+      'demir': 'iron',
+      'iron': 'iron',
       'ldl': 'ldl',
       'hdl': 'hdl',
       'total kolesterol': 'total_cholesterol',
       'trigliserid': 'triglyceride',
-      'glukoz': 'glucose', 'glucose': 'glucose',
+      'glukoz': 'glucose',
+      'glucose': 'glucose',
       'hba1c': 'hba1c',
       'tsh': 'tsh',
       'alt': 'alt',
@@ -463,10 +537,14 @@ class FullAnalysisOrchestrator {
       'kreatinin': 'creatinine',
       'üre': 'urea',
       'crp': 'crp',
-      'hemoglobin': 'hemoglobin', 'hgb': 'hemoglobin',
-      'wbc': 'wbc', 'lökosit': 'wbc',
-      'rbc': 'rbc', 'eritrosit': 'rbc',
-      'plt': 'plt', 'trombosit': 'plt',
+      'hemoglobin': 'hemoglobin',
+      'hgb': 'hemoglobin',
+      'wbc': 'wbc',
+      'lökosit': 'wbc',
+      'rbc': 'rbc',
+      'eritrosit': 'rbc',
+      'plt': 'plt',
+      'trombosit': 'plt',
     };
     return map[lower];
   }

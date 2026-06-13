@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});
 
@@ -111,17 +110,18 @@ class _QuickActionCard extends StatelessWidget {
             children: [
               Icon(icon, size: 26, color: color),
               const SizedBox(height: 8),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  height: 1.15,
-                  fontFamily: 'SF Pro Display',
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.15,
+                    fontFamily: 'SF Pro Display',
+                  ),
                 ),
               ),
             ],

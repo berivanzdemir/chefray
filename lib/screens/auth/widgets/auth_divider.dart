@@ -26,8 +26,7 @@ class AuthDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
               color: AppColors.backgroundMint,
               borderRadius: BorderRadius.circular(20),

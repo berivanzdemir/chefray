@@ -55,13 +55,15 @@ class ProfileBasicInfoCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.person_outline, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.person_outline,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Temel Bilgiler',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -70,11 +72,15 @@ class ProfileBasicInfoCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.edit_rounded, size: 20, color: Theme.of(context).colorScheme.primary),
+                icon: Icon(
+                  Icons.edit_rounded,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => _showEditDialog(context),
-              )
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -198,8 +204,6 @@ class ProfileBasicInfoCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Colors.grey.shade600,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
@@ -210,8 +214,6 @@ class ProfileBasicInfoCard extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                   height: 1.2,
                 ),
-                maxLines: multiLine ? 2 : 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -253,7 +255,7 @@ class _EditBasicInfoDialogState extends State<_EditBasicInfoDialog> {
   late TextEditingController ageCtrl;
   late TextEditingController heightCtrl;
   late TextEditingController weightCtrl;
-  
+
   late String selectedGender;
   late String selectedActivity;
   late String selectedGoal;
@@ -323,7 +325,10 @@ class _EditBasicInfoDialogState extends State<_EditBasicInfoDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Temel Bilgileri Düzenle', style: TextStyle(fontSize: 18)),
+      title: const Text(
+        'Temel Bilgileri Düzenle',
+        style: TextStyle(fontSize: 18),
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       content: SingleChildScrollView(
         child: Column(
@@ -340,7 +345,11 @@ class _EditBasicInfoDialogState extends State<_EditBasicInfoDialog> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -370,25 +379,52 @@ class _EditBasicInfoDialogState extends State<_EditBasicInfoDialog> {
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              initialValue: ['Kadın', 'Erkek', 'Diğer'].contains(selectedGender) ? selectedGender : 'Kadın',
-              items: ['Kadın', 'Erkek', 'Diğer'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              initialValue: ['Kadın', 'Erkek', 'Diğer'].contains(selectedGender)
+                  ? selectedGender
+                  : 'Kadın',
+              items: [
+                'Kadın',
+                'Erkek',
+                'Diğer',
+              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: (v) => setState(() => selectedGender = v ?? 'Kadın'),
               decoration: const InputDecoration(labelText: 'Cinsiyet'),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              initialValue: ['Düşük', 'Orta', 'Yüksek'].contains(selectedActivity) ? selectedActivity : 'Orta',
-              items: ['Düşük', 'Orta', 'Yüksek'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              initialValue:
+                  ['Düşük', 'Orta', 'Yüksek'].contains(selectedActivity)
+                  ? selectedActivity
+                  : 'Orta',
+              items: [
+                'Düşük',
+                'Orta',
+                'Yüksek',
+              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: (v) => setState(() => selectedActivity = v ?? 'Orta'),
               decoration: const InputDecoration(labelText: 'Aktivite'),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              initialValue: ['Kilo vermek', 'Kas kazanmak', 'Kilo korumak', 'Daha dengeli beslenmek', 'Sağlıklı tarifler keşfetmek'].contains(selectedGoal) 
-                  ? selectedGoal : 'Daha dengeli beslenmek',
-              items: ['Kilo vermek', 'Kas kazanmak', 'Kilo korumak', 'Daha dengeli beslenmek', 'Sağlıklı tarifler keşfetmek']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              onChanged: (v) => setState(() => selectedGoal = v ?? 'Daha dengeli beslenmek'),
+              initialValue:
+                  [
+                    'Kilo vermek',
+                    'Kas kazanmak',
+                    'Kilo korumak',
+                    'Daha dengeli beslenmek',
+                    'Sağlıklı tarifler keşfetmek',
+                  ].contains(selectedGoal)
+                  ? selectedGoal
+                  : 'Daha dengeli beslenmek',
+              items: [
+                'Kilo vermek',
+                'Kas kazanmak',
+                'Kilo korumak',
+                'Daha dengeli beslenmek',
+                'Sağlıklı tarifler keşfetmek',
+              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              onChanged: (v) =>
+                  setState(() => selectedGoal = v ?? 'Daha dengeli beslenmek'),
               decoration: const InputDecoration(labelText: 'Hedef'),
             ),
           ],
@@ -400,14 +436,23 @@ class _EditBasicInfoDialogState extends State<_EditBasicInfoDialog> {
           child: const Text('İptal', style: TextStyle(color: Colors.grey)),
         ),
         _isSaving
-            ? const Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())
+            ? const Padding(
+                padding: EdgeInsets.all(8),
+                child: CircularProgressIndicator(),
+              )
             : ElevatedButton(
                 onPressed: _save,
-                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                child: Text('Kaydet', style: TextStyle(color: Theme.of(context).colorScheme.surface)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(
+                  'Kaydet',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
               ),
       ],
     );
   }
 }
-

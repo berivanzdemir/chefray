@@ -29,9 +29,8 @@ class NotificationService {
         AndroidInitializationSettings('@drawable/ic_notification');
 
     // iOS ayarları gerekliyse eklenebilir. Şimdilik Android odaklı ilerliyoruz.
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
@@ -48,21 +47,30 @@ class NotificationService {
   }
 
   Future<void> checkPendingNotifications() async {
-    final pendingList = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    final pendingList = await flutterLocalNotificationsPlugin
+        .pendingNotificationRequests();
     debugPrint('Pending notifications count: ${pendingList.length}');
     for (var req in pendingList) {
       debugPrint(' - Pending: id=${req.id}, title=${req.title}');
     }
   }
 
-  Future<void> saveNotificationToHistory(String title, String body, DateTime time, {String type = 'Genel'}) async {
+  Future<void> saveNotificationToHistory(
+    String title,
+    String body,
+    DateTime time, {
+    String type = 'Genel',
+  }) async {
     // Release modda test bildirimlerini kaydetme
-    if (!kDebugMode && (title.contains('Test') || body.contains('(Test)') || body.contains('Bildirim sistemi çalışıyor'))) {
+    if (!kDebugMode &&
+        (title.contains('Test') ||
+            body.contains('(Test)') ||
+            body.contains('Bildirim sistemi çalışıyor'))) {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
     List<String> history = prefs.getStringList('notification_history') ?? [];
-    
+
     final notification = {
       'title': title,
       'body': body,
@@ -70,13 +78,14 @@ class NotificationService {
       'type': type,
       'isRead': false,
     };
-    
+
     final notifJson = jsonEncode(notification);
     // Don't add if already exists (basic duplicate check)
     bool exists = history.any((item) {
       final map = jsonDecode(item);
-      return map['title'] == title && map['body'] == body && 
-             DateTime.parse(map['time']).difference(time).inMinutes.abs() < 5;
+      return map['title'] == title &&
+          map['body'] == body &&
+          DateTime.parse(map['time']).difference(time).inMinutes.abs() < 5;
     });
 
     if (!exists) {
@@ -94,17 +103,17 @@ class NotificationService {
 
     List<String> history = prefs.getStringList('notification_history') ?? [];
     final originalLength = history.length;
-    
+
     history.removeWhere((item) {
       try {
         final map = jsonDecode(item) as Map<String, dynamic>;
         final title = (map['title'] as String?) ?? '';
         final body = (map['body'] as String?) ?? '';
         final type = (map['type'] as String?) ?? '';
-        return title.contains('Test') || 
-               body.contains('(Test)') || 
-               body.contains('Bildirim sistemi çalışıyor') ||
-               type == 'Test';
+        return title.contains('Test') ||
+            body.contains('(Test)') ||
+            body.contains('Bildirim sistemi çalışıyor') ||
+            type == 'Test';
       } catch (_) {
         return false;
       }
@@ -112,21 +121,88 @@ class NotificationService {
 
     if (history.length != originalLength) {
       await prefs.setStringList('notification_history', history);
-      debugPrint('Cleaned ${originalLength - history.length} test notifications from history.');
+      debugPrint(
+        'Cleaned ${originalLength - history.length} test notifications from history.',
+      );
     }
     await prefs.setBool('test_notifications_cleaned', true);
   }
 
+  Future<int> getUnreadNotificationCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> history = prefs.getStringList('notification_history') ?? [];
+    int unreadCount = 0;
+    int testFilteredCount = 0;
+
+    for (var item in history) {
+      try {
+        final map = jsonDecode(item) as Map<String, dynamic>;
+
+        final title = (map['title'] as String?) ?? '';
+        final body = (map['body'] as String?) ?? '';
+        final type = (map['type'] as String?) ?? '';
+
+        if (title.contains('Test') ||
+            body.contains('(Test)') ||
+            body.contains('Bildirim sistemi çalışıyor') ||
+            type == 'Test') {
+          testFilteredCount++;
+          continue;
+        }
+
+        final isRead = map['isRead'] as bool? ?? false;
+        if (!isRead) {
+          unreadCount++;
+        }
+      } catch (_) {}
+    }
+
+    debugPrint(
+      'Notification unread count:\n - totalHistoryCount: ${history.length}\n - unreadCount: $unreadCount\n - testFilteredCount: $testFilteredCount\n - markAllAsReadCalled: false\n - badgeUpdated: false',
+    );
+    return unreadCount;
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> history = prefs.getStringList('notification_history') ?? [];
+    List<String> updatedHistory = [];
+
+    for (var item in history) {
+      try {
+        final map = jsonDecode(item) as Map<String, dynamic>;
+        map['isRead'] = true;
+        map['read_at'] = DateTime.now().toIso8601String();
+        updatedHistory.add(jsonEncode(map));
+      } catch (_) {
+        updatedHistory.add(item);
+      }
+    }
+
+    await prefs.setStringList('notification_history', updatedHistory);
+    debugPrint(
+      'Notification unread count:\n - markAllAsReadCalled: true\n - badgeUpdated: true',
+    );
+  }
+
   Future<void> syncActiveNotificationsToHistory() async {
     try {
-      final List<ActiveNotification>? activeNotifications = 
-          await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()?.getActiveNotifications();
-      
+      final List<ActiveNotification>? activeNotifications =
+          await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()
+              ?.getActiveNotifications();
+
       if (activeNotifications != null) {
         for (var notification in activeNotifications) {
           if (notification.title != null) {
-            await saveNotificationToHistory(notification.title!, notification.body ?? '', DateTime.now(), type: 'Sistem');
+            await saveNotificationToHistory(
+              notification.title!,
+              notification.body ?? '',
+              DateTime.now(),
+              type: 'Sistem',
+            );
           }
         }
       }
@@ -137,11 +213,12 @@ class NotificationService {
 
   Future<void> requestPermissions() async {
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
 
     await androidImplementation?.requestNotificationsPermission();
-    await androidImplementation?.requestExactAlarmsPermission();
   }
 
   Future<void> cancelNotification(int id) async {
@@ -160,7 +237,8 @@ class NotificationService {
           android: AndroidNotificationDetails(
             'chefray_notifications',
             'ChefRay Bildirimleri',
-            channelDescription: 'ChefRay su, diyet, hareket ve analiz bildirimleri',
+            channelDescription:
+                'ChefRay su, diyet, hareket ve analiz bildirimleri',
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
@@ -169,7 +247,12 @@ class NotificationService {
           ),
         ),
       );
-      await saveNotificationToHistory('ChefRay', 'Bildirim sistemi çalışıyor 💧', DateTime.now(), type: 'Test');
+      await saveNotificationToHistory(
+        'ChefRay',
+        'Bildirim sistemi çalışıyor 💧',
+        DateTime.now(),
+        type: 'Test',
+      );
       debugPrint('Test bildirimi gönderildi.');
     } catch (e) {
       debugPrint('Test notification error: $e');
@@ -178,10 +261,12 @@ class NotificationService {
 
   Future<void> scheduleTestNotificationAfterOneMinute() async {
     if (!kDebugMode) return;
-    debugPrint('Scheduling 1 minute test notification (Smart Notification simülasyonu için korundu)...');
+    debugPrint(
+      'Scheduling 1 minute test notification (Smart Notification simülasyonu için korundu)...',
+    );
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final tz.TZDateTime scheduledDate = now.add(const Duration(minutes: 1));
-    
+
     debugPrint('Test notification scheduled at $scheduledDate');
 
     try {
@@ -194,7 +279,8 @@ class NotificationService {
           android: AndroidNotificationDetails(
             'chefray_notifications',
             'ChefRay Bildirimleri',
-            channelDescription: 'ChefRay su, diyet, hareket ve analiz bildirimleri',
+            channelDescription:
+                'ChefRay su, diyet, hareket ve analiz bildirimleri',
             importance: Importance.max,
             priority: Priority.high,
             icon: '@drawable/ic_notification',
@@ -203,14 +289,19 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      
+
       await checkPendingNotifications();
     } catch (e) {
       debugPrint('Schedule test notification error: $e');
     }
   }
 
-  Future<void> showLocalNotification(String? title, String? body, {String? payload, String type = 'FCM'}) async {
+  Future<void> showLocalNotification(
+    String? title,
+    String? body, {
+    String? payload,
+    String type = 'FCM',
+  }) async {
     try {
       await flutterLocalNotificationsPlugin.show(
         id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -221,7 +312,8 @@ class NotificationService {
           android: AndroidNotificationDetails(
             'chefray_notifications',
             'ChefRay Bildirimleri',
-            channelDescription: 'ChefRay su, diyet, hareket ve analiz bildirimleri',
+            channelDescription:
+                'ChefRay su, diyet, hareket ve analiz bildirimleri',
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
@@ -230,7 +322,12 @@ class NotificationService {
           ),
         ),
       );
-      await saveNotificationToHistory(title ?? 'ChefRay', body ?? '', DateTime.now(), type: type);
+      await saveNotificationToHistory(
+        title ?? 'ChefRay',
+        body ?? '',
+        DateTime.now(),
+        type: type,
+      );
     } catch (e) {
       debugPrint('Local notification error: $e');
     }

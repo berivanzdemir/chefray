@@ -196,10 +196,7 @@ class _IngredientStackItem extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: _IngredientLabel(
-                ingredient: ingredient,
-                alignRight: true,
-              ),
+              child: _IngredientLabel(ingredient: ingredient, alignRight: true),
             ),
           ),
         ),
@@ -246,8 +243,8 @@ class _IngredientCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = ingredient.imageUrl != null &&
-        ingredient.imageUrl!.isNotEmpty;
+    final hasImage =
+        ingredient.imageUrl != null && ingredient.imageUrl!.isNotEmpty;
 
     return Container(
       width: 54,
@@ -322,10 +319,7 @@ class _IngredientLabel extends StatelessWidget {
   final IngredientModel ingredient;
   final bool alignRight;
 
-  const _IngredientLabel({
-    required this.ingredient,
-    required this.alignRight,
-  });
+  const _IngredientLabel({required this.ingredient, required this.alignRight});
 
   @override
   Widget build(BuildContext context) {
@@ -342,13 +336,12 @@ class _IngredientLabel extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
       ),
       child: Column(
-        crossAxisAlignment:
-            alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: alignRight
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -392,9 +385,7 @@ class _ConnectorLine extends StatelessWidget {
     return SizedBox(
       width: 20,
       height: 2,
-      child: CustomPaint(
-        painter: _ConnectorPainter(isLeft: isLeft),
-      ),
+      child: CustomPaint(painter: _ConnectorPainter(isLeft: isLeft)),
     );
   }
 }
@@ -526,15 +517,9 @@ class _DefaultPlate extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: const RadialGradient(
               center: Alignment(0, 0.12),
-              colors: [
-                Color(0xFFFAFAFA),
-                Color(0xFFF0F0F0),
-              ],
+              colors: [Color(0xFFFAFAFA), Color(0xFFF0F0F0)],
             ),
-            border: Border.all(
-              color: const Color(0xFFE4E4E4),
-              width: 1.5,
-            ),
+            border: Border.all(color: const Color(0xFFE4E4E4), width: 1.5),
           ),
         ),
         // Center highlight
@@ -545,10 +530,7 @@ class _DefaultPlate extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: const RadialGradient(
               center: Alignment(-0.2, -0.2),
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0xFFF5F5F5),
-              ],
+              colors: [Color(0xFFFFFFFF), Color(0xFFF5F5F5)],
             ),
           ),
         ),

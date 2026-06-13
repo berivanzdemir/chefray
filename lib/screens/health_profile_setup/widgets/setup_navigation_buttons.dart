@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Navigation buttons for the "Seni Tanıyalım" onboarding flow.
 class SetupNavigationButtons extends StatelessWidget {
   final bool canGoBack;
@@ -57,10 +56,14 @@ class SetupNavigationButtons extends StatelessWidget {
           Expanded(
             flex: canGoBack ? 1 : 1,
             child: GestureDetector(
-              onTap: isLoading ? null : () {
-                debugPrint('Health setup next pressed. Step: isValid=$isValid');
-                onNext();
-              },
+              onTap: isLoading
+                  ? null
+                  : () {
+                      debugPrint(
+                        'Health setup next pressed. Step: isValid=$isValid',
+                      );
+                      onNext();
+                    },
               child: Container(
                 height: 64,
                 decoration: BoxDecoration(
@@ -85,8 +88,10 @@ class SetupNavigationButtons extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              isLastStep 
-                                  ? (isEditMode ? 'Değişiklikleri Kaydet' : 'Profilimi Oluştur') 
+                              isLastStep
+                                  ? (isEditMode
+                                        ? 'Değişiklikleri Kaydet'
+                                        : 'Profilimi Oluştur')
                                   : 'Devam',
                               style: const TextStyle(
                                 color: Color(0xFF102B2B),

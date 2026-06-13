@@ -28,10 +28,7 @@ class StatChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: chipColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: chipColor.withValues(alpha: 0.15),
-          width: 1,
-        ),
+        border: Border.all(color: chipColor.withValues(alpha: 0.15), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

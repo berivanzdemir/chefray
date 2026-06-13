@@ -45,7 +45,8 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
         child: Consumer<UserProfileProvider>(
           builder: (context, provider, _) {
             final hp = provider.healthProfile;
-            final hasData = hp != null && hp.weightKg != null && hp.heightCm != null;
+            final hasData =
+                hp != null && hp.weightKg != null && hp.heightCm != null;
 
             // Pre-calculate values if data exists
             final double bmi;
@@ -65,10 +66,21 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
               bmi = HealthCalculationService.calculateBMI(w, h);
               bmiStatus = HealthCalculationService.getBMIStatus(bmi);
               bmr = HealthCalculationService.calculateBMR(w, h, a, g);
-              dailyCal = HealthCalculationService.calculateDailyCalories(bmr, hp.activityLevel);
+              dailyCal = HealthCalculationService.calculateDailyCalories(
+                bmr,
+                hp.activityLevel,
+              );
               ideal = HealthCalculationService.calculateIdealWeightRange(h);
-              goals = HealthCalculationService.calculateDailyGoals(dailyCal, w, hp.goalType);
-              suggestions = HealthCalculationService.getSuggestions(hp.goalType, bmi, bmiStatus);
+              goals = HealthCalculationService.calculateDailyGoals(
+                dailyCal,
+                w,
+                hp.goalType,
+              );
+              suggestions = HealthCalculationService.getSuggestions(
+                hp.goalType,
+                bmi,
+                bmiStatus,
+              );
             } else {
               bmi = 0;
               bmiStatus = 'Bilinmiyor';
@@ -88,9 +100,7 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
               child: Column(
                 children: [
                   // ── Header ──────────────────────────────────
-                  BodyStatusHeader(
-                    onUpdateTap: () => _openEditSheet(hp),
-                  ),
+                  BodyStatusHeader(onUpdateTap: () => _openEditSheet(hp)),
                   const SizedBox(height: 14),
                   // ── Summary Strip ───────────────────────────
                   BodySummaryStrip(healthProfile: hp),
@@ -114,7 +124,9 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
                       activityLevel: hp.activityLevel,
                       goalType: hp.goalType,
                       onDetailTap: () {
-                        final bmiDetail = HealthCalculationService.getBMIDetail(bmi);
+                        final bmiDetail = HealthCalculationService.getBMIDetail(
+                          bmi,
+                        );
                         BodyAnalysisDetailSheet.show(
                           context,
                           bmi: bmi,
@@ -179,12 +191,18 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
         ),
         child: Row(
           children: [
-            Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+            Icon(
+              Icons.info_outline_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 'Bu değerler; kilo, boy, yaş, hedef ve aktivite bilgilerini güncellediğinde otomatik olarak yeniden hesaplanır.',
-                style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMedium),
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.textMedium,
+                ),
               ),
             ),
           ],
@@ -201,7 +219,10 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
       child: Text(
         'Bu veriler tıbbi tavsiye yerine geçmez.',
         textAlign: TextAlign.center,
-        style: AppTextStyles.labelSmall.copyWith(fontSize: 9, color: AppColors.textHint),
+        style: AppTextStyles.labelSmall.copyWith(
+          fontSize: 9,
+          color: AppColors.textHint,
+        ),
       ),
     );
   }
@@ -217,21 +238,22 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
       currentGender: hp?.gender,
       currentGoalType: hp?.goalType,
       currentActivityLevel: hp?.activityLevel,
-      onSave: ({
-        required double weightKg,
-        required double heightCm,
-        required int age,
-        required String gender,
-        required String goalType,
-        required String activityLevel,
-      }) => _handleMetricsSave(
-        weightKg: weightKg,
-        heightCm: heightCm,
-        age: age,
-        gender: gender,
-        goalType: goalType,
-        activityLevel: activityLevel,
-      ),
+      onSave:
+          ({
+            required double weightKg,
+            required double heightCm,
+            required int age,
+            required String gender,
+            required String goalType,
+            required String activityLevel,
+          }) => _handleMetricsSave(
+            weightKg: weightKg,
+            heightCm: heightCm,
+            age: age,
+            gender: gender,
+            goalType: goalType,
+            activityLevel: activityLevel,
+          ),
     );
   }
 
@@ -257,20 +279,27 @@ class _BodyAnalysisScreenState extends State<BodyAnalysisScreen> {
         activityLevel: activityLevel,
         updatedAt: DateTime.now(),
       );
-      await UserHealthProfileRepository.instance.upsertCurrentUserHealthProfile(hp);
+      await UserHealthProfileRepository.instance.upsertCurrentUserHealthProfile(
+        hp,
+      );
 
       if (mounted) {
         await context.read<UserProfileProvider>().refreshAll();
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 10),
-              Text('Bilgiler güncellendi, analiz yeniden hesaplandı.'),
-            ]),
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                SizedBox(width: 10),
+                Text('Bilgiler güncellendi, analiz yeniden hesaplandı.'),
+              ],
+            ),
             backgroundColor: AppColors.primary.withValues(alpha: 0.9),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
         );
       }

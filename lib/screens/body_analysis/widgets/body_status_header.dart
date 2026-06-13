@@ -6,10 +6,7 @@ import '../../../core/constants/app_text_styles.dart';
 class BodyStatusHeader extends StatelessWidget {
   final VoidCallback? onUpdateTap;
 
-  const BodyStatusHeader({
-    super.key,
-    this.onUpdateTap,
-  });
+  const BodyStatusHeader({super.key, this.onUpdateTap});
 
   @override
   Widget build(BuildContext context) {

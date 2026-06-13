@@ -41,9 +41,10 @@ class _AuthSocialButtonState extends State<AuthSocialButton>
       duration: const Duration(milliseconds: 120),
       reverseDuration: const Duration(milliseconds: 200),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _pressCtrl, curve: Curves.easeOut),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeOut));
   }
 
   @override
@@ -85,7 +86,9 @@ class _AuthSocialButtonState extends State<AuthSocialButton>
             color: AppColors.backgroundWhite,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: _pressed ? AppColors.primary.withValues(alpha: 0.4) : AppColors.divider,
+              color: _pressed
+                  ? AppColors.primary.withValues(alpha: 0.4)
+                  : AppColors.divider,
               width: 1.2,
             ),
             boxShadow: [
@@ -104,8 +107,9 @@ class _AuthSocialButtonState extends State<AuthSocialButton>
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
                     ),
                   ),
                 )
@@ -146,7 +150,9 @@ class _SocialIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String imagePath = asset == 'google' ? 'assets/google.png' : '$_basePath$asset.png';
+    final String imagePath = asset == 'google'
+        ? 'assets/google.png'
+        : '$_basePath$asset.png';
     return SizedBox(
       width: _size,
       height: _size,
@@ -179,10 +185,7 @@ class _GoogleFallbackIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(22, 22),
-      painter: _GoogleGPainter(),
-    );
+    return CustomPaint(size: const Size(22, 22), painter: _GoogleGPainter());
   }
 }
 
@@ -201,18 +204,17 @@ class _GoogleGPainter extends CustomPainter {
     final strokeW = w * 0.16;
     final radius = (w - strokeW) / 2;
 
-    final rect = Rect.fromCircle(
-        center: Offset(cx, cy), radius: radius);
+    final rect = Rect.fromCircle(center: Offset(cx, cy), radius: radius);
 
     // ── 4 coloured arc segments (each ~90° but with 2° gaps) ───────────────
     const gap = 0.04; // radians ≈ 2°
     final pi = 3.14159265358979;
     final arcs = [
       // [startAngle, sweepAngle, color]
-      [-pi / 2 + gap, pi / 2 - gap * 2, _blue],    // top → right (blue)
-      [gap, pi / 2 - gap * 2, _green],               // right → bottom (green)
-      [pi / 2 + gap, pi / 2 - gap * 2, _yellow],    // bottom → left (yellow)
-      [pi + gap, pi / 2 - gap * 2, _red],            // left → top (red)
+      [-pi / 2 + gap, pi / 2 - gap * 2, _blue], // top → right (blue)
+      [gap, pi / 2 - gap * 2, _green], // right → bottom (green)
+      [pi / 2 + gap, pi / 2 - gap * 2, _yellow], // bottom → left (yellow)
+      [pi + gap, pi / 2 - gap * 2, _red], // left → top (red)
     ];
 
     for (final arc in arcs) {
@@ -227,8 +229,8 @@ class _GoogleGPainter extends CustomPainter {
     // ── Horizontal blue bar (the flat part of the G) ───────────────────────
     final barTop = cy - strokeW * 0.55;
     final barBottom = cy + strokeW * 0.55;
-    final barLeft = cx - strokeW * 0.1;   // starts just past center
-    final barRight = cx + radius;          // reaches the right edge of circle
+    final barLeft = cx - strokeW * 0.1; // starts just past center
+    final barRight = cx + radius; // reaches the right edge of circle
 
     // White background to erase arc behind bar
     canvas.drawRect(

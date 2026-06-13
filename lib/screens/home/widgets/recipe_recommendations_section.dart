@@ -11,10 +11,12 @@ class RecipeRecommendationsSection extends StatefulWidget {
   const RecipeRecommendationsSection({super.key});
 
   @override
-  State<RecipeRecommendationsSection> createState() => _RecipeRecommendationsSectionState();
+  State<RecipeRecommendationsSection> createState() =>
+      _RecipeRecommendationsSectionState();
 }
 
-class _RecipeRecommendationsSectionState extends State<RecipeRecommendationsSection> {
+class _RecipeRecommendationsSectionState
+    extends State<RecipeRecommendationsSection> {
   final _repo = SupabaseRecipeRepository();
   late Future<List<RecipeModel>> _recipesFuture;
   Set<String> _favoriteIds = {};
@@ -53,99 +55,113 @@ class _RecipeRecommendationsSectionState extends State<RecipeRecommendationsSect
           ),
         ),
         const SizedBox(height: 14),
-        SizedBox(
-          height: 230,
-          child: FutureBuilder<List<RecipeModel>>(
-            future: _recipesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
-                );
-              }
-
-              if (snapshot.hasError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_off_rounded, size: 32, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tarifler yüklenirken hata oluştu',
-                          style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              final recipes = snapshot.data ?? [];
-
-              if (recipes.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.restaurant_menu_rounded, size: 32, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Henüz öneri bulunmuyor',
-                          style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: recipes.length,
-                itemBuilder: (context, index) {
-                  final recipe = recipes[index];
-                  return _HomeRecipeCard(
-                    recipe: recipe,
-                    isFavorite: _favoriteIds.contains(recipe.id),
-                    onFavoriteToggle: () async {
-                      final isFav = _favoriteIds.contains(recipe.id);
-                      debugPrint('Home Special Recommendation favorite tap:');
-                      debugPrint('- recipe.title: ${recipe.shownTitle}');
-                      debugPrint('- recipe.id: ${recipe.id}');
-                      debugPrint('- current favorite state: $isFav');
-
-                      setState(() {
-                        if (isFav) {
-                          _favoriteIds.remove(recipe.id);
-                        } else {
-                          _favoriteIds.add(recipe.id);
-                        }
-                      });
-
-                      final newFav = await FavoriteService.toggleFavorite(recipe.id);
-                      debugPrint('- toggle result: $newFav');
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(newFav ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı')),
-                        );
-                      }
-                    },
-                    onTap: () => context.push('/recipe-show', extra: recipe),
-                  );
-                },
+        FutureBuilder<List<RecipeModel>>(
+          future: _recipesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               );
-            },
-          ),
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tarifler yüklenirken hata oluştu',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final recipes = snapshot.data ?? [];
+
+            if (recipes.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu_rounded,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Henüz öneri bulunmuyor',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: recipes.map((recipe) {
+                    return _HomeRecipeCard(
+                      recipe: recipe,
+                      isFavorite: _favoriteIds.contains(recipe.id),
+                      onFavoriteToggle: () async {
+                        final isFav = _favoriteIds.contains(recipe.id);
+                        setState(() {
+                          if (isFav) {
+                            _favoriteIds.remove(recipe.id);
+                          } else {
+                            _favoriteIds.add(recipe.id);
+                          }
+                        });
+                        final newFav = await FavoriteService.toggleFavorite(
+                          recipe.id,
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                newFav
+                                    ? 'Favorilere eklendi'
+                                    : 'Favorilerden çıkarıldı',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      onTap: () => context.push('/recipe-show', extra: recipe),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -199,12 +215,15 @@ class _HomeRecipeCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                     child: hasImage
                         ? Image.network(
                             recipe.imageUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => _buildPlaceholder(context),
+                            errorBuilder: (_, _, _) =>
+                                _buildPlaceholder(context),
                           )
                         : _buildPlaceholder(context),
                   ),
@@ -216,13 +235,19 @@ class _HomeRecipeCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surface.withValues(alpha: 0.92),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
                           size: 16,
-                          color: isFavorite ? Color(0xFFFF4B4B) : Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: isFavorite
+                              ? Color(0xFFFF4B4B)
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -236,11 +261,10 @@ class _HomeRecipeCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
                       title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.labelMedium.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
@@ -248,12 +272,17 @@ class _HomeRecipeCard extends StatelessWidget {
                         height: 1.2,
                       ),
                     ),
+                    const SizedBox(height: 8),
                     const Spacer(),
                     // Info row — sadece gerçek veriler gösterilir
                     Row(
                       children: [
                         if (recipe.caloriesKcal != null) ...[
-                          Icon(Icons.local_fire_department_rounded, size: 14, color: Theme.of(context).colorScheme.primary),
+                          Icon(
+                            Icons.local_fire_department_rounded,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             '${recipe.caloriesKcal} kcal',
@@ -264,15 +293,24 @@ class _HomeRecipeCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                        if (recipe.caloriesKcal != null && recipe.displayTime != null)
+                        if (recipe.caloriesKcal != null &&
+                            recipe.displayTime != null)
                           const Spacer(),
                         if (recipe.displayTime != null) ...[
-                          Icon(Icons.schedule_rounded, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 14,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             recipe.displayTime!,
                             style: AppTextStyles.labelSmall.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 10,
                             ),
                           ),
@@ -281,7 +319,11 @@ class _HomeRecipeCard extends StatelessWidget {
                         if (recipe.proteinG != null &&
                             recipe.caloriesKcal == null &&
                             recipe.displayTime == null) ...[
-                          Icon(Icons.fitness_center_rounded, size: 13, color: Theme.of(context).colorScheme.primary),
+                          Icon(
+                            Icons.fitness_center_rounded,
+                            size: 13,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             '${recipe.proteinG}g protein',

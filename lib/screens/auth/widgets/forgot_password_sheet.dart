@@ -95,19 +95,27 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                       color: AppColors.backgroundMint,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.lock_reset_rounded,
-                        color: AppColors.primary, size: 22),
+                    child: const Icon(
+                      Icons.lock_reset_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Şifreni Sıfırla',
-                          style: AppTextStyles.h3.copyWith(
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        'Şifreni Sıfırla',
+                        style: AppTextStyles.h3.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text('Bağlantı e-postanıza gönderilecek',
-                          style: AppTextStyles.bodySmall),
+                      Text(
+                        'Bağlantı e-postanıza gönderilecek',
+                        style: AppTextStyles.bodySmall,
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -120,8 +128,11 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                         color: AppColors.backgroundMint,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.close_rounded,
-                          size: 16, color: AppColors.textMedium),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: AppColors.textMedium,
+                      ),
                     ),
                   ),
                 ],
@@ -141,20 +152,27 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textDark,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
-                    child: Text('Tamam',
-                        style: AppTextStyles.button
-                            .copyWith(color: AppColors.textDark)),
+                    child: Text(
+                      'Tamam',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.textDark,
+                      ),
+                    ),
                   ),
                 ),
               ] else ...[
                 // ── Email input ──────────────────────────────────────────
-                Text('E-posta Adresi',
-                    style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textDark,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  'E-posta Adresi',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailCtrl,
@@ -162,24 +180,29 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                   textInputAction: TextInputAction.done,
                   validator: _validateEmail,
                   onFieldSubmitted: (_) => _sendResetLink(),
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textDark),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textDark,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'ornek@email.com',
-                    hintStyle: AppTextStyles.bodyMedium
-                        .copyWith(color: AppColors.textHint),
-                    prefixIcon: const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16),
-                      child: Icon(Icons.mail_outline_rounded,
-                          color: AppColors.textLight, size: 20),
+                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textHint,
                     ),
-                    prefixIconConstraints:
-                        const BoxConstraints(minWidth: 52),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Icon(
+                        Icons.mail_outline_rounded,
+                        color: AppColors.textLight,
+                        size: 20,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(minWidth: 52),
                     filled: true,
                     fillColor: AppColors.backgroundMint,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 16),
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none,
@@ -187,25 +210,34 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: const BorderSide(
-                          color: AppColors.divider, width: 1),
+                        color: AppColors.divider,
+                        width: 1,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: const BorderSide(
-                          color: AppColors.primary, width: 1.5),
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: const BorderSide(
-                          color: AppColors.error, width: 1.2),
+                        color: AppColors.error,
+                        width: 1.2,
+                      ),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: const BorderSide(
-                          color: AppColors.error, width: 1.5),
+                        color: AppColors.error,
+                        width: 1.5,
+                      ),
                     ),
-                    errorStyle: AppTextStyles.labelSmall
-                        .copyWith(color: AppColors.error),
+                    errorStyle: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -219,10 +251,12 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textDark,
-                      disabledBackgroundColor:
-                          AppColors.primary.withValues(alpha: 0.6),
+                      disabledBackgroundColor: AppColors.primary.withValues(
+                        alpha: 0.6,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: _isLoading
@@ -232,12 +266,16 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.textDark),
+                                AppColors.textDark,
+                              ),
                             ),
                           )
-                        : Text('Şifre Sıfırlama Linki Gönder',
-                            style: AppTextStyles.button
-                                .copyWith(color: AppColors.textDark)),
+                        : Text(
+                            'Şifre Sıfırlama Linki Gönder',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.textDark,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -269,7 +307,9 @@ class _SuccessBanner extends StatelessWidget {
         color: AppColors.backgroundMint,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3), width: 1),
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -280,8 +320,11 @@ class _SuccessBanner extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.mark_email_read_outlined,
-                color: AppColors.primary, size: 26),
+            child: const Icon(
+              Icons.mark_email_read_outlined,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(height: 12),
           Text(

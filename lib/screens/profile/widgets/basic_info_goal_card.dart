@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class BasicInfoGoalCard extends StatelessWidget {
   final int age;
   final String gender;
@@ -39,7 +38,11 @@ class BasicInfoGoalCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.person_outline_rounded, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.person_outline_rounded,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 6),
               Text(
                 'Temel Bilgiler',
@@ -57,11 +60,26 @@ class BasicInfoGoalCard extends StatelessWidget {
           _buildDivider(),
           _buildInfoRow(context, Icons.wc_rounded, 'Cinsiyet', gender),
           _buildDivider(),
-          _buildInfoRow(context, Icons.height_rounded, 'Boy', '${height.toInt()} cm'),
+          _buildInfoRow(
+            context,
+            Icons.height_rounded,
+            'Boy',
+            '${height.toInt()} cm',
+          ),
           _buildDivider(),
-          _buildInfoRow(context, Icons.monitor_weight_rounded, 'Kilo', '${weight.toInt()} kg'),
+          _buildInfoRow(
+            context,
+            Icons.monitor_weight_rounded,
+            'Kilo',
+            '${weight.toInt()} kg',
+          ),
           _buildDivider(),
-          _buildInfoRow(context, Icons.directions_run_rounded, 'Aktivite', activity),
+          _buildInfoRow(
+            context,
+            Icons.directions_run_rounded,
+            'Aktivite',
+            activity,
+          ),
           _buildDivider(),
           _buildInfoRow(context, Icons.flag_rounded, 'Hedef', goal),
         ],
@@ -69,7 +87,12 @@ class BasicInfoGoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -77,19 +100,31 @@ class BasicInfoGoalCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icon,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 6),
-              Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.right,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

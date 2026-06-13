@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../fcm_service.dart';
 
 /// Supabase Auth işlemlerini tek bir noktada yöneten servis.
 ///
@@ -37,7 +38,7 @@ class SupabaseAuthService {
   }
 
   // ── Sign Up ──────────────────────────────────────────────────────────────
-  
+
   /// E-posta ve şifre ile yeni hesap oluşturma.
   Future<AuthResult> signUpWithEmail({
     required String email,
@@ -68,7 +69,10 @@ class SupabaseAuthService {
         redirectTo: 'com.chefray.chefray://login-callback/',
       );
       if (!success) {
-        return AuthResult.failure(message: 'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.');
+        return AuthResult.failure(
+          message:
+              'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.',
+        );
       }
       return AuthResult.success();
     } on AuthException catch (e) {
@@ -77,30 +81,46 @@ class SupabaseAuthService {
           msg.contains('configuration') ||
           msg.contains('not configured') ||
           msg.contains('not_enabled')) {
-        return AuthResult.failure(message: 'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.');
+        return AuthResult.failure(
+          message:
+              'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.',
+        );
       } else if (msg.contains('cancel') ||
-                 msg.contains('user_canceled') ||
-                 msg.contains('canceled') ||
-                 msg.contains('dismiss') ||
-                 msg.contains('abort')) {
+          msg.contains('user_canceled') ||
+          msg.contains('canceled') ||
+          msg.contains('dismiss') ||
+          msg.contains('abort')) {
         return AuthResult.failure(message: 'Google ile giriş iptal edildi.');
       } else {
-        return AuthResult.failure(message: 'Google ile giriş sırasında bir sorun oluştu.');
+        return AuthResult.failure(
+          message: 'Google ile giriş sırasında bir sorun oluştu.',
+        );
       }
     } catch (e) {
       final msg = e.toString().toLowerCase();
-      if (msg.contains('cancel') || msg.contains('user_canceled') || msg.contains('canceled')) {
+      if (msg.contains('cancel') ||
+          msg.contains('user_canceled') ||
+          msg.contains('canceled')) {
         return AuthResult.failure(message: 'Google ile giriş iptal edildi.');
-      } else if (msg.contains('provider') || msg.contains('configuration') || msg.contains('not configured')) {
-        return AuthResult.failure(message: 'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.');
+      } else if (msg.contains('provider') ||
+          msg.contains('configuration') ||
+          msg.contains('not configured')) {
+        return AuthResult.failure(
+          message:
+              'Google ile giriş yapılandırması tamamlanmamış. Lütfen daha sonra tekrar deneyin.',
+        );
       }
-      return AuthResult.failure(message: 'Google ile giriş sırasında bir sorun oluştu.');
+      return AuthResult.failure(
+        message: 'Google ile giriş sırasında bir sorun oluştu.',
+      );
     }
   }
 
   /// Apple ile OAuth girişi için placeholder metodu (Şu an devre dışı).
   Future<AuthResult> signInWithApplePlaceholder() async {
-    return AuthResult.failure(message: 'Apple ile giriş şu anda yapılandırma aşamasındadır.');
+    return AuthResult.failure(
+      message: 'Apple ile giriş şu anda yapılandırma aşamasındadır.',
+    );
   }
 
   // ── Password Reset ───────────────────────────────────────────────────────
@@ -120,6 +140,11 @@ class SupabaseAuthService {
   // ── Sign Out ─────────────────────────────────────────────────────────────
 
   Future<void> signOut() async {
+    try {
+      // Çıkış yaparken mevcut FCM token'ı pasife al
+      await FcmService.instance.deactivateCurrentToken();
+    } catch (_) {}
+
     await _client.auth.signOut();
   }
 

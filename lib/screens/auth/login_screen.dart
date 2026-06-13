@@ -55,14 +55,17 @@ class _LoginScreenState extends State<LoginScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
 
-    final initialSessionExists = SupabaseAuthService.instance.currentSession != null;
+    final initialSessionExists =
+        SupabaseAuthService.instance.currentSession != null;
     if (kDebugMode) {
       debugPrint('Session exists: $initialSessionExists');
     }
 
-    _authStateSub = SupabaseAuthService.instance.authStateChanges.listen((data) async {
+    _authStateSub = SupabaseAuthService.instance.authStateChanges.listen((
+      data,
+    ) async {
       if (!mounted) return;
-      
+
       final sessionExists = data.session != null;
       if (kDebugMode) {
         debugPrint('Session exists: $sessionExists');
@@ -73,7 +76,8 @@ class _LoginScreenState extends State<LoginScreen>
         if (_socialLoading != null) {
           setState(() => _socialLoading = null);
         }
-        final isSetupComplete = await UserHealthProfileRepository.instance.isProfileSetupCompleted();
+        final isSetupComplete = await UserHealthProfileRepository.instance
+            .isProfileSetupCompleted();
         if (!mounted) return;
         if (isSetupComplete) {
           context.go('/home');
@@ -116,8 +120,8 @@ class _LoginScreenState extends State<LoginScreen>
     if (result.isSuccess) {
       await AuthPreferencesService.instance.setRememberMe(_rememberMe);
       if (!mounted) return;
-      final isSetupComplete =
-          await UserHealthProfileRepository.instance.isProfileSetupCompleted();
+      final isSetupComplete = await UserHealthProfileRepository.instance
+          .isProfileSetupCompleted();
       if (!mounted) return;
       if (isSetupComplete) {
         context.go('/home');
@@ -160,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen>
     }
 
     if (!mounted) return;
-    
+
     // Eğer işlem başarısızsa loading'i kaldırıp hatayı göster
     if (result != null && !result.isSuccess) {
       setState(() => _socialLoading = null);
@@ -173,7 +177,10 @@ class _LoginScreenState extends State<LoginScreen>
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: const Color(0xFFFF4D6A).withValues(alpha: 0.95),
         behavior: SnackBarBehavior.floating,
@@ -210,12 +217,7 @@ class _LoginScreenState extends State<LoginScreen>
                             const SizedBox(height: 40),
 
                             // ── Logo ──────────────────────────────────────
-                            Center(
-                              child: AppLogo(
-                                size: 72,
-                                showText: true,
-                              ),
-                            ),
+                            Center(child: AppLogo(size: 72, showText: true)),
                             const SizedBox(height: 32),
 
                             // ── Hero text ─────────────────────────────────
@@ -246,7 +248,8 @@ class _LoginScreenState extends State<LoginScreen>
                               suffixWidget: _VisibilityToggle(
                                 isObscured: _obscurePass,
                                 onTap: () => setState(
-                                    () => _obscurePass = !_obscurePass),
+                                  () => _obscurePass = !_obscurePass,
+                                ),
                               ),
                               onFieldSubmitted: (_) => _handleLogin(),
                             ),
@@ -355,8 +358,7 @@ class _HeroTextBlock extends StatelessWidget {
       children: [
         Text(title, style: AppTextStyles.displayLarge),
         const SizedBox(height: 8),
-        Text(subtitle,
-            style: AppTextStyles.bodyLarge.copyWith(height: 1.6)),
+        Text(subtitle, style: AppTextStyles.bodyLarge.copyWith(height: 1.6)),
       ],
     );
   }
@@ -415,15 +417,15 @@ class _RememberMeToggle extends StatelessWidget {
               ),
             ),
             child: value
-                ? const Icon(Icons.check_rounded,
-                    size: 13, color: AppColors.textDark)
+                ? const Icon(
+                    Icons.check_rounded,
+                    size: 13,
+                    color: AppColors.textDark,
+                  )
                 : null,
           ),
           const SizedBox(width: 8),
-          Text(
-            'Beni Hatırla',
-            style: AppTextStyles.labelMedium,
-          ),
+          Text('Beni Hatırla', style: AppTextStyles.labelMedium),
         ],
       ),
     );
@@ -434,17 +436,21 @@ class _AuthSwitchRow extends StatelessWidget {
   final String question;
   final String actionText;
   final VoidCallback onTap;
-  const _AuthSwitchRow(
-      {required this.question, required this.actionText, required this.onTap});
+  const _AuthSwitchRow({
+    required this.question,
+    required this.actionText,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(question,
-            style:
-                AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium)),
+        Text(
+          question,
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMedium),
+        ),
         GestureDetector(
           onTap: onTap,
           child: Text(

@@ -24,10 +24,7 @@ class ExplodedIngredientLayer extends StatelessWidget {
       offset: Offset(dx, dy),
       child: Transform.scale(
         scale: scale,
-        child: Opacity(
-          opacity: opacity.clamp(0.0, 1.0),
-          child: child,
-        ),
+        child: Opacity(opacity: opacity.clamp(0.0, 1.0), child: child),
       ),
     );
   }

@@ -25,7 +25,8 @@ class CombinedAnalysisService {
       final dietCtx = _buildDietContext(dietAnalysis);
       final bloodCtx = _buildBloodContext(bloodAnalysis);
 
-      final prompt = '''
+      final prompt =
+          '''
 Sen ChefRay asistanısın. Görevin diyet analiz sonucu ile kan tahlili sonucunu birleştirip genel bir sağlık özeti oluşturmaktır.
 
 Kullanıcı Profili:
@@ -53,15 +54,18 @@ JSON Formatı:
 ''';
 
       final responseText = await _gemini.generateText(prompt: prompt);
-      
-      String clean = responseText.replaceAll('```json', '').replaceAll('```', '').trim();
+
+      String clean = responseText
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
       final startIdx = clean.indexOf('{');
       final endIdx = clean.lastIndexOf('}');
       if (startIdx == -1 || endIdx == -1) return CombinedHealthAnalysis.empty();
 
       final jsonStr = clean.substring(startIdx, endIdx + 1);
       final parsed = jsonDecode(jsonStr) as Map<String, dynamic>;
-      
+
       return CombinedHealthAnalysis.fromJson(parsed);
     } catch (e) {
       debugPrint('CombinedAnalysisService error: $e');
@@ -96,7 +100,8 @@ JSON Formatı:
 
   // ── Context Builders ──────────────────────────────────────────────────────
 
-  String _buildProfileContext(UserHealthProfile p) => '''
+  String _buildProfileContext(UserHealthProfile p) =>
+      '''
 Kullanıcı Profili:
 - Yaş: ${p.age ?? 'Belirtilmedi'}
 - Cinsiyet: ${p.gender ?? 'Belirtilmedi'}
@@ -108,7 +113,8 @@ Kullanıcı Profili:
 - Alerjiler: ${p.allergies.isEmpty ? 'Yok' : p.allergies.join(', ')}
 - Beslenme Tercihleri: ${p.dietPreferences.isEmpty ? 'Belirtilmedi' : p.dietPreferences.join(', ')}''';
 
-  String _buildDietContext(DietAnalysisResult d) => '''
+  String _buildDietContext(DietAnalysisResult d) =>
+      '''
 Diyet Analizi:
 - Günlük Kalori Hedefi: ${d.dailyCalorieTarget ?? 'Belirtilmedi'}
 - Protein: ${d.proteinGrams != null ? '${d.proteinGrams}g' : 'Belirtilmedi'}
@@ -119,7 +125,9 @@ Diyet Analizi:
 
   String _buildBloodContext(BloodAnalysisResult b) {
     final markerStr = b.markers
-        .map((m) => '${m.name}: ${m.value ?? '?'} ${m.unit ?? ''} (${m.status})')
+        .map(
+          (m) => '${m.name}: ${m.value ?? '?'} ${m.unit ?? ''} (${m.status})',
+        )
         .join(', ');
     return '''
 Kan Değerleri:
@@ -127,17 +135,18 @@ Kan Değerleri:
 - Genel Not: ${b.generalNote}''';
   }
 
-  List<RecipeRecommendationResult> _fallbackRanking(
-      List<RecipeModel> recipes) {
+  List<RecipeRecommendationResult> _fallbackRanking(List<RecipeModel> recipes) {
     return recipes
-        .map((r) => RecipeRecommendationResult(
-              recipeId: r.id,
-              recipeTitle: r.title,
-              matchScore: 75,
-              suggestedMealType: r.mealType,
-              matchReason: 'Genel beslenme açısından uygun görünüyor.',
-              isSafeForUser: true,
-            ))
+        .map(
+          (r) => RecipeRecommendationResult(
+            recipeId: r.id,
+            recipeTitle: r.title,
+            matchScore: 75,
+            suggestedMealType: r.mealType,
+            matchReason: 'Genel beslenme açısından uygun görünüyor.',
+            isSafeForUser: true,
+          ),
+        )
         .toList();
   }
 }

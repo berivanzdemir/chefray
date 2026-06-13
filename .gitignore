@@ -48,3 +48,28 @@ app.*.map.json
 .env
 .env.*
 !.env.example
+
+# Keystore and signing secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+key.properties
+android/key.properties
+
+# Firebase and Google Services secrets
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Testing / Emulator directories
+emulator/
+
+# Service account keys
+**/service-account*.json
+
+# Keystore directory
+android/keystore/
+
+# Debug symbols
+build/symbols/

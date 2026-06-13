@@ -18,7 +18,8 @@ class UserHealthProfileRepository {
   /// exception if no session exists.
   String get _currentUserId {
     final id = _client.auth.currentUser?.id;
-    if (id == null) throw Exception('Oturum bulunamadı. Lütfen tekrar giriş yap.');
+    if (id == null)
+      throw Exception('Oturum bulunamadı. Lütfen tekrar giriş yap.');
     return id;
   }
 
@@ -35,8 +36,7 @@ class UserHealthProfileRepository {
     return UserHealthProfile.fromJson(data);
   }
 
-  Future<void> upsertCurrentUserHealthProfile(
-      UserHealthProfile profile) async {
+  Future<void> upsertCurrentUserHealthProfile(UserHealthProfile profile) async {
     final uid = _currentUserId;
     final json = profile.copyWith(userId: uid).toJson();
     await _client
@@ -65,13 +65,11 @@ class UserHealthProfileRepository {
 
   Future<void> markProfileSetupCompleted() async {
     final uid = _currentUserId;
-    await _client
-        .from('profiles')
-        .upsert({
-          'id': uid,
-          'profile_setup_completed': true,
-          'updated_at': DateTime.now().toIso8601String(),
-        }, onConflict: 'id');
+    await _client.from('profiles').upsert({
+      'id': uid,
+      'profile_setup_completed': true,
+      'updated_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'id');
     cachedProfileSetupCompleted = true;
   }
 }

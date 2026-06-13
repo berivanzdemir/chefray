@@ -22,12 +22,12 @@ class SetupMultiSelectChip extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF2DFF88)
-              : Colors.white,
+          color: isSelected ? const Color(0xFF2DFF88) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2DFF88) : const Color(0xFFE8F3ED),
+            color: isSelected
+                ? const Color(0xFF2DFF88)
+                : const Color(0xFFE8F3ED),
             width: 1,
           ),
           boxShadow: [
@@ -43,14 +43,20 @@ class SetupMultiSelectChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isSelected) ...[
-              const Icon(Icons.check_rounded, size: 18, color: Color(0xFF102B2B)),
+              const Icon(
+                Icons.check_rounded,
+                size: 18,
+                color: Color(0xFF102B2B),
+              ),
               const SizedBox(width: 6),
             ],
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: isSelected ? const Color(0xFF102B2B) : const Color(0xFF5F7373),
+                color: isSelected
+                    ? const Color(0xFF102B2B)
+                    : const Color(0xFF5F7373),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),

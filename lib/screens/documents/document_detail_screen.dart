@@ -20,7 +20,9 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
   bool _isLoading = true;
   List<UploadedDocumentModel> _documents = [];
 
-  String get _title => widget.documentType == 'diet' ? 'Diyet Listesi Geçmişi' : 'Kan Tahlili Geçmişi';
+  String get _title => widget.documentType == 'diet'
+      ? 'Diyet Listesi Geçmişi'
+      : 'Kan Tahlili Geçmişi';
 
   @override
   void initState() {
@@ -30,7 +32,9 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
 
   Future<void> _loadDocuments() async {
     setState(() => _isLoading = true);
-    final docs = await DocumentHistoryService.instance.getDocumentsByType(widget.documentType);
+    final docs = await DocumentHistoryService.instance.getDocumentsByType(
+      widget.documentType,
+    );
     if (mounted) {
       setState(() {
         _documents = docs;
@@ -45,22 +49,36 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Belgeyi Sil'),
-        content: const Text('Bu belgeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+        content: const Text(
+          'Bu belgeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal', style: TextStyle(color: AppColors.textMedium)),
+            child: const Text(
+              'İptal',
+              style: TextStyle(color: AppColors.textMedium),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sil', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Sil',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Siliniyor...')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Siliniyor...')));
       await DocumentHistoryService.instance.deleteDocument(doc.id);
       _loadDocuments();
     }
@@ -68,18 +86,24 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
 
   void _viewDoc(UploadedDocumentModel doc) async {
     if (doc.filePath == null && doc.fileUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Belge dosyası görüntülenemiyor.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Belge dosyası görüntülenemiyor.')),
+      );
       return;
     }
-    
+
     // Attempt to open or show signed URL
     String? url = doc.fileUrl;
     if (url == null && doc.filePath != null) {
-      url = await DocumentHistoryService.instance.createSignedUrl(doc.filePath!);
+      url = await DocumentHistoryService.instance.createSignedUrl(
+        doc.filePath!,
+      );
     }
 
     if (url == null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Belge url alınamadı.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Belge url alınamadı.')));
       return;
     }
 
@@ -91,9 +115,14 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Görüntüle'),
-          content: Text('Dosya Linki:\n$url\n\nNot: Gerçek uygulamada in-app pdf viewer veya url_launcher ile açılır.'),
+          content: Text(
+            'Dosya Linki:\n$url\n\nNot: Gerçek uygulamada in-app pdf viewer veya url_launcher ile açılır.',
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Kapat')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kapat'),
+            ),
           ],
         ),
       );
@@ -110,12 +139,19 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
             child: Text(doc.parsedData.toString()),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Kapat')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kapat'),
+            ),
           ],
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bu belge için analiz verisi bulunamadı.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bu belge için analiz verisi bulunamadı.'),
+        ),
+      );
     }
   }
 
@@ -135,12 +171,18 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'verified': return 'Doğrulandı';
-      case 'processed': return 'Analiz Edildi';
-      case 'error': return 'Hata';
-      case 'rejected': return 'Reddedildi';
-      case 'uploaded': return 'Yüklendi';
-      default: return status;
+      case 'verified':
+        return 'Doğrulandı';
+      case 'processed':
+        return 'Analiz Edildi';
+      case 'error':
+        return 'Hata';
+      case 'rejected':
+        return 'Reddedildi';
+      case 'uploaded':
+        return 'Yüklendi';
+      default:
+        return status;
     }
   }
 
@@ -156,17 +198,19 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _documents.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: _documents.length,
-                  itemBuilder: (context, index) {
-                    final doc = _documents[index];
-                    return _buildDocumentCard(doc);
-                  },
-                ),
+          ? _buildEmptyState()
+          : ListView.builder(
+              padding: const EdgeInsets.all(24),
+              itemCount: _documents.length,
+              itemBuilder: (context, index) {
+                final doc = _documents[index];
+                return _buildDocumentCard(doc);
+              },
+            ),
     );
   }
 
@@ -190,24 +234,36 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                   ),
                 ],
               ),
-              child: Icon(Icons.folder_off_rounded, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              child: Icon(
+                Icons.folder_off_rounded,
+                size: 64,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
               'Henüz belge yüklemedin.',
-              style: AppTextStyles.h2.copyWith(fontSize: 20, color: Theme.of(context).colorScheme.onSurface),
+              style: AppTextStyles.h2.copyWith(
+                fontSize: 20,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Diyet listesi veya kan tahlili yükleyerek belgelerini burada görüntüleyebilirsin.',
-              style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () async {
-                final uploadType = widget.documentType == 'diet' ? 'dietPdf' : 'bloodPdf';
+                final uploadType = widget.documentType == 'diet'
+                    ? 'dietPdf'
+                    : 'bloodPdf';
                 await context.push('/diet-upload?uploadType=$uploadType');
                 _loadDocuments();
               },
@@ -215,10 +271,15 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
-              child: const Text('Belge Yükle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Belge Yükle',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -234,87 +295,95 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: SoftCard(
         padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  widget.documentType == 'diet' ? Icons.restaurant_menu : Icons.bloodtype_rounded,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      doc.fileName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.h3.copyWith(fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dateStr,
-                      style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMedium),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(doc.status).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _getStatusText(doc.status),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: _getStatusColor(doc.status),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    widget.documentType == 'diet'
+                        ? Icons.restaurant_menu
+                        : Icons.bloodtype_rounded,
+                    color: AppColors.primary,
+                    size: 20,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: AppColors.divider),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _ActionBtn(
-                icon: Icons.visibility_rounded,
-                label: 'Görüntüle',
-                color: Theme.of(context).colorScheme.onSurface,
-                onTap: () => _viewDoc(doc),
-              ),
-              _ActionBtn(
-                icon: Icons.analytics_rounded,
-                label: 'Analiz Et',
-                color: AppColors.primary,
-                onTap: () => _analyzeDoc(doc),
-              ),
-              _ActionBtn(
-                icon: Icons.delete_outline_rounded,
-                label: 'Sil',
-                color: AppColors.error,
-                onTap: () => _deleteDoc(doc),
-              ),
-            ],
-          ),
-        ],
-      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        doc.fileName,
+                        style: AppTextStyles.h3.copyWith(
+                          fontSize: 15,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        dateStr,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(doc.status).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _getStatusText(doc.status),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: _getStatusColor(doc.status),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _ActionBtn(
+                  icon: Icons.visibility_rounded,
+                  label: 'Görüntüle',
+                  color: Theme.of(context).colorScheme.onSurface,
+                  onTap: () => _viewDoc(doc),
+                ),
+                _ActionBtn(
+                  icon: Icons.analytics_rounded,
+                  label: 'Analiz Et',
+                  color: AppColors.primary,
+                  onTap: () => _analyzeDoc(doc),
+                ),
+                _ActionBtn(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'Sil',
+                  color: AppColors.error,
+                  onTap: () => _deleteDoc(doc),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -346,7 +415,11 @@ class _ActionBtn extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

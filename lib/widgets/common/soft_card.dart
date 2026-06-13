@@ -45,7 +45,9 @@ class SoftCard extends StatelessWidget {
             ),
             if (hasGreenGlow)
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.08),
                 blurRadius: 30,
                 offset: const Offset(0, 8),
                 spreadRadius: -4,

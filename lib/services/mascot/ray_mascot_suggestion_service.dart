@@ -26,12 +26,12 @@ class RaySuggestion {
   });
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'message': message,
-        'type': type.name,
-        'action_label': actionLabel,
-        'action_route': actionRoute,
-      };
+    'title': title,
+    'message': message,
+    'type': type.name,
+    'action_label': actionLabel,
+    'action_route': actionRoute,
+  };
 }
 
 class RayMascotSuggestionService {
@@ -40,7 +40,7 @@ class RayMascotSuggestionService {
   factory RayMascotSuggestionService() => _instance;
   RayMascotSuggestionService._();
 
-  final _random = Random();
+  final _random = Random.secure();
   String? _lastMessageText;
 
   // ── Pre-approved safe message pool ─────────────────────────
@@ -53,19 +53,22 @@ class RayMascotSuggestionService {
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Bugün bol su içmeyi unutma. Küçük alışkanlıklar büyük fark yaratır.',
+      message:
+          'Bugün bol su içmeyi unutma. Küçük alışkanlıklar büyük fark yaratır.',
       type: RayMessageType.hydrationTip,
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Bugün lif oranı yüksek tariflere göz atmak iyi bir fikir olabilir.',
+      message:
+          'Bugün lif oranı yüksek tariflere göz atmak iyi bir fikir olabilir.',
       type: RayMessageType.recipeSuggestion,
       actionLabel: 'Tarifleri keşfet',
       actionRoute: '/recipe-list',
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Kızartmalar yerine fırın veya haşlama alternatiflerini denemeye ne dersin?',
+      message:
+          'Kızartmalar yerine fırın veya haşlama alternatiflerini denemeye ne dersin?',
       type: RayMessageType.balancedMealTip,
     ),
     RaySuggestion(
@@ -75,22 +78,26 @@ class RayMascotSuggestionService {
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Öğünlerinde protein, karbonhidrat ve sağlıklı yağ dengesine dikkat etmek uzun vadede fark yaratır.',
+      message:
+          'Öğünlerinde protein, karbonhidrat ve sağlıklı yağ dengesine dikkat etmek uzun vadede fark yaratır.',
       type: RayMessageType.balancedMealTip,
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Yemeklerini yavaş yemek ve iyi çiğnemek sindirimine yardımcı olabilir.',
+      message:
+          'Yemeklerini yavaş yemek ve iyi çiğnemek sindirimine yardımcı olabilir.',
       type: RayMessageType.balancedMealTip,
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Haftada en az 2 gün balık tüketmek omega-3 alımına katkı sağlayabilir.',
+      message:
+          'Haftada en az 2 gün balık tüketmek omega-3 alımına katkı sağlayabilir.',
       type: RayMessageType.recipeSuggestion,
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Mevsim sebzeleriyle hazırlanmış bir salata her öğüne renk katar.',
+      message:
+          'Mevsim sebzeleriyle hazırlanmış bir salata her öğüne renk katar.',
       type: RayMessageType.recipeSuggestion,
     ),
   ];
@@ -105,7 +112,8 @@ class RayMascotSuggestionService {
     ),
     RaySuggestion(
       title: 'Diyet listesi yükle 📋',
-      message: 'Diyet listesine göre tarifleri kişiselleştirmemi ister misin? Hemen yükle.',
+      message:
+          'Diyet listesine göre tarifleri kişiselleştirmemi ister misin? Hemen yükle.',
       type: RayMessageType.uploadDietReminder,
       actionLabel: 'Diyet listesi yükle',
       actionRoute: '/diet-upload?uploadType=dietPdf',
@@ -115,14 +123,16 @@ class RayMascotSuggestionService {
   static const _uploadBloodReminders = [
     RaySuggestion(
       title: 'Kan değerlerini yükle 🩸',
-      message: 'Kan değerlerini yüklersen tarif önerilerini daha bilinçli kişiselleştirebilirim.',
+      message:
+          'Kan değerlerini yüklersen tarif önerilerini daha bilinçli kişiselleştirebilirim.',
       type: RayMessageType.uploadBloodReminder,
       actionLabel: 'Kan değerlerini yükle',
       actionRoute: '/diet-upload?uploadType=bloodPdf',
     ),
     RaySuggestion(
       title: 'Tahlilini yükle 🔬',
-      message: 'Kan değerlerini düzenli takip etmek, beslenme planını daha bilinçli yönetmene yardımcı olabilir.',
+      message:
+          'Kan değerlerini düzenli takip etmek, beslenme planını daha bilinçli yönetmene yardımcı olabilir.',
       type: RayMessageType.uploadBloodReminder,
       actionLabel: 'Kan değerlerini yükle',
       actionRoute: '/diet-upload?uploadType=bloodPdf',
@@ -132,13 +142,15 @@ class RayMascotSuggestionService {
   static const _bothUploadedTips = [
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Diyet listen ve kan değerlerin hazır. Birlikte analiz ederek sana en uygun tarifleri bulabiliriz!',
+      message:
+          'Diyet listen ve kan değerlerin hazır. Birlikte analiz ederek sana en uygun tarifleri bulabiliriz!',
       type: RayMessageType.recipeSuggestion,
       actionLabel: 'Birlikte analiz et',
     ),
     RaySuggestion(
       title: "Ray'den öneri",
-      message: 'Belgelerin tamam! Şimdi sana özel tarif önerilerine göz atabilirsin.',
+      message:
+          'Belgelerin tamam! Şimdi sana özel tarif önerilerine göz atabilirsin.',
       type: RayMessageType.recipeSuggestion,
       actionLabel: 'Tarifleri keşfet',
       actionRoute: '/recipe-list',
@@ -148,19 +160,22 @@ class RayMascotSuggestionService {
   static const _welcomeMessages = [
     RaySuggestion(
       title: 'Hoş geldin! 👋',
-      message: 'Merhaba, ben Ray! Bugün sağlıklı tarifler keşfetmeye ne dersin?',
+      message:
+          'Merhaba, ben Ray! Bugün sağlıklı tarifler keşfetmeye ne dersin?',
       type: RayMessageType.welcome,
     ),
     RaySuggestion(
       title: 'Hoş geldin! 🌟',
-      message: 'Merhaba, ben Ray! Beslenme yolculuğunda sana eşlik etmek için buradayım.',
+      message:
+          'Merhaba, ben Ray! Beslenme yolculuğunda sana eşlik etmek için buradayım.',
       type: RayMessageType.welcome,
     ),
   ];
 
   static const _safetyWarning = RaySuggestion(
     title: 'Hatırlatma ⚠️',
-    message: 'Beslenme önerilerim genel bilgilendirme amaçlıdır. Özel durumlarda uzmana danışmayı unutma.',
+    message:
+        'Beslenme önerilerim genel bilgilendirme amaçlıdır. Özel durumlarda uzmana danışmayı unutma.',
     type: RayMessageType.safetyWarning,
   );
 

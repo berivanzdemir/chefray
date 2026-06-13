@@ -126,8 +126,11 @@ class DigitalTwinCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.auto_awesome_rounded,
-                      color: Theme.of(context).colorScheme.primary, size: 18),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Dijital Beslenme İkizim',

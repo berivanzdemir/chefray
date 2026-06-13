@@ -10,8 +10,10 @@ class RecipeTranslationService {
   // ── Recipe Title Translations ─────────────────────────────
   static const Map<String, String> _titleMap = {
     // Common recipe titles from Spoonacular
-    'asparagus and pea soup: real convenience food': 'Kuşkonmaz ve Bezelye Çorbası',
-    'red lentil soup with chicken and turnips': 'Tavuklu ve Şalgamlı Kırmızı Mercimek Çorbası',
+    'asparagus and pea soup: real convenience food':
+        'Kuşkonmaz ve Bezelye Çorbası',
+    'red lentil soup with chicken and turnips':
+        'Tavuklu ve Şalgamlı Kırmızı Mercimek Çorbası',
     'garlicky kale': 'Sarımsaklı Karalahana',
     'chicken and broccoli stir fry': 'Tavuk ve Brokoli Sote',
     'grilled salmon': 'Izgara Somon',
@@ -359,7 +361,9 @@ class RecipeTranslationService {
       title: translateTitle(recipe.title),
       description: _translateDescription(recipe.description, recipe.title),
       tags: recipe.tags.map((t) => translateTag(t)).toList(),
-      ingredients: recipe.ingredients.map((i) => _translateIngredient(i)).toList(),
+      ingredients: recipe.ingredients
+          .map((i) => _translateIngredient(i))
+          .toList(),
       steps: recipe.steps.map((s) => _translateStep(s)).toList(),
       mealType: translateTag(recipe.mealType),
     );
@@ -378,7 +382,10 @@ class RecipeTranslationService {
     // Try word-by-word translation for compound titles
     String result = title;
     _ingredientMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
 
@@ -410,7 +417,10 @@ class RecipeTranslationService {
     };
 
     titleWords.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
 
@@ -430,7 +440,9 @@ class RecipeTranslationService {
     return ing.copyWith(
       name: translateIngredientName(ing.name),
       amount: _translateAmount(ing.amount),
-      nutrientTag: ing.nutrientTag != null ? _translateNutrientTag(ing.nutrientTag!) : null,
+      nutrientTag: ing.nutrientTag != null
+          ? _translateNutrientTag(ing.nutrientTag!)
+          : null,
     );
   }
 
@@ -442,7 +454,10 @@ class RecipeTranslationService {
     // Try partial match
     String result = name;
     _ingredientMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
     return result;
@@ -452,7 +467,10 @@ class RecipeTranslationService {
   static String _translateAmount(String amount) {
     String result = amount;
     _unitMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
     // Clean ".0" amounts
@@ -490,7 +508,10 @@ class RecipeTranslationService {
     // Short descriptions — try word-by-word
     String result = description;
     _ingredientMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
     return result;
@@ -511,19 +532,28 @@ class RecipeTranslationService {
 
     // Translate ingredient names first
     _ingredientMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
 
     // Translate cooking verbs and keywords
     _instructionKeywords.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
 
     // Translate units
     _unitMap.forEach((en, tr) {
-      final regex = RegExp(r'\b' + RegExp.escape(en) + r'\b', caseSensitive: false);
+      final regex = RegExp(
+        r'\b' + RegExp.escape(en) + r'\b',
+        caseSensitive: false,
+      );
       result = result.replaceAll(regex, tr);
     });
 

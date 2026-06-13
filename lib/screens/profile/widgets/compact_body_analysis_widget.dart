@@ -40,7 +40,11 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.scale_rounded, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.scale_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Vücut Analizi',
@@ -53,19 +57,59 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              Icon(Icons.info_outline_rounded, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(flex: 3, child: _buildMetricItem(context, 'BMI', bmi.toStringAsFixed(1), bmiStatus, _getBmiColor(bmi))),
+              Expanded(
+                flex: 3,
+                child: _buildMetricItem(
+                  context,
+                  'BMI',
+                  bmi.toStringAsFixed(1),
+                  bmiStatus,
+                  _getBmiColor(bmi),
+                ),
+              ),
               _buildVerticalDivider(),
-              Expanded(flex: 3, child: _buildMetricItem(context, 'BMR', '${bmr.toInt()}', 'kcal/gün', Theme.of(context).colorScheme.onSurface)),
+              Expanded(
+                flex: 3,
+                child: _buildMetricItem(
+                  context,
+                  'BMR',
+                  '${bmr.toInt()}',
+                  'kcal/gün',
+                  Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               _buildVerticalDivider(),
-              Expanded(flex: 3, child: _buildMetricItem(context, 'Günlük Kalori', '${dailyCalories.toInt()}', 'kcal', Theme.of(context).colorScheme.onSurface)),
+              Expanded(
+                flex: 3,
+                child: _buildMetricItem(
+                  context,
+                  'Günlük Kalori',
+                  '${dailyCalories.toInt()}',
+                  'kcal',
+                  Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               _buildVerticalDivider(),
-              Expanded(flex: 4, child: _buildMetricItem(context, 'İdeal Kilo Aralığı', '${idealRange.min.toInt()} - ${idealRange.max.toInt()}', 'kg', Theme.of(context).colorScheme.onSurface)),
+              Expanded(
+                flex: 4,
+                child: _buildMetricItem(
+                  context,
+                  'İdeal Kilo Aralığı',
+                  '${idealRange.min.toInt()} - ${idealRange.max.toInt()}',
+                  'kg',
+                  Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -77,11 +121,24 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Vücut Durumu', style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    Text(
+                      'Vücut Durumu',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     _buildStatusSlider(bmi),
                     const SizedBox(height: 4),
-                    Text(bmiStatus, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _getBmiColor(bmi))),
+                    Text(
+                      bmiStatus,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: _getBmiColor(bmi),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -92,35 +149,48 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricItem(BuildContext context, String title, String value, String subtitle, Color subtitleColor) {
+  Widget _buildMetricItem(
+    BuildContext context,
+    String title,
+    String value,
+    String subtitle,
+    Color subtitleColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 9, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            fontSize: 9,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           textAlign: TextAlign.center,
           maxLines: 1,
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         Text(
           subtitle,
-          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: subtitleColor),
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: subtitleColor,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildVerticalDivider() {
-    return Container(
-      width: 1,
-      height: 40,
-      color: const Color(0xFFF0F0F0),
-    );
+    return Container(width: 1, height: 40, color: const Color(0xFFF0F0F0));
   }
 
   Widget _buildStatusSlider(double bmi) {
@@ -134,7 +204,7 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
     } else {
       percent = 0.9;
     }
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
@@ -166,7 +236,11 @@ class CompactBodyAnalysisWidget extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.black26, width: 1.5),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
                   ],
                 ),
               ),

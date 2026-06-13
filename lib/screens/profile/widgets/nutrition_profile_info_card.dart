@@ -8,10 +8,7 @@ import '../../../widgets/common/soft_card.dart';
 class NutritionProfileInfoCard extends StatelessWidget {
   final UserHealthProfile healthProfile;
 
-  const NutritionProfileInfoCard({
-    super.key,
-    required this.healthProfile,
-  });
+  const NutritionProfileInfoCard({super.key, required this.healthProfile});
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +30,17 @@ class NutritionProfileInfoCard extends StatelessWidget {
       _InfoItem(
         icon: Icons.straighten_rounded,
         label: 'Boy',
-        value:
-            healthProfile.heightCm != null ? '${healthProfile.heightCm} cm' : '-',
+        value: healthProfile.heightCm != null
+            ? '${healthProfile.heightCm} cm'
+            : '-',
         color: AppColors.carbs,
       ),
       _InfoItem(
         icon: Icons.monitor_weight_rounded,
         label: 'Kilo',
-        value:
-            healthProfile.weightKg != null ? '${healthProfile.weightKg} kg' : '-',
+        value: healthProfile.weightKg != null
+            ? '${healthProfile.weightKg} kg'
+            : '-',
         color: AppColors.error,
       ),
       _InfoItem(
@@ -70,15 +69,22 @@ class NutritionProfileInfoCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.person_outline_rounded,
-                    color: Theme.of(context).colorScheme.primary, size: 18),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 10),
-              Text('Temel Bilgiler & Hedef',
-                  style: AppTextStyles.h3.copyWith(fontSize: 15)),
+              Text(
+                'Temel Bilgiler & Hedef',
+                style: AppTextStyles.h3.copyWith(fontSize: 15),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -136,7 +142,6 @@ class NutritionProfileInfoCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

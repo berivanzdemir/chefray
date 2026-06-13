@@ -44,7 +44,9 @@ class ProgressCard extends StatelessWidget {
           Text(
             'Günlük Kalori Özeti',
             style: AppTextStyles.labelMedium.copyWith(
-              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -58,25 +60,29 @@ class ProgressCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     RichText(
-                      text: TextSpan(children: [
-                        TextSpan(
-                          text: _formatNum(current),
-                          style: TextStyle(
-                            fontSize: 38,
-                            fontWeight: FontWeight.w800,
-                            color: Theme.of(context).colorScheme.surface,
-                            letterSpacing: -1,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: _formatNum(current),
+                            style: TextStyle(
+                              fontSize: 38,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.surface,
+                              letterSpacing: -1,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: ' / ${_formatNum(target)} kcal',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
+                          TextSpan(
+                            text: ' / ${_formatNum(target)} kcal',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surface.withValues(alpha: 0.6),
+                            ),
                           ),
-                        ),
-                      ]),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
                     // Progress bar
@@ -85,21 +91,30 @@ class ProgressCard extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: percentage,
                         minHeight: 8,
-                        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.15),
-                        valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surface.withValues(alpha: 0.15),
+                        valueColor: AlwaysStoppedAnimation(
+                          Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Icon(Icons.local_fire_department_rounded,
-                            size: 14, color: Theme.of(context).colorScheme.primary),
+                        Icon(
+                          Icons.local_fire_department_rounded,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '$remaining kcal kaldı',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surface.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -131,7 +146,9 @@ class ProgressCard extends StatelessWidget {
                           'Tamamlandı',
                           style: TextStyle(
                             fontSize: 8,
-                            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surface.withValues(alpha: 0.6),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -166,7 +183,8 @@ class _PercentRingPainter extends CustomPainter {
     final r = size.width / 2 - 5;
     const sw = 6.0;
     canvas.drawCircle(
-      c, r,
+      c,
+      r,
       Paint()
         ..color = Theme.of(context).colorScheme.surface.withValues(alpha: 0.12)
         ..style = PaintingStyle.stroke

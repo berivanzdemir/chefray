@@ -33,9 +33,15 @@ class AnalysisHistoryItem {
       'summary': summary,
       'nutrition_priorities': nutritionPriorities,
       'safety_notes': safetyNotes,
-      'diet_analysis': dietAnalysis != null ? _dietAnalysisToJson(dietAnalysis!) : null,
-      'blood_analysis': bloodAnalysis != null ? _bloodAnalysisToJson(bloodAnalysis!) : null,
-      'combined_analysis': combinedAnalysis != null ? _combinedAnalysisToJson(combinedAnalysis!) : null,
+      'diet_analysis': dietAnalysis != null
+          ? _dietAnalysisToJson(dietAnalysis!)
+          : null,
+      'blood_analysis': bloodAnalysis != null
+          ? _bloodAnalysisToJson(bloodAnalysis!)
+          : null,
+      'combined_analysis': combinedAnalysis != null
+          ? _combinedAnalysisToJson(combinedAnalysis!)
+          : null,
     };
   }
 
@@ -43,21 +49,33 @@ class AnalysisHistoryItem {
     return AnalysisHistoryItem(
       id: json['id'] ?? '',
       userId: json['user_id'] ?? json['userId'] ?? '',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at']) 
-          : (json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now()),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : (json['createdAt'] != null
+                ? DateTime.parse(json['createdAt'])
+                : DateTime.now()),
       summary: json['summary'] ?? '',
-      nutritionPriorities: List<String>.from(json['nutrition_priorities'] ?? json['nutritionPriorities'] ?? []),
-      safetyNotes: List<String>.from(json['safety_notes'] ?? json['safetyNotes'] ?? []),
-      dietAnalysis: json['diet_analysis'] != null 
-          ? _dietAnalysisFromJson(json['diet_analysis']) 
-          : (json['dietAnalysis'] != null ? _dietAnalysisFromJson(json['dietAnalysis']) : null),
-      bloodAnalysis: json['blood_analysis'] != null 
-          ? _bloodAnalysisFromJson(json['blood_analysis']) 
-          : (json['bloodAnalysis'] != null ? _bloodAnalysisFromJson(json['bloodAnalysis']) : null),
-      combinedAnalysis: json['combined_analysis'] != null 
-          ? _combinedAnalysisFromJson(json['combined_analysis']) 
-          : (json['combinedAnalysis'] != null ? _combinedAnalysisFromJson(json['combinedAnalysis']) : null),
+      nutritionPriorities: List<String>.from(
+        json['nutrition_priorities'] ?? json['nutritionPriorities'] ?? [],
+      ),
+      safetyNotes: List<String>.from(
+        json['safety_notes'] ?? json['safetyNotes'] ?? [],
+      ),
+      dietAnalysis: json['diet_analysis'] != null
+          ? _dietAnalysisFromJson(json['diet_analysis'])
+          : (json['dietAnalysis'] != null
+                ? _dietAnalysisFromJson(json['dietAnalysis'])
+                : null),
+      bloodAnalysis: json['blood_analysis'] != null
+          ? _bloodAnalysisFromJson(json['blood_analysis'])
+          : (json['bloodAnalysis'] != null
+                ? _bloodAnalysisFromJson(json['bloodAnalysis'])
+                : null),
+      combinedAnalysis: json['combined_analysis'] != null
+          ? _combinedAnalysisFromJson(json['combined_analysis'])
+          : (json['combinedAnalysis'] != null
+                ? _combinedAnalysisFromJson(json['combinedAnalysis'])
+                : null),
     );
   }
 
@@ -72,7 +90,9 @@ class AnalysisHistoryItem {
       'avoidedFoods': res.avoidedFoods,
       'nutritionNotes': res.nutritionNotes,
       'rawExtractedText': res.rawExtractedText,
-      'breakfast': res.breakfast != null ? _dietMealToJson(res.breakfast!) : null,
+      'breakfast': res.breakfast != null
+          ? _dietMealToJson(res.breakfast!)
+          : null,
       'lunch': res.lunch != null ? _dietMealToJson(res.lunch!) : null,
       'dinner': res.dinner != null ? _dietMealToJson(res.dinner!) : null,
       'snacks': res.snacks.map((s) => _dietMealToJson(s)).toList(),
@@ -89,19 +109,19 @@ class AnalysisHistoryItem {
       avoidedFoods: List<String>.from(map['avoidedFoods'] ?? []),
       nutritionNotes: List<String>.from(map['nutritionNotes'] ?? []),
       rawExtractedText: map['rawExtractedText'] as String? ?? '',
-      breakfast: map['breakfast'] != null ? _dietMealFromJson(map['breakfast']) : null,
+      breakfast: map['breakfast'] != null
+          ? _dietMealFromJson(map['breakfast'])
+          : null,
       lunch: map['lunch'] != null ? _dietMealFromJson(map['lunch']) : null,
       dinner: map['dinner'] != null ? _dietMealFromJson(map['dinner']) : null,
-      snacks: (map['snacks'] as List?)?.map((s) => _dietMealFromJson(s)).toList() ?? const [],
+      snacks:
+          (map['snacks'] as List?)?.map((s) => _dietMealFromJson(s)).toList() ??
+          const [],
     );
   }
 
   static Map<String, dynamic> _dietMealToJson(DietMeal meal) {
-    return {
-      'name': meal.name,
-      'items': meal.items,
-      'calories': meal.calories,
-    };
+    return {'name': meal.name, 'items': meal.items, 'calories': meal.calories};
   }
 
   static DietMeal _dietMealFromJson(Map<String, dynamic> map) {
@@ -127,7 +147,11 @@ class AnalysisHistoryItem {
       generalNote: map['generalNote'] as String? ?? '',
       safetyWarning: map['safetyWarning'] as String? ?? '',
       rawExtractedText: map['rawExtractedText'] as String? ?? '',
-      markers: (map['markers'] as List?)?.map((m) => _bloodMarkerFromJson(m)).toList() ?? const [],
+      markers:
+          (map['markers'] as List?)
+              ?.map((m) => _bloodMarkerFromJson(m))
+              .toList() ??
+          const [],
     );
   }
 
@@ -154,7 +178,9 @@ class AnalysisHistoryItem {
   }
 
   // Helper serializers for CombinedHealthAnalysis
-  static Map<String, dynamic> _combinedAnalysisToJson(CombinedHealthAnalysis res) {
+  static Map<String, dynamic> _combinedAnalysisToJson(
+    CombinedHealthAnalysis res,
+  ) {
     return {
       'combinedSummary': res.combinedSummary,
       'nutritionPriorities': res.nutritionPriorities,
@@ -164,12 +190,16 @@ class AnalysisHistoryItem {
     };
   }
 
-  static CombinedHealthAnalysis _combinedAnalysisFromJson(Map<String, dynamic> map) {
+  static CombinedHealthAnalysis _combinedAnalysisFromJson(
+    Map<String, dynamic> map,
+  ) {
     return CombinedHealthAnalysis(
       combinedSummary: map['combinedSummary'] as String? ?? '',
       nutritionPriorities: List<String>.from(map['nutritionPriorities'] ?? []),
       avoidOrLimit: List<String>.from(map['avoidOrLimit'] ?? []),
-      recommendedMealFocus: List<String>.from(map['recommendedMealFocus'] ?? []),
+      recommendedMealFocus: List<String>.from(
+        map['recommendedMealFocus'] ?? [],
+      ),
       safetyNotes: List<String>.from(map['safetyNotes'] ?? []),
     );
   }

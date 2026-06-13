@@ -39,7 +39,9 @@ class ProfileHeaderCard extends StatelessWidget {
                   gradient: AppColors.primaryGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.3),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -66,7 +68,10 @@ class ProfileHeaderCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.surface,
+                      width: 2,
+                    ),
                   ),
                   child: Icon(
                     Icons.camera_alt_rounded,
@@ -89,7 +94,6 @@ class ProfileHeaderCard extends StatelessWidget {
                       child: Text(
                         displayName,
                         style: AppTextStyles.h1.copyWith(fontSize: 22),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -100,14 +104,19 @@ class ProfileHeaderCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.diamond_rounded,
-                              size: 10, color: Theme.of(context).colorScheme.primary),
+                          Icon(
+                            Icons.diamond_rounded,
+                            size: 10,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             'Pro',
@@ -126,14 +135,16 @@ class ProfileHeaderCard extends StatelessWidget {
                 // Goal row
                 Row(
                   children: [
-                    Icon(Icons.track_changes_rounded,
-                        size: 14, color: Theme.of(context).colorScheme.primary),
+                    Icon(
+                      Icons.track_changes_rounded,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         'Hedef: $goal',
                         style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -142,14 +153,16 @@ class ProfileHeaderCard extends StatelessWidget {
                 // Motivation row
                 Row(
                   children: [
-                    Icon(Icons.emoji_events_rounded,
-                        size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.emoji_events_rounded,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         'Daha sağlıklı bir sen için buradayız!',
                         style: AppTextStyles.bodySmall.copyWith(fontSize: 10),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -171,32 +184,46 @@ class ProfileHeaderCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: Theme.of(context).dividerColor),
                   ),
-                  child: Icon(Icons.settings_rounded,
-                      size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               // Streak card
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.local_fire_department_rounded,
-                        size: 18, color: Theme.of(context).colorScheme.primary),
+                    Icon(
+                      Icons.local_fire_department_rounded,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     Text(
                       '$streak',
                       style: AppTextStyles.h3.copyWith(
-                          fontSize: 14, color: Theme.of(context).colorScheme.primary),
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     Text(
                       'Seri Gün',
                       style: AppTextStyles.labelSmall.copyWith(
-                          fontSize: 7, color: Theme.of(context).colorScheme.primary),
+                        fontSize: 7,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),

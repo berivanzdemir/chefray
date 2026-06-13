@@ -17,7 +17,8 @@ class ProductAnalysisScreen extends StatefulWidget {
 }
 
 class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
-  final ProductSuitabilityService _suitabilityService = ProductSuitabilityService();
+  final ProductSuitabilityService _suitabilityService =
+      ProductSuitabilityService();
   UserHealthProfile? _profile;
   String _chefRayInsight = "Hesaplanıyor...";
   bool _isLoadingProfile = true;
@@ -38,18 +39,24 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
     }
 
     try {
-      final profile = await UserHealthProfileRepository.instance.getCurrentUserHealthProfile();
+      final profile = await UserHealthProfileRepository.instance
+          .getCurrentUserHealthProfile();
       if (mounted) {
         setState(() {
           _profile = profile;
-          _chefRayInsight = _suitabilityService.analyzeSuitability(widget.product!, profile: _profile);
+          _chefRayInsight = _suitabilityService.analyzeSuitability(
+            widget.product!,
+            profile: _profile,
+          );
           _isLoadingProfile = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _chefRayInsight = _suitabilityService.analyzeSuitability(widget.product!);
+          _chefRayInsight = _suitabilityService.analyzeSuitability(
+            widget.product!,
+          );
           _isLoadingProfile = false;
         });
       }
@@ -66,7 +73,10 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
       );
     }
 
-    final hasWarning = _chefRayInsight.contains('DİKKAT') || _chefRayInsight.contains('dikkat') || _chefRayInsight.contains('kaçınmalısın');
+    final hasWarning =
+        _chefRayInsight.contains('DİKKAT') ||
+        _chefRayInsight.contains('dikkat') ||
+        _chefRayInsight.contains('kaçınmalısın');
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -77,7 +87,10 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
             pinned: true,
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
-            title: const Text('Ürün İçeriği Analizi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            title: const Text(
+              'Ürün İçeriği Analizi',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -117,23 +130,33 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
                             product.brand ?? 'Marka bilgisi yok',
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           product.name ?? 'İsimsiz ürün',
-                          style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 26),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.h1.copyWith(
+                            color: Colors.white,
+                            fontSize: 26,
+                          ),
                         ),
                       ],
                     ),
@@ -184,28 +207,40 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: _isLoadingProfile 
-                                    ? Colors.blue.withValues(alpha: 0.1) 
-                                    : (!hasWarning ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1)),
+                                color: _isLoadingProfile
+                                    ? Colors.blue.withValues(alpha: 0.1)
+                                    : (!hasWarning
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : Colors.orange.withValues(
+                                              alpha: 0.1,
+                                            )),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Center(
                                 child: Image.asset(
-                                  _isLoadingProfile 
-                                      ? 'assets/mascot/ray_scanning.png' 
-                                      : (!hasWarning ? 'assets/mascot/ray_success.png' : 'assets/mascot/ray_thinking.png'),
+                                  _isLoadingProfile
+                                      ? 'assets/mascot/ray_scanning.png'
+                                      : (!hasWarning
+                                            ? 'assets/mascot/ray_success.png'
+                                            : 'assets/mascot/ray_thinking.png'),
                                   width: 32,
                                   height: 32,
                                   fit: BoxFit.contain,
                                   errorBuilder: (ctx, err, stk) {
-                                    debugPrint('Mascot asset not found, fallback icon used.');
+                                    debugPrint(
+                                      'Mascot asset not found, fallback icon used.',
+                                    );
                                     return Icon(
-                                      _isLoadingProfile 
-                                          ? Icons.hourglass_empty_rounded 
-                                          : (!hasWarning ? Icons.verified_rounded : Icons.warning_rounded),
-                                      color: _isLoadingProfile 
-                                          ? Colors.blue 
-                                          : (!hasWarning ? Colors.green : Colors.orange),
+                                      _isLoadingProfile
+                                          ? Icons.hourglass_empty_rounded
+                                          : (!hasWarning
+                                                ? Icons.verified_rounded
+                                                : Icons.warning_rounded),
+                                      color: _isLoadingProfile
+                                          ? Colors.blue
+                                          : (!hasWarning
+                                                ? Colors.green
+                                                : Colors.orange),
                                     );
                                   },
                                 ),
@@ -216,11 +251,19 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('ChefRay Yorumu', style: AppTextStyles.h3),
+                                  Text(
+                                    'ChefRay Yorumu',
+                                    style: AppTextStyles.h3,
+                                  ),
                                   const SizedBox(height: 8),
                                   Text(
                                     _chefRayInsight,
-                                    style: AppTextStyles.bodyMedium.copyWith(height: 1.4, color: Theme.of(context).colorScheme.onSurface),
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      height: 1.4,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -233,7 +276,13 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                   const SizedBox(height: 32),
 
                   // Nutrients Header
-                  Text('100g İçin Besin Değerleri', style: AppTextStyles.h2.copyWith(fontSize: 18, color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    '100g İçin Besin Değerleri',
+                    style: AppTextStyles.h2.copyWith(
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
                   // Nutrients List
@@ -270,7 +319,9 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                       name: 'Doymuş Yağ',
                       amount: '${product.saturatedFat} g',
                       percentage: (product.saturatedFat! / 10).clamp(0.0, 1.0),
-                      color: (product.saturatedFat! > 5) ? Colors.red : Colors.green,
+                      color: (product.saturatedFat! > 5)
+                          ? Colors.red
+                          : Colors.green,
                     ),
                   if (product.carbs != null)
                     _NutrientItem(
@@ -293,29 +344,71 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
                       percentage: (product.salt! / 3).clamp(0.0, 1.0),
                       color: (product.salt! > 1.5) ? Colors.red : Colors.green,
                     ),
-                    
-                  if (product.calories == null && product.protein == null && product.fat == null)
-                     Text('Besin değeri bilgisi bulunmuyor (Veri Yok).', style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                  
+
+                  if (product.calories == null &&
+                      product.protein == null &&
+                      product.fat == null)
+                    Text(
+                      'Besin değeri bilgisi bulunmuyor (Veri Yok).',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+
                   const SizedBox(height: 24),
-                  if (product.ingredientsText != null && product.ingredientsText!.isNotEmpty) ...[
-                    Text('İçindekiler', style: AppTextStyles.h2.copyWith(fontSize: 18, color: Theme.of(context).colorScheme.onSurface)),
+                  if (product.ingredientsText != null &&
+                      product.ingredientsText!.isNotEmpty) ...[
+                    Text(
+                      'İçindekiler',
+                      style: AppTextStyles.h2.copyWith(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    Text(product.ingredientsText!, style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    Text(
+                      product.ingredientsText!,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                     const SizedBox(height: 24),
                   ],
-                  
+
                   if (product.allergens.isNotEmpty) ...[
-                    Text('Alerjenler', style: AppTextStyles.h2.copyWith(fontSize: 18, color: Colors.redAccent)),
+                    Text(
+                      'Alerjenler',
+                      style: AppTextStyles.h2.copyWith(
+                        fontSize: 18,
+                        color: Colors.redAccent,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: product.allergens.map((e) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                        child: Text(e.toUpperCase(), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
-                      )).toList(),
+                      children: product.allergens
+                          .map(
+                            (e) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                e.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ],
                   const SizedBox(height: 40),
@@ -330,43 +423,65 @@ class _ProductAnalysisScreenState extends State<ProductAnalysisScreen> {
 
   Color _getNutriScoreColor(String? score) {
     switch (score?.toUpperCase()) {
-      case 'A': return const Color(0xFF008b4c);
-      case 'B': return const Color(0xFF80c14a);
-      case 'C': return const Color(0xFFfecd00);
-      case 'D': return const Color(0xFFee8100);
-      case 'E': return const Color(0xFFe63e11);
-      default: return Colors.grey;
+      case 'A':
+        return const Color(0xFF008b4c);
+      case 'B':
+        return const Color(0xFF80c14a);
+      case 'C':
+        return const Color(0xFFfecd00);
+      case 'D':
+        return const Color(0xFFee8100);
+      case 'E':
+        return const Color(0xFFe63e11);
+      default:
+        return Colors.grey;
     }
   }
 
   String _getNutriScoreDesc(String? score) {
     switch (score?.toUpperCase()) {
-      case 'A': return 'Çok İyi';
-      case 'B': return 'İyi';
-      case 'C': return 'Orta';
-      case 'D': return 'Zayıf';
-      case 'E': return 'Çok Zayıf';
-      default: return 'Bilinmiyor';
+      case 'A':
+        return 'Çok İyi';
+      case 'B':
+        return 'İyi';
+      case 'C':
+        return 'Orta';
+      case 'D':
+        return 'Zayıf';
+      case 'E':
+        return 'Çok Zayıf';
+      default:
+        return 'Bilinmiyor';
     }
   }
 
   Color _getNovaColor(String? nova) {
     switch (nova) {
-      case '1': return Colors.green;
-      case '2': return Colors.lightGreen;
-      case '3': return Colors.orange;
-      case '4': return Colors.red;
-      default: return Colors.grey;
+      case '1':
+        return Colors.green;
+      case '2':
+        return Colors.lightGreen;
+      case '3':
+        return Colors.orange;
+      case '4':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   String _getNovaDesc(String? nova) {
     switch (nova) {
-      case '1': return 'İşlenmemiş';
-      case '2': return 'İşlenmiş İçerik';
-      case '3': return 'İşlenmiş';
-      case '4': return 'Aşırı İşlenmiş';
-      default: return 'Bilinmiyor';
+      case '1':
+        return 'İşlenmemiş';
+      case '2':
+        return 'İşlenmiş İçerik';
+      case '3':
+        return 'İşlenmiş';
+      case '4':
+        return 'Aşırı İşlenmiş';
+      default:
+        return 'Bilinmiyor';
     }
   }
 }
@@ -402,11 +517,21 @@ class _ScoreWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(title, style: AppTextStyles.labelSmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
+          Text(
+            title,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             score,
-            style: AppTextStyles.displayMedium.copyWith(color: color, fontSize: 42, height: 1.0),
+            style: AppTextStyles.displayMedium.copyWith(
+              color: color,
+              fontSize: 42,
+              height: 1.0,
+            ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -417,7 +542,10 @@ class _ScoreWidget extends StatelessWidget {
             ),
             child: Text(
               description,
-              style: AppTextStyles.labelSmall.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+              style: AppTextStyles.labelSmall.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -450,8 +578,20 @@ class _NutrientItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(name, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
-              Text(amount, style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w800, color: color)),
+              Text(
+                name,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                amount,
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),

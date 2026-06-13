@@ -24,7 +24,7 @@ enum UploadProcessState {
   validating,
   validated,
   analyzing,
-  failed
+  failed,
 }
 
 /// Two-mode upload screen: dietPdf → validates diet list → goes to blood upload
@@ -92,7 +92,15 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
 
   UploadType get _uploadType {
     final type = widget.uploadType?.toLowerCase() ?? '';
-    if (['bloodpdf', 'blood_test', 'bloodtest', 'lab_result', 'laboratory_result', 'kan_tahlili', 'kan_degeri'].contains(type)) {
+    if ([
+      'bloodpdf',
+      'blood_test',
+      'bloodtest',
+      'lab_result',
+      'laboratory_result',
+      'kan_tahlili',
+      'kan_degeri',
+    ].contains(type)) {
       return UploadType.bloodPdf;
     }
     return UploadType.dietPdf;
@@ -110,7 +118,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     }
   }
 
-  File? get originalSelectedFile => _isBlood ? originalSelectedBloodFile : originalSelectedDietFile;
+  File? get originalSelectedFile =>
+      _isBlood ? originalSelectedBloodFile : originalSelectedDietFile;
   set originalSelectedFile(File? val) {
     if (_isBlood) {
       originalSelectedBloodFile = val;
@@ -137,7 +146,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     }
   }
 
-  DocumentValidationResult? get validationResult => _isBlood ? bloodValidationResult : dietValidationResult;
+  DocumentValidationResult? get validationResult =>
+      _isBlood ? bloodValidationResult : dietValidationResult;
   set validationResult(DocumentValidationResult? val) {
     if (_isBlood) {
       bloodValidationResult = val;
@@ -155,7 +165,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     }
   }
 
-  String? get selectedFileHash => _isBlood ? selectedBloodFileHash : selectedDietFileHash;
+  String? get selectedFileHash =>
+      _isBlood ? selectedBloodFileHash : selectedDietFileHash;
   set selectedFileHash(String? val) {
     if (_isBlood) {
       selectedBloodFileHash = val;
@@ -163,8 +174,6 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
       selectedDietFileHash = val;
     }
   }
-
-
 
   String? get _selectedFileName {
     if (selectedFile != null) {
@@ -198,14 +207,15 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           processState = selectedFile != null
               ? UploadProcessState.validated
               : (selectedPreviousBloodAnalysis != null
-                  ? UploadProcessState.validated
-                  : UploadProcessState.idle);
+                    ? UploadProcessState.validated
+                    : UploadProcessState.idle);
         });
       }
     } catch (e) {
       setState(() {
         processState = UploadProcessState.failed;
-        errorMessage = "Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
+        errorMessage =
+            "Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
       });
     }
   }
@@ -230,14 +240,15 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           processState = selectedFile != null
               ? UploadProcessState.validated
               : (selectedPreviousBloodAnalysis != null
-                  ? UploadProcessState.validated
-                  : UploadProcessState.idle);
+                    ? UploadProcessState.validated
+                    : UploadProcessState.idle);
         });
       }
     } catch (e) {
       setState(() {
         processState = UploadProcessState.failed;
-        errorMessage = "Dosya seçilirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
+        errorMessage =
+            "Dosya seçilirken bir sorun oluştu. Lütfen tekrar deneyiniz.";
       });
     }
   }
@@ -275,7 +286,7 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
         });
         return;
       }
-      
+
       final bytes = await file.readAsBytes();
       final size = bytes.length;
       if (size == 0) {
@@ -288,9 +299,13 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
 
       // Check file extensions
       final ext = file.path.toLowerCase();
-      if (!ext.endsWith('.jpg') && !ext.endsWith('.jpeg') && !ext.endsWith('.png') && !ext.endsWith('.pdf')) {
+      if (!ext.endsWith('.jpg') &&
+          !ext.endsWith('.jpeg') &&
+          !ext.endsWith('.png') &&
+          !ext.endsWith('.pdf')) {
         setState(() {
-          errorMessage = "Bu format desteklenmiyor. Lütfen JPG, PNG veya PDF yükleyiniz.";
+          errorMessage =
+              "Bu format desteklenmiyor. Lütfen JPG, PNG veya PDF yükleyiniz.";
           processState = UploadProcessState.failed;
         });
         return;
@@ -301,15 +316,18 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
       // Copy to system temp directory with a highly unique timestamp-based filename to avoid picker cache collisions
       final tempDir = Directory.systemTemp;
       final fileExtension = ext.split('.').last;
-      final uniqueName = 'chef_ray_upload_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
+      final uniqueName =
+          'chef_ray_upload_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
       final copiedFile = await file.copy('${tempDir.path}/$uniqueName');
-      
+
       previewFile = copiedFile;
 
       // Check dimensions if it's an image
       int width = 0;
       int height = 0;
-      if (ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png')) {
+      if (ext.endsWith('.jpg') ||
+          ext.endsWith('.jpeg') ||
+          ext.endsWith('.png')) {
         try {
           final ui.Codec codec = await ui.instantiateImageCodec(bytes);
           final ui.FrameInfo fi = await codec.getNextFrame();
@@ -321,9 +339,13 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
       }
 
       // Quality Validation Threshold
-      if ((ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png')) && 
+      if ((ext.endsWith('.jpg') ||
+              ext.endsWith('.jpeg') ||
+              ext.endsWith('.png')) &&
           (width < 900 || height < 900)) {
-        debugPrint('Warning: Image resolution is below 900px ($width x $height). Using original selected file as analysis file.');
+        debugPrint(
+          'Warning: Image resolution is below 900px ($width x $height). Using original selected file as analysis file.',
+        );
         analysisFile = originalSelectedFile;
       } else {
         analysisFile = copiedFile;
@@ -368,7 +390,7 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
         selectedFile = copiedFile;
         selectedFileHash = hash;
         validationResult = result;
-        errorMessage = null; 
+        errorMessage = null;
         processState = UploadProcessState.validated;
       });
     } catch (e, st) {
@@ -381,7 +403,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
       debugPrint('Technical error: $e');
       debugPrint('Stack trace: $st');
       setState(() {
-        errorMessage = "Dosya formatı okunamadı veya analiz başarısız oldu. Lütfen daha net bir belge yükleyiniz.";
+        errorMessage =
+            "Dosya formatı okunamadı veya analiz başarısız oldu. Lütfen daha net bir belge yükleyiniz.";
         processState = UploadProcessState.failed;
       });
     }
@@ -433,20 +456,18 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
 
     if (_isBlood) {
       final canAnalyze =
-        selectedDietFile != null &&
-        dietValidationResult?.isValid == true &&
-        (
-          selectedPreviousBloodAnalysis != null ||
-          (
-            selectedBloodFile != null &&
-            bloodValidationResult?.isValid == true
-          )
-        );
+          selectedDietFile != null &&
+          dietValidationResult?.isValid == true &&
+          (selectedPreviousBloodAnalysis != null ||
+              (selectedBloodFile != null &&
+                  bloodValidationResult?.isValid == true));
 
       if (!canAnalyze) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Lütfen hem diyet listenizi hem de kan değerlerinizi yüklediğinizden emin olun.'),
+            content: Text(
+              'Lütfen hem diyet listenizi hem de kan değerlerinizi yüklediğinizden emin olun.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -459,14 +480,14 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     if (!_isBlood) {
       // Diet Mode → analyze diet → go to blood upload screen
       _showProcessingDialog('Diyet listeniz analiz ediliyor...');
-      
+
       try {
         final hash = selectedFileHash!;
         final cacheManager = AnalysisCacheManager();
-        
+
         DietAnalysisResult? cachedDiet = cacheManager.getDietAnalysis(hash);
         DietAnalysisResult dietResult;
-        
+
         if (cachedDiet != null) {
           dietResult = cachedDiet;
         } else {
@@ -476,16 +497,13 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           );
           cacheManager.cacheDietAnalysis(hash, dietResult);
         }
-        
+
         if (!mounted) return;
         Navigator.of(context).pop(); // close dialog
-        
+
         context.push(
           '/diet-upload?uploadType=bloodPdf',
-          extra: {
-            'dietAnalysis': dietResult,
-            'dietFile': analysisFile,
-          },
+          extra: {'dietAnalysis': dietResult, 'dietFile': analysisFile},
         );
       } catch (e, st) {
         debugPrint('Diet analysis failed');
@@ -495,7 +513,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
         if (mounted) {
           Navigator.of(context).pop(); // close dialog
           setState(() {
-            errorMessage = "Diyet analizi tamamlanamadı. Lütfen dosyanızı kontrol edip tekrar deneyiniz.";
+            errorMessage =
+                "Diyet analizi tamamlanamadı. Lütfen dosyanızı kontrol edip tekrar deneyiniz.";
           });
         }
       } finally {
@@ -504,14 +523,21 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     } else {
       // Blood Mode → proceed to processing screen with both analyses
       setState(() => processState = UploadProcessState.validated);
-      context.push('/processing', extra: {
-        'dietAnalysis': widget.previousDietAnalysis,
-        'dietFile': selectedDietFile,
-        'dietValidationResult': dietValidationResult,
-        'bloodFile': selectedPreviousBloodAnalysis != null ? null : selectedBloodFile,
-        'bloodValidationResult': selectedPreviousBloodAnalysis != null ? null : bloodValidationResult,
-        'previousBloodAnalysis': selectedPreviousBloodAnalysis,
-      });
+      context.push(
+        '/processing',
+        extra: {
+          'dietAnalysis': widget.previousDietAnalysis,
+          'dietFile': selectedDietFile,
+          'dietValidationResult': dietValidationResult,
+          'bloodFile': selectedPreviousBloodAnalysis != null
+              ? null
+              : selectedBloodFile,
+          'bloodValidationResult': selectedPreviousBloodAnalysis != null
+              ? null
+              : bloodValidationResult,
+          'previousBloodAnalysis': selectedPreviousBloodAnalysis,
+        },
+      );
     }
   }
 
@@ -553,7 +579,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     } catch (e) {
       debugPrint('Error loading previous blood test markers: $e');
       setState(() {
-        errorMessage = "Kan değerleri geçmişi alınırken bir sorun oluştu. Lütfen tekrar deneyiniz.";
+        errorMessage =
+            "Kan değerleri geçmişi alınırken bir sorun oluştu. Lütfen tekrar deneyiniz.";
         processState = UploadProcessState.failed;
       });
     } finally {
@@ -612,10 +639,20 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               const SizedBox(height: 8),
               _buildHeader(),
               const SizedBox(height: 24),
-              Text(titleText, style: AppTextStyles.displayMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+              Text(
+                titleText,
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text(subtitleText,
-                  textAlign: TextAlign.center, style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text(
+                subtitleText,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 24),
               _buildUploadCard(),
               if (isFetchingPreviousBlood) ...[
@@ -627,14 +664,21 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: AppColors.primary, strokeWidth: 2),
+                        color: AppColors.primary,
+                        strokeWidth: 2,
+                      ),
                     ),
                     SizedBox(width: 10),
-                    Text('Önceki kan değerlerin getiriliyor...', style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text(
+                      'Önceki kan değerlerin getiriliyor...',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
               ],
-              if ((errorMessage != null || validationResult != null || previousBloodSuccessMessage != null) && 
+              if ((errorMessage != null ||
+                      validationResult != null ||
+                      previousBloodSuccessMessage != null) &&
                   processState != UploadProcessState.failed) ...[
                 const SizedBox(height: 12),
                 _buildValidationBanner(),
@@ -644,13 +688,17 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               PrimaryButton(
                 text: 'Fotoğraf Çek',
                 trailingIcon: Icons.camera_alt_rounded,
-                onPressed: isInteractionDisabled ? null : () => _pickImage(ImageSource.camera),
+                onPressed: isInteractionDisabled
+                    ? null
+                    : () => _pickImage(ImageSource.camera),
               ),
               const SizedBox(height: 10),
               _OutlineBtn(
                 icon: Icons.photo_library_rounded,
                 label: 'Galeriden Seç',
-                onTap: isInteractionDisabled ? () {} : () => _pickImage(ImageSource.gallery),
+                onTap: isInteractionDisabled
+                    ? () {}
+                    : () => _pickImage(ImageSource.gallery),
               ),
               const SizedBox(height: 10),
               _OutlineBtn(
@@ -664,16 +712,20 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                 trailingIcon: _isBlood
                     ? Icons.analytics_rounded
                     : Icons.arrow_forward_rounded,
-                onPressed: (isDocValid && !isInteractionDisabled) ? _onContinue : () {
-                  if (!isInteractionDisabled) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Lütfen önce uygun bir belge yükleyiniz.'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
+                onPressed: (isDocValid && !isInteractionDisabled)
+                    ? _onContinue
+                    : () {
+                        if (!isInteractionDisabled) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Lütfen önce uygun bir belge yükleyiniz.',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
               ),
               if (_isBlood) ...[
                 const SizedBox(height: 12),
@@ -685,8 +737,13 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               ],
               const SizedBox(height: 20),
               SoftCard(
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -696,23 +753,41 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                         color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.verified_user_rounded,
-                          color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        Icons.verified_user_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Verilerin Güvende',
-                              style: AppTextStyles.h3.copyWith(fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
+                          Text(
+                            'Verilerin Güvende',
+                            style: AppTextStyles.h3.copyWith(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(securityText, style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(
+                            securityText,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    Icon(Icons.lock_rounded,
-                        color: AppColors.primary.withValues(alpha: 0.4), size: 20),
+                    Icon(
+                      Icons.lock_rounded,
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -722,10 +797,16 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.schedule_rounded, size: 14, color: AppColors.textLight),
+                  Icon(
+                    Icons.schedule_rounded,
+                    size: 14,
+                    color: AppColors.textLight,
+                  ),
                   const SizedBox(width: 6),
-                  Text('Analiz süreci ortalama 10-20 saniye sürer.',
-                      style: AppTextStyles.bodySmall),
+                  Text(
+                    'Analiz süreci ortalama 10-20 saniye sürer.',
+                    style: AppTextStyles.bodySmall,
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -749,8 +830,11 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: Theme.of(context).dividerColor),
             ),
-            child: Icon(Icons.arrow_back_rounded,
-                color: Theme.of(context).colorScheme.onSurface, size: 20),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 20,
+            ),
           ),
         ),
         const Spacer(),
@@ -765,11 +849,19 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.verified_user_rounded, size: 14, color: AppColors.primary),
+              const Icon(
+                Icons.verified_user_rounded,
+                size: 14,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 4),
-              Text('Güvenli',
-                  style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.primary, fontWeight: FontWeight.w600)),
+              Text(
+                'Güvenli',
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -779,7 +871,7 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
 
   void _showFullScreenPreview() {
     if (previewFile == null) return;
-    
+
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.9),
@@ -802,10 +894,7 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             panEnabled: true,
             minScale: 0.5,
             maxScale: 4.0,
-            child: Image.file(
-              previewFile!,
-              fit: BoxFit.contain,
-            ),
+            child: Image.file(previewFile!, fit: BoxFit.contain),
           ),
         ),
       ),
@@ -826,8 +915,8 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           color: isError
               ? AppColors.error.withValues(alpha: 0.4)
               : isValid
-                  ? AppColors.primary.withValues(alpha: 0.4)
-                  : Theme.of(context).dividerColor,
+              ? AppColors.primary.withValues(alpha: 0.4)
+              : Theme.of(context).dividerColor,
           width: 1.5,
         ),
         boxShadow: [
@@ -844,7 +933,10 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           if (processState == UploadProcessState.picking) ...[
             const CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
-            Text('Belge seçiliyor...', style: AppTextStyles.h3.copyWith(color: AppColors.primary)),
+            Text(
+              'Belge seçiliyor...',
+              style: AppTextStyles.h3.copyWith(color: AppColors.primary),
+            ),
             const SizedBox(height: 6),
             Text('Lütfen bekleyiniz.', style: AppTextStyles.bodySmall),
           ]
@@ -857,11 +949,17 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -883,26 +981,47 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             Column(
               children: [
                 const SizedBox(
-                  width: 24, height: 24,
-                  child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  _isBlood ? 'Kan değerleriniz doğrulanıyor...' : 'Diyet listeniz doğrulanıyor...',
-                  style: AppTextStyles.h3.copyWith(color: AppColors.primary, fontSize: 15),
+                  _isBlood
+                      ? 'Kan değerleriniz doğrulanıyor...'
+                      : 'Diyet listeniz doğrulanıyor...',
+                  style: AppTextStyles.h3.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text('Bu işlem birkaç saniye sürebilir.', style: AppTextStyles.bodySmall),
+                Text(
+                  'Bu işlem birkaç saniye sürebilir.',
+                  style: AppTextStyles.bodySmall,
+                ),
               ],
             ),
           ]
           // ── STATE: VALIDATED ─────────────────────────────────────────────
           else if (processState == UploadProcessState.validated) ...[
-            const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 48),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.primary,
+              size: 48,
+            ),
             const SizedBox(height: 12),
             Text(
-              _isBlood ? 'Kan değerleriniz doğrulandı.' : 'Diyet listeniz doğrulandı.',
-              style: AppTextStyles.h3.copyWith(color: AppColors.primary, fontSize: 16),
+              _isBlood
+                  ? 'Kan değerleriniz doğrulandı.'
+                  : 'Diyet listeniz doğrulandı.',
+              style: AppTextStyles.h3.copyWith(
+                color: AppColors.primary,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 12),
             _buildFilePreviewSection(),
@@ -910,7 +1029,10 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             GestureDetector(
               onTap: _clearFile,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
@@ -931,7 +1053,10 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             const SizedBox(height: 12),
             Text(
               'Belge Doğrulanamadı',
-              style: AppTextStyles.h3.copyWith(color: AppColors.error, fontSize: 16),
+              style: AppTextStyles.h3.copyWith(
+                color: AppColors.error,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 12),
             _buildFilePreviewSection(),
@@ -941,12 +1066,15 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.2),
+                ),
               ),
               child: Text(
-                errorMessage ?? (_isBlood
-                    ? 'Bu dosya kan tahlili gibi görünmüyor. Lütfen kan değerlerinizi içeren belgeyi daha net şekilde yükleyiniz.'
-                    : 'Bu dosya diyet listesi gibi görünmüyor. Lütfen diyet listenizi daha net şekilde yükleyiniz.'),
+                errorMessage ??
+                    (_isBlood
+                        ? 'Bu dosya kan tahlili gibi görünmüyor. Lütfen kan değerlerinizi içeren belgeyi daha net şekilde yükleyiniz.'
+                        : 'Bu dosya diyet listesi gibi görünmüyor. Lütfen diyet listenizi daha net şekilde yükleyiniz.'),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.error,
@@ -958,7 +1086,10 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             GestureDetector(
               onTap: _clearFile,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
@@ -976,23 +1107,30 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
           // ── STATE: IDLE ──────────────────────────────────────────────────
           else ...[
             SizedBox(
-              width: 80, height: 80,
+              width: 80,
+              height: 80,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 64, height: 64,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Icon(Icons.description_rounded,
-                        size: 32, color: AppColors.primary.withValues(alpha: 0.6)),
+                    child: Icon(
+                      Icons.description_rounded,
+                      size: 32,
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                    ),
                   ),
                   Positioned(
-                    bottom: 0, right: 0,
+                    bottom: 0,
+                    right: 0,
                     child: Container(
-                      width: 32, height: 32,
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
@@ -1003,16 +1141,30 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Text('Fotoğraf çek veya dosya yükle', style: AppTextStyles.h3.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+            Text(
+              'Fotoğraf çek veya dosya yükle',
+              style: AppTextStyles.h3.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
             const SizedBox(height: 6),
-            Text('JPG, PNG, PDF formatları desteklenir.', style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(
+              'JPG, PNG, PDF formatları desteklenir.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ],
       ),
@@ -1023,12 +1175,16 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     if (selectedPreviousBloodAnalysis != null) {
       return Text(
         'Önceki Kan Değerleri Seçildi',
-        style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+        style: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.bold,
+        ),
       );
     }
     if (selectedFile == null) return const SizedBox.shrink();
 
-    final bool isPdf = _selectedFileName?.toLowerCase().endsWith('.pdf') ?? false;
+    final bool isPdf =
+        _selectedFileName?.toLowerCase().endsWith('.pdf') ?? false;
 
     return Column(
       children: [
@@ -1044,7 +1200,9 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                     constraints: const BoxConstraints(maxHeight: 180),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                      ),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Image.file(
@@ -1053,14 +1211,19 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
                     ),
                   ),
                   Positioned(
-                    right: 8, bottom: 8,
+                    right: 8,
+                    bottom: 8,
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.6),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.fullscreen, color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.fullscreen,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -1074,14 +1237,23 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.1),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.picture_as_pdf_rounded, color: AppColors.error, size: 32),
+                const Icon(
+                  Icons.picture_as_pdf_rounded,
+                  color: AppColors.error,
+                  size: 32,
+                ),
                 const SizedBox(width: 12),
-                Text('PDF Belgesi Yüklendi', style: AppTextStyles.h3.copyWith(fontSize: 14)),
+                Text(
+                  'PDF Belgesi Yüklendi',
+                  style: AppTextStyles.h3.copyWith(fontSize: 14),
+                ),
               ],
             ),
           ),
@@ -1097,8 +1269,14 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
   }
 
   Widget _buildValidationBanner() {
-    final bool isError = errorMessage != null || (validationResult != null && !validationResult!.isValid);
-    final String message = previousBloodSuccessMessage ?? errorMessage ?? validationResult?.userMessage ?? 'Bilinmeyen hata';
+    final bool isError =
+        errorMessage != null ||
+        (validationResult != null && !validationResult!.isValid);
+    final String message =
+        previousBloodSuccessMessage ??
+        errorMessage ??
+        validationResult?.userMessage ??
+        'Bilinmeyen hata';
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -1139,20 +1317,34 @@ class _DietUploadScreenState extends State<DietUploadScreen> {
     return const SizedBox.shrink();
   }
 
-
   Widget _buildTips() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Daha iyi sonuçlar için ipuçları', style: AppTextStyles.h3.copyWith(fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
+        Text(
+          'Daha iyi sonuçlar için ipuçları',
+          style: AppTextStyles.h3.copyWith(
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
         const SizedBox(height: 14),
         Row(
           children: [
-            _TipCard(icon: Icons.fullscreen_rounded, text: 'Belgenin tamamı\ngörünsün'),
+            _TipCard(
+              icon: Icons.fullscreen_rounded,
+              text: 'Belgenin tamamı\ngörünsün',
+            ),
             const SizedBox(width: 10),
-            _TipCard(icon: Icons.wb_sunny_rounded, text: 'Net ve aydınlık\nçekim yap'),
+            _TipCard(
+              icon: Icons.wb_sunny_rounded,
+              text: 'Net ve aydınlık\nçekim yap',
+            ),
             const SizedBox(width: 10),
-            _TipCard(icon: Icons.text_fields_rounded, text: 'Yazılar okunabilir\nolsun'),
+            _TipCard(
+              icon: Icons.text_fields_rounded,
+              text: 'Yazılar okunabilir\nolsun',
+            ),
           ],
         ),
       ],
@@ -1166,7 +1358,11 @@ class _OutlineBtn extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _OutlineBtn({required this.icon, required this.label, required this.onTap});
+  const _OutlineBtn({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1176,16 +1372,28 @@ class _OutlineBtn extends StatelessWidget {
         width: double.infinity,
         height: 52,
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Theme.of(context).dividerColor, width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            Icon(
+              icon,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 10),
-            Text(label, style: AppTextStyles.labelLarge.copyWith(fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
+            Text(
+              label,
+              style: AppTextStyles.labelLarge.copyWith(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ],
         ),
       ),
@@ -1208,21 +1416,29 @@ class _TipCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2))
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Column(
           children: [
-            Icon(icon, size: 28, color: AppColors.primary.withValues(alpha: 0.5)),
+            Icon(
+              icon,
+              size: 28,
+              color: AppColors.primary.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 8),
-            Text(text,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.labelSmall.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11)),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+                fontSize: 11,
+              ),
+            ),
           ],
         ),
       ),

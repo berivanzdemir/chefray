@@ -95,20 +95,20 @@ class UserHealthProfile {
   }
 
   Map<String, dynamic> toJson() => {
-        if (id != null) 'id': id,
-        'user_id': userId,
-        'age': age,
-        'gender': gender,
-        'height_cm': heightCm,
-        'weight_kg': weightKg,
-        'goal_type': goalType,
-        'health_conditions': healthConditions,
-        'allergies': allergies,
-        'diet_preferences': dietPreferences,
-        'activity_level': activityLevel,
-        if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-        if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
-      };
+    if (id != null) 'id': id,
+    'user_id': userId,
+    'age': age,
+    'gender': gender,
+    'height_cm': heightCm,
+    'weight_kg': weightKg,
+    'goal_type': goalType,
+    'health_conditions': healthConditions,
+    'allergies': allergies,
+    'diet_preferences': dietPreferences,
+    'activity_level': activityLevel,
+    if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+    if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
+  };
 
   factory UserHealthProfile.fromJson(Map<String, dynamic> json) {
     return UserHealthProfile(
@@ -119,15 +119,18 @@ class UserHealthProfile {
       gender: json['gender'] as String?,
       heightCm: _toDouble(json['height_cm']),
       weightKg: _toDouble(json['weight_kg']),
-      goalType: (json['goal_type'] as String?) ?? json['nutrition_goal'] as String?,
-      healthConditions:
-          List<String>.from((json['health_conditions'] as List?) ?? []),
+      goalType:
+          (json['goal_type'] as String?) ?? json['nutrition_goal'] as String?,
+      healthConditions: List<String>.from(
+        (json['health_conditions'] as List?) ?? [],
+      ),
       allergies: List<String>.from((json['allergies'] as List?) ?? []),
       dietPreferences: List<String>.from(
-          (json['diet_preferences'] as List?) ??
-              (json['diet_preference'] != null
-                  ? [json['diet_preference'] as String]
-                  : [])),
+        (json['diet_preferences'] as List?) ??
+            (json['diet_preference'] != null
+                ? [json['diet_preference'] as String]
+                : []),
+      ),
       activityLevel: json['activity_level'] as String?,
       streakDays: (json['streak_days'] as int?) ?? 0,
       createdAt: json['created_at'] != null

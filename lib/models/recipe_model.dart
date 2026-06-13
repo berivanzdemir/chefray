@@ -222,34 +222,47 @@ class RecipeModel {
 
   static String cleanRecipeTitle(String title) {
     String cleaned = title;
-    
+
     final patterns = [
-      '1 Dakikada Hazır:', '1 Dakikada Hazır',
-      '5 Dakikada Hazır:', '5 Dakikada Hazır',
-      '10 Dakikada Hazır:', '10 Dakikada Hazır',
-      '15 Dakikada Hazır:', '15 Dakikada Hazır',
-      '20 Dakikada Hazır:', '20 Dakikada Hazır',
-      '30 Dakikada Hazır:', '30 Dakikada Hazır',
-      'Bunu Böyle Deneyen Var Mı?', 'Bunu Böyle Deneyen Var Mı',
-      'Bunu Deneyen Var Mı?', 'Bunu Deneyen Var Mı',
+      '1 Dakikada Hazır:',
+      '1 Dakikada Hazır',
+      '5 Dakikada Hazır:',
+      '5 Dakikada Hazır',
+      '10 Dakikada Hazır:',
+      '10 Dakikada Hazır',
+      '15 Dakikada Hazır:',
+      '15 Dakikada Hazır',
+      '20 Dakikada Hazır:',
+      '20 Dakikada Hazır',
+      '30 Dakikada Hazır:',
+      '30 Dakikada Hazır',
+      'Bunu Böyle Deneyen Var Mı?',
+      'Bunu Böyle Deneyen Var Mı',
+      'Bunu Deneyen Var Mı?',
+      'Bunu Deneyen Var Mı',
       'Mutlaka Deneyin',
-      'Şipşak', 'Sipşak', 'Sipsak',
+      'Şipşak',
+      'Sipşak',
+      'Sipsak',
       'Pratik',
       'Kolay',
       'Nefis',
       'Videolu',
       'Tam Ölçülü',
-      'Kıyır Kıyır', 'Kiyir Kiyir',
+      'Kıyır Kıyır',
+      'Kiyir Kiyir',
       'Lezzetli',
-      'En Güzel', 'En Guzel',
-      'Ev Yapımı', 'Ev Yapimi'
+      'En Güzel',
+      'En Guzel',
+      'Ev Yapımı',
+      'Ev Yapimi',
     ];
-    
+
     for (final pattern in patterns) {
       final regExp = RegExp(RegExp.escape(pattern), caseSensitive: false);
       cleaned = cleaned.replaceAll(regExp, '');
     }
-    
+
     cleaned = cleaned.trim();
     if (cleaned.startsWith(':')) {
       cleaned = cleaned.substring(1).trim();
@@ -258,11 +271,11 @@ class RecipeModel {
       cleaned = cleaned.substring(1).trim();
     }
     cleaned = cleaned.trim();
-    
+
     if (cleaned.isEmpty) {
       return title;
     }
-    
+
     return cleaned[0].toUpperCase() + cleaned.substring(1);
   }
 
@@ -270,7 +283,9 @@ class RecipeModel {
     final id = json['id']?.toString() ?? UniqueKey().toString();
     final title = json['title']?.toString() ?? 'Lezzetli Tarif';
     final displayTitle = json['display_title']?.toString();
-    final description = json['description']?.toString() ?? 'Sağlıklı ve lezzetli bir ev tarifi.';
+    final description =
+        json['description']?.toString() ??
+        'Sağlıklı ve lezzetli bir ev tarifi.';
     final imageUrl = json['image_url']?.toString();
     final category = json['category']?.toString() ?? 'Genel';
     final prepTime = json['prep_time']?.toString();
@@ -278,18 +293,18 @@ class RecipeModel {
     final totalTimeMin = int.tryParse(json['total_time_min']?.toString() ?? '');
     final caloriesKcal = int.tryParse(json['calories_kcal']?.toString() ?? '');
     final proteinG = int.tryParse(json['protein_g']?.toString() ?? '');
-    
+
     final mealType = json['meal_type']?.toString() ?? 'breakfast';
     final mealTypeV2 = json['meal_type_v2']?.toString();
     final dishType = json['dish_type']?.toString();
     final dishTypeV2 = json['dish_type_v2']?.toString();
-    
+
     final isRecommendable = json['is_recommendable'] != false;
     final isDietFriendly = json['is_diet_friendly'] != false;
     final isGlutenFree = json['is_gluten_free'] == true;
     final isHighProtein = json['is_high_protein'] == true;
     final isLowCalorie = json['is_low_calorie'] == true;
-    
+
     final glutenStatus = json['gluten_status']?.toString();
     final calorieStatus = json['calorie_status']?.toString();
     final proteinStatus = json['protein_status']?.toString();
@@ -302,56 +317,66 @@ class RecipeModel {
     final legacyProtein = proteinG ?? 12;
     final legacyCarbs = int.tryParse(json['carbs']?.toString() ?? '') ?? 45;
     final legacyFat = int.tryParse(json['fat']?.toString() ?? '') ?? 10;
-    final legacyTimeMinutes = totalTimeMin ?? (extractMinutes(prepTime) + extractMinutes(cookTime));
+    final legacyTimeMinutes =
+        totalTimeMin ?? (extractMinutes(prepTime) + extractMinutes(cookTime));
 
     // 2. Ingredients parsing - multiple format support
     final List<IngredientModel> ingredientModels = [];
     final rawIngData = json['ingredients'] ?? json['ingredient_list'];
-    
+
     if (rawIngData != null) {
       if (rawIngData is List) {
         for (var item in rawIngData) {
           if (item == null) continue;
           if (item is Map) {
-            String name = item['name']?.toString() ?? item['ingredient']?.toString() ?? '';
+            String name =
+                item['name']?.toString() ??
+                item['ingredient']?.toString() ??
+                '';
             String amount = item['display']?.toString() ?? '';
-            
+
             if (amount.trim().isEmpty) {
-              final quantity = item['quantity']?.toString() ?? item['amount']?.toString() ?? '';
-              final unit = item['unit']?.toString() ?? item['measure']?.toString() ?? '';
+              final quantity =
+                  item['quantity']?.toString() ??
+                  item['amount']?.toString() ??
+                  '';
+              final unit =
+                  item['unit']?.toString() ?? item['measure']?.toString() ?? '';
               final note = item['note']?.toString() ?? '';
-              
+
               final List<String> parts = [];
               if (quantity.isNotEmpty) parts.add(quantity);
               if (unit.isNotEmpty) parts.add(unit);
               if (name.isNotEmpty && !parts.contains(name)) parts.add(name);
               if (note.isNotEmpty) parts.add('($note)');
-              
+
               amount = parts.join(' ').trim();
               if (amount.isEmpty) amount = 'Göz kararı / İsteğe bağlı';
             }
-            
-            if (name.isNotEmpty && !name.contains('[object Object]') && !name.contains('object Object')) {
-              ingredientModels.add(IngredientModel(
-                name: name,
-                amount: amount,
-                calories: 0,
-              ));
+
+            if (name.isNotEmpty &&
+                !name.contains('[object Object]') &&
+                !name.contains('object Object')) {
+              ingredientModels.add(
+                IngredientModel(name: name, amount: amount, calories: 0),
+              );
             }
           } else {
             final name = item.toString().trim();
-            if (name.isNotEmpty && !name.contains('[object Object]') && !name.contains('object Object')) {
-              ingredientModels.add(IngredientModel(
-                name: name,
-                amount: '1 porsiyon',
-                calories: 0,
-              ));
+            if (name.isNotEmpty &&
+                !name.contains('[object Object]') &&
+                !name.contains('object Object')) {
+              ingredientModels.add(
+                IngredientModel(name: name, amount: '1 porsiyon', calories: 0),
+              );
             }
           }
         }
       } else if (rawIngData is String) {
         final rawStr = rawIngData.trim();
-        if (rawStr.isNotEmpty && !rawStr.contains('[object Object]') && !rawStr.contains('object Object')) {
+        if (rawStr.isNotEmpty &&
+            !rawStr.contains('[object Object]') &&
+            !rawStr.contains('object Object')) {
           List<String> parts = [];
           if (rawStr.contains('\n')) {
             parts = rawStr.split('\n');
@@ -362,21 +387,21 @@ class RecipeModel {
           } else {
             parts = [rawStr];
           }
-          
+
           for (var part in parts) {
             final name = part.trim();
-            if (name.isNotEmpty && !name.contains('[object Object]') && !name.contains('object Object')) {
-              ingredientModels.add(IngredientModel(
-                name: name,
-                amount: '1 porsiyon',
-                calories: 0,
-              ));
+            if (name.isNotEmpty &&
+                !name.contains('[object Object]') &&
+                !name.contains('object Object')) {
+              ingredientModels.add(
+                IngredientModel(name: name, amount: '1 porsiyon', calories: 0),
+              );
             }
           }
         }
       }
     }
-    
+
     // Fallback to ingredients_text if models are empty due to [object Object] corruption
     if (ingredientModels.isEmpty) {
       final textData = json['ingredients_text']?.toString() ?? '';
@@ -384,56 +409,72 @@ class RecipeModel {
         final parts = textData.split(RegExp(r'[,;\n]'));
         for (var part in parts) {
           final name = part.trim();
-          if (name.isNotEmpty && !name.contains('[object Object]') && !name.contains('object Object')) {
-            ingredientModels.add(IngredientModel(
-              name: name,
-              amount: 'Göz kararı / İsteğe bağlı',
-              calories: 0,
-            ));
+          if (name.isNotEmpty &&
+              !name.contains('[object Object]') &&
+              !name.contains('object Object')) {
+            ingredientModels.add(
+              IngredientModel(
+                name: name,
+                amount: 'Göz kararı / İsteğe bağlı',
+                calories: 0,
+              ),
+            );
           }
         }
       }
     }
 
     if (ingredientModels.isEmpty) {
-      ingredientModels.add(const IngredientModel(
-        name: 'Malzeme bilgisi düzenleniyor.',
-        amount: '',
-        calories: 0,
-      ));
+      ingredientModels.add(
+        const IngredientModel(
+          name: 'Malzeme bilgisi düzenleniyor.',
+          amount: '',
+          calories: 0,
+        ),
+      );
     }
 
     // 3. Instructions/Steps parsing - multiple format support
     final List<CookingStepModel> stepModels = [];
-    final rawInstData = json['instructions'] ?? json['steps'] ?? json['recipe_steps'];
-    
+    final rawInstData =
+        json['instructions'] ?? json['steps'] ?? json['recipe_steps'];
+
     if (rawInstData != null) {
       if (rawInstData is List) {
         for (var i = 0; i < rawInstData.length; i++) {
           final item = rawInstData[i];
           if (item == null) continue;
           if (item is Map) {
-            final text = item['text']?.toString() ?? item['step_description']?.toString() ?? item['description']?.toString() ?? '';
-            final stepNum = int.tryParse(item['step']?.toString() ?? '') ?? (i + 1);
+            final text =
+                item['text']?.toString() ??
+                item['step_description']?.toString() ??
+                item['description']?.toString() ??
+                '';
+            final stepNum =
+                int.tryParse(item['step']?.toString() ?? '') ?? (i + 1);
             if (text.isNotEmpty) {
-              stepModels.add(CookingStepModel(
-                step: stepNum,
-                title: 'Adım $stepNum',
-                description: text,
-                duration: '5 dk',
-                timerSeconds: 300,
-              ));
+              stepModels.add(
+                CookingStepModel(
+                  step: stepNum,
+                  title: 'Adım $stepNum',
+                  description: text,
+                  duration: '5 dk',
+                  timerSeconds: 300,
+                ),
+              );
             }
           } else {
             final text = item.toString().trim();
             if (text.isNotEmpty) {
-              stepModels.add(CookingStepModel(
-                step: i + 1,
-                title: 'Adım ${i + 1}',
-                description: text,
-                duration: '5 dk',
-                timerSeconds: 300,
-              ));
+              stepModels.add(
+                CookingStepModel(
+                  step: i + 1,
+                  title: 'Adım ${i + 1}',
+                  description: text,
+                  duration: '5 dk',
+                  timerSeconds: 300,
+                ),
+              );
             }
           }
         }
@@ -448,17 +489,20 @@ class RecipeModel {
           } else {
             parts = [rawStr];
           }
-          
-          final validParts = parts.map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+
+          final validParts = parts
+              .map((p) => p.trim())
+              .where((p) => p.isNotEmpty)
+              .toList();
           final maxSteps = validParts.length > 8 ? 8 : validParts.length;
-          
+
           for (int i = 0; i < maxSteps; i++) {
             final desc = validParts[i];
             final stepCounter = i + 1;
-            
+
             String dynamicTitle = 'Adım $stepCounter';
             String dynamicDuration = '5 dk';
-            
+
             if (stepCounter == 1) {
               dynamicTitle = 'Hazırlık';
               dynamicDuration = '10 dk';
@@ -466,48 +510,65 @@ class RecipeModel {
               dynamicTitle = 'Servis Edin';
               dynamicDuration = '0 dk';
             } else {
-              dynamicTitle = stepCounter % 2 == 0 ? 'Malzemeleri Ekleyin' : 'Pişirin';
+              dynamicTitle = stepCounter % 2 == 0
+                  ? 'Malzemeleri Ekleyin'
+                  : 'Pişirin';
               dynamicDuration = '10 dk';
             }
 
-            stepModels.add(CookingStepModel(
-              step: stepCounter,
-              title: dynamicTitle,
-              description: desc,
-              duration: dynamicDuration,
-              timerSeconds: 300,
-            ));
+            stepModels.add(
+              CookingStepModel(
+                step: stepCounter,
+                title: dynamicTitle,
+                description: desc,
+                duration: dynamicDuration,
+                timerSeconds: 300,
+              ),
+            );
           }
         }
       }
     }
-    
+
     if (stepModels.isEmpty) {
-      stepModels.add(const CookingStepModel(
-        step: 1,
-        title: 'Yapılış',
-        description: 'Yapılış adımları bulunamadı.',
-        duration: '',
-        timerSeconds: 0,
-      ));
+      stepModels.add(
+        const CookingStepModel(
+          step: 1,
+          title: 'Yapılış',
+          description: 'Yapılış adımları bulunamadı.',
+          duration: '',
+          timerSeconds: 0,
+        ),
+      );
     }
 
     final List<String> detectedAllergens = [];
     final List<String> detectedDietTypes = ['Dengeli', 'Sağlıklı'];
 
-    final ingNamesLower = ingredientModels.map((e) => e.name.toLowerCase()).toList();
+    final ingNamesLower = ingredientModels
+        .map((e) => e.name.toLowerCase())
+        .toList();
     bool hasMeat = false;
     bool hasDairy = false;
     bool hasGluten = false;
     bool hasEgg = false;
 
     for (var name in ingNamesLower) {
-      if (name.contains('yoğurt') || name.contains('süt') || name.contains('peynir') || name.contains('tereyağı') || name.contains('labne') || name.contains('kefir')) {
+      if (name.contains('yoğurt') ||
+          name.contains('süt') ||
+          name.contains('peynir') ||
+          name.contains('tereyağı') ||
+          name.contains('labne') ||
+          name.contains('kefir')) {
         hasDairy = true;
         detectedAllergens.add('laktoz');
         detectedAllergens.add('süt ürünleri');
       }
-      if (name.contains('pirinç') || name.contains('un') || name.contains('kruton') || name.contains('ekmek') || name.contains('makarna')) {
+      if (name.contains('pirinç') ||
+          name.contains('un') ||
+          name.contains('kruton') ||
+          name.contains('ekmek') ||
+          name.contains('makarna')) {
         hasGluten = true;
         detectedAllergens.add('gluten');
       }
@@ -515,14 +576,23 @@ class RecipeModel {
         hasEgg = true;
         detectedAllergens.add('yumurta');
       }
-      if (name.contains('somon') || name.contains('balık') || name.contains('ton balığı')) {
+      if (name.contains('somon') ||
+          name.contains('balık') ||
+          name.contains('ton balığı')) {
         hasMeat = true;
         detectedAllergens.add('balık');
       }
-      if (name.contains('dana') || name.contains('bonfile') || name.contains('et') || name.contains('tavuk') || name.contains('köfte')) {
+      if (name.contains('dana') ||
+          name.contains('bonfile') ||
+          name.contains('et') ||
+          name.contains('tavuk') ||
+          name.contains('köfte')) {
         hasMeat = true;
       }
-      if (name.contains('ceviz') || name.contains('fındık') || name.contains('fıstık') || name.contains('badem')) {
+      if (name.contains('ceviz') ||
+          name.contains('fındık') ||
+          name.contains('fıstık') ||
+          name.contains('badem')) {
         detectedAllergens.add('fındık');
         detectedAllergens.add('fıstık');
       }
@@ -615,7 +685,8 @@ class RecipeMockData {
   static const primary = RecipeModel(
     id: 'salmon-quinoa',
     title: 'Limonlu Somon, Kinoa ve Buharda Sebzeler',
-    description: 'Yüksek proteinli, omega-3 açısından zengin, dengeli ve hafif bir öğün.',
+    description:
+        'Yüksek proteinli, omega-3 açısından zengin, dengeli ve hafif bir öğün.',
     calories: 450,
     protein: 38,
     carbs: 40,
@@ -624,19 +695,87 @@ class RecipeMockData {
     tags: ['Yüksek Protein', 'Düşük Kalori', 'Glutensiz'],
     mealType: 'Öğle Yemeği',
     ingredients: [
-      IngredientModel(name: 'Somon Fileto', amount: '150g', calories: 310, nutrientTag: 'Yüksek Protein, Omega-3', category: IngredientCategory.seafood),
-      IngredientModel(name: 'Kinoa', amount: '80g', calories: 120, nutrientTag: 'Lif, Kompleks Karbonhidrat', category: IngredientCategory.grain),
-      IngredientModel(name: 'Buharda Sebzeler', amount: '150g', calories: 80, nutrientTag: 'Lif, C Vitamini', category: IngredientCategory.vegetable),
-      IngredientModel(name: 'Limon', amount: '1/2 adet', calories: 5, category: IngredientCategory.fruit),
-      IngredientModel(name: 'Zeytinyağı', amount: '1 tatlı kaşığı', calories: 40, category: IngredientCategory.liquid),
-      IngredientModel(name: 'Tuz & Karabiber', amount: 'az miktar', calories: 0, category: IngredientCategory.spice),
+      IngredientModel(
+        name: 'Somon Fileto',
+        amount: '150g',
+        calories: 310,
+        nutrientTag: 'Yüksek Protein, Omega-3',
+        category: IngredientCategory.seafood,
+      ),
+      IngredientModel(
+        name: 'Kinoa',
+        amount: '80g',
+        calories: 120,
+        nutrientTag: 'Lif, Kompleks Karbonhidrat',
+        category: IngredientCategory.grain,
+      ),
+      IngredientModel(
+        name: 'Buharda Sebzeler',
+        amount: '150g',
+        calories: 80,
+        nutrientTag: 'Lif, C Vitamini',
+        category: IngredientCategory.vegetable,
+      ),
+      IngredientModel(
+        name: 'Limon',
+        amount: '1/2 adet',
+        calories: 5,
+        category: IngredientCategory.fruit,
+      ),
+      IngredientModel(
+        name: 'Zeytinyağı',
+        amount: '1 tatlı kaşığı',
+        calories: 40,
+        category: IngredientCategory.liquid,
+      ),
+      IngredientModel(
+        name: 'Tuz & Karabiber',
+        amount: 'az miktar',
+        calories: 0,
+        category: IngredientCategory.spice,
+      ),
     ],
     steps: [
-      CookingStepModel(step: 1, title: 'Kinoayı Pişirin', description: 'Kinoayı bol suyla yıkayın. 1 su bardağı su ile tencereye alın. Kısık ateşte 12-15 dakika pişirin ve demlenmeye bırakın.', duration: '12-15 dk', timerSeconds: 780),
-      CookingStepModel(step: 2, title: 'Somonu Marine Edin', description: 'Somonun üzerine limon suyu, zeytinyağı, tuz ve karabiber ekleyin. 10 dakika marine edin.', duration: '10 dk', timerSeconds: 600, tip: 'Somonu fazla bekletmeyin, dokusu bozulabilir.'),
-      CookingStepModel(step: 3, title: 'Somonu Pişirin', description: 'Tavayı ısıtın ve somonu her iki tarafı altın rengi olana kadar pişirin.', duration: '8-10 dk', timerSeconds: 540),
-      CookingStepModel(step: 4, title: 'Sebzeleri Buharda Pişirin', description: 'Brokoli ve havucu buharda 8-10 dakika kadar pişirin.', duration: '8-10 dk', timerSeconds: 540),
-      CookingStepModel(step: 5, title: 'Servis Edin', description: 'Kinoayı tabağa alın, üzerine somon ve sebzeleri ekleyin. Limon dilimleriyle servis edin.', duration: '2 dk', timerSeconds: 120),
+      CookingStepModel(
+        step: 1,
+        title: 'Kinoayı Pişirin',
+        description:
+            'Kinoayı bol suyla yıkayın. 1 su bardağı su ile tencereye alın. Kısık ateşte 12-15 dakika pişirin ve demlenmeye bırakın.',
+        duration: '12-15 dk',
+        timerSeconds: 780,
+      ),
+      CookingStepModel(
+        step: 2,
+        title: 'Somonu Marine Edin',
+        description:
+            'Somonun üzerine limon suyu, zeytinyağı, tuz ve karabiber ekleyin. 10 dakika marine edin.',
+        duration: '10 dk',
+        timerSeconds: 600,
+        tip: 'Somonu fazla bekletmeyin, dokusu bozulabilir.',
+      ),
+      CookingStepModel(
+        step: 3,
+        title: 'Somonu Pişirin',
+        description:
+            'Tavayı ısıtın ve somonu her iki tarafı altın rengi olana kadar pişirin.',
+        duration: '8-10 dk',
+        timerSeconds: 540,
+      ),
+      CookingStepModel(
+        step: 4,
+        title: 'Sebzeleri Buharda Pişirin',
+        description: 'Brokoli ve havucu buharda 8-10 dakika kadar pişirin.',
+        duration: '8-10 dk',
+        timerSeconds: 540,
+      ),
+      CookingStepModel(
+        step: 5,
+        title: 'Servis Edin',
+        description:
+            'Kinoayı tabağa alın, üzerine somon ve sebzeleri ekleyin. Limon dilimleriyle servis edin.',
+        duration: '2 dk',
+        timerSeconds: 120,
+      ),
     ],
   );
 
@@ -646,37 +785,59 @@ class RecipeMockData {
       id: 'chicken-pesto',
       title: 'Pesto Soslu Tavuk ve Brokoli',
       description: 'Yüksek proteinli, lifli ve doyurucu dengeli bir öğün.',
-      calories: 520, protein: 42, carbs: 62, fat: 14, timeMinutes: 20,
+      calories: 520,
+      protein: 42,
+      carbs: 62,
+      fat: 14,
+      timeMinutes: 20,
       tags: ['Yüksek Protein', 'Glutensiz'],
       mealType: 'Öğle Yemeği',
-      ingredients: [], steps: [],
+      ingredients: [],
+      steps: [],
     ),
     RecipeModel(
       id: 'lentil-soup',
       title: 'Mercimek Çorbası',
-      description: 'Bitkisel protein kaynağı, lifli ve tok tutan lezzetli bir çorba.',
-      calories: 380, protein: 16, carbs: 48, fat: 15, timeMinutes: 15,
+      description:
+          'Bitkisel protein kaynağı, lifli ve tok tutan lezzetli bir çorba.',
+      calories: 380,
+      protein: 16,
+      carbs: 48,
+      fat: 15,
+      timeMinutes: 15,
       tags: ['Vegan', 'Glutensiz', 'Lifli'],
       mealType: 'Akşam Yemeği',
-      ingredients: [], steps: [],
+      ingredients: [],
+      steps: [],
     ),
     RecipeModel(
       id: 'tuna-salad',
       title: 'Ton Balıklı Avokado Salatası',
       description: 'Omega-3 açısından zengin, hafif ve sağlıklı bir seçenek.',
-      calories: 420, protein: 24, carbs: 58, fat: 10, timeMinutes: 25,
+      calories: 420,
+      protein: 24,
+      carbs: 58,
+      fat: 10,
+      timeMinutes: 25,
       tags: ['Vegan', 'Lifli'],
       mealType: 'Kahvaltı',
-      ingredients: [], steps: [],
+      ingredients: [],
+      steps: [],
     ),
     RecipeModel(
       id: 'beef-rice',
       title: 'Dana Sote, Esmer Pirinç ve Sebzeler',
-      description: 'Demir açısından zengin, enerji veren klasik ve doyurucu bir öğün.',
-      calories: 560, protein: 46, carbs: 55, fat: 18, timeMinutes: 30,
+      description:
+          'Demir açısından zengin, enerji veren klasik ve doyurucu bir öğün.',
+      calories: 560,
+      protein: 46,
+      carbs: 55,
+      fat: 18,
+      timeMinutes: 30,
       tags: ['Yüksek Protein', 'Düşük Kalori'],
       mealType: 'Akşam Yemeği',
-      ingredients: [], steps: [],
+      ingredients: [],
+      steps: [],
     ),
   ];
 }

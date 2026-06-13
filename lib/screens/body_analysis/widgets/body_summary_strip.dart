@@ -7,10 +7,7 @@ import '../../../models/user_health_profile.dart';
 class BodySummaryStrip extends StatelessWidget {
   final UserHealthProfile? healthProfile;
 
-  const BodySummaryStrip({
-    super.key,
-    this.healthProfile,
-  });
+  const BodySummaryStrip({super.key, this.healthProfile});
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +85,7 @@ class BodySummaryStrip extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: children,
-      ),
+      child: Row(children: children),
     );
   }
 
@@ -107,19 +102,22 @@ class BodySummaryStrip extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppTextStyles.labelSmall.copyWith(color: AppColors.textLight),
+            style: AppTextStyles.labelSmall.copyWith(
+              color: AppColors.textLight,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 2),
-          Text(
-            value,
-            style: AppTextStyles.labelMedium.copyWith(
-              color: AppColors.textDark,
-              fontWeight: FontWeight.w600,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -127,10 +125,6 @@ class BodySummaryStrip extends StatelessWidget {
   }
 
   Widget _divider() {
-    return Container(
-      width: 1,
-      height: 36,
-      color: AppColors.divider,
-    );
+    return Container(width: 1, height: 36, color: AppColors.divider);
   }
 }

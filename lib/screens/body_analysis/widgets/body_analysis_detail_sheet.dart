@@ -59,10 +59,14 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
 
   String get _goalLabel {
     switch (goalType?.toLowerCase()) {
-      case 'kilo vermek': return 'Kilo vermek';
-      case 'kas kazanmak': return 'Kas kazanmak';
-      case 'kilo korumak': return 'Kilo korumak';
-      default: return goalType ?? 'Belirtilmedi';
+      case 'kilo vermek':
+        return 'Kilo vermek';
+      case 'kas kazanmak':
+        return 'Kas kazanmak';
+      case 'kilo korumak':
+        return 'Kilo korumak';
+      default:
+        return goalType ?? 'Belirtilmedi';
     }
   }
 
@@ -94,7 +98,8 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 4),
             child: Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: AppColors.divider,
                 borderRadius: BorderRadius.circular(2),
@@ -111,12 +116,17 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    width: 32, height: 32,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
                       color: AppColors.backgroundMint,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close_rounded, size: 18, color: AppColors.textMedium),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: AppColors.textMedium,
+                    ),
                   ),
                 ),
               ],
@@ -144,17 +154,21 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
                     value: bmr > 0 ? '${bmr.toStringAsFixed(0)} kcal' : '-',
                     status: 'Dinlenme halinde',
                     statusColor: AppColors.carbs,
-                    description: 'Vücudunuzun temel yaşam fonksiyonlarını sürdürmek için ihtiyaç duyduğu günlük enerji miktarıdır. '
+                    description:
+                        'Vücudunuzun temel yaşam fonksiyonlarını sürdürmek için ihtiyaç duyduğu günlük enerji miktarıdır. '
                         'Bu değer hiç hareket etmeden sadece nefes alıp vermek, kalp atışı gibi işlevler için harcanan kaloriyi gösterir.',
                   ),
                   const SizedBox(height: 14),
                   _metricCard(
                     icon: Icons.restaurant_rounded,
                     title: 'Günlük Kalori İhtiyacı',
-                    value: dailyCalories > 0 ? '${dailyCalories.toStringAsFixed(0)} kcal' : '-',
+                    value: dailyCalories > 0
+                        ? '${dailyCalories.toStringAsFixed(0)} kcal'
+                        : '-',
                     status: _goalLabel,
                     statusColor: AppColors.primary,
-                    description: 'BMR değerinizin aktivite seviyenize göre çarpılmasıyla hesaplanır. '
+                    description:
+                        'BMR değerinizin aktivite seviyenize göre çarpılmasıyla hesaplanır. '
                         'Günlük toplam enerji ihtiyacınızı gösterir. '
                         'Hedefinize göre bu değerin altında veya üstünde beslenmeniz önerilir.',
                   ),
@@ -167,7 +181,8 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
                         : '-',
                     status: _weightVsGoal,
                     statusColor: _idealWeightStatusColor,
-                    description: 'BMI 18.5–24.9 aralığı baz alınarak hesaplanan sağlıklı kilo aralığınızdır. '
+                    description:
+                        'BMI 18.5–24.9 aralığı baz alınarak hesaplanan sağlıklı kilo aralığınızdır. '
                         'Bu aralıkta kalmak; kalp hastalığı, diyabet ve diğer kronik rahatsızlıkların riskini azaltır. '
                         'Mevcut kilonuz: ${currentWeight > 0 ? currentWeight.toStringAsFixed(1) : "?"} kg.',
                   ),
@@ -181,12 +196,18 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+                        Icon(
+                          Icons.info_outline_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Bu değerler genel sağlık referansıdır; tıbbi teşhis veya tedavi yerine geçmez.',
-                            style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMedium),
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.textMedium,
+                            ),
                           ),
                         ),
                       ],
@@ -203,11 +224,16 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
 
   Color get _bmiStatusColor {
     switch (bmiStatus) {
-      case 'Zayıf': return AppColors.info;
-      case 'Normal': return AppColors.primary;
-      case 'Fazla kilolu': return AppColors.warning;
-      case 'Obez': return AppColors.error;
-      default: return AppColors.textMedium;
+      case 'Zayıf':
+        return AppColors.info;
+      case 'Normal':
+        return AppColors.primary;
+      case 'Fazla kilolu':
+        return AppColors.warning;
+      case 'Obez':
+        return AppColors.error;
+      default:
+        return AppColors.textMedium;
     }
   }
 
@@ -232,7 +258,11 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: AppColors.cardShadow, blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -241,7 +271,8 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40, height: 40,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -253,17 +284,37 @@ class BodyAnalysisDetailSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyles.labelMedium.copyWith(color: AppColors.textDark)),
+                    Text(
+                      title,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.textDark,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(status, style: AppTextStyles.labelSmall.copyWith(color: statusColor, fontWeight: FontWeight.w600)),
+                    Text(
+                      status,
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Text(value, style: AppTextStyles.h1.copyWith(fontSize: 20, color: AppColors.textDark)),
+              Text(
+                value,
+                style: AppTextStyles.h1.copyWith(
+                  fontSize: 20,
+                  color: AppColors.textDark,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(description, style: AppTextStyles.bodySmall.copyWith(height: 1.5)),
+          Text(
+            description,
+            style: AppTextStyles.bodySmall.copyWith(height: 1.5),
+          ),
         ],
       ),
     );

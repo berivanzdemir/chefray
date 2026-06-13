@@ -17,7 +17,7 @@ class HealthProfileSetupScreen extends StatefulWidget {
   final UserHealthProfile? existingProfile;
 
   const HealthProfileSetupScreen({
-    super.key, 
+    super.key,
     this.isEditMode = false,
     this.existingProfile,
   });
@@ -45,9 +45,13 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   void initState() {
     super.initState();
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 700));
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.06),
@@ -63,9 +67,12 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
 
     if (widget.isEditMode && widget.existingProfile != null) {
       _provider.initializeForEdit(widget.existingProfile!);
-      if (widget.existingProfile!.age != null) _ageCtrl.text = widget.existingProfile!.age.toString();
-      if (widget.existingProfile!.heightCm != null) _heightCtrl.text = widget.existingProfile!.heightCm.toString();
-      if (widget.existingProfile!.weightKg != null) _weightCtrl.text = widget.existingProfile!.weightKg.toString();
+      if (widget.existingProfile!.age != null)
+        _ageCtrl.text = widget.existingProfile!.age.toString();
+      if (widget.existingProfile!.heightCm != null)
+        _heightCtrl.text = widget.existingProfile!.heightCm.toString();
+      if (widget.existingProfile!.weightKg != null)
+        _weightCtrl.text = widget.existingProfile!.weightKg.toString();
     }
 
     _ageCtrl.addListener(() => _provider.setAge(_ageCtrl.text));
@@ -132,9 +139,13 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w600)),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: AppColors.error.withValues(alpha: 0.92),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -177,7 +188,9 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
                           return FadeTransition(
                             opacity: animation,
                             child: SlideTransition(
-                                position: offset, child: child),
+                              position: offset,
+                              child: child,
+                            ),
                           );
                         },
                         child: _buildQuestionCard(
@@ -188,7 +201,8 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
                     SetupNavigationButtons(
                       isEditMode: widget.isEditMode,
                       canGoBack: _provider.currentStep > 0,
-                      isLastStep: _provider.currentStep ==
+                      isLastStep:
+                          _provider.currentStep ==
                           HealthProfileSetupProvider.totalSteps - 1,
                       isValid: _provider.validateCurrentStep(),
                       isLoading: _provider.isLoading,
@@ -221,8 +235,11 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.divider),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 16, color: AppColors.textDark),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: AppColors.textDark,
+            ),
           ),
         ),
         const SizedBox(width: 16),
@@ -354,13 +371,16 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   // ── Ray info note ────────────────────────────────────────────────────
 
   Widget _buildRayInfoNote() {
-    String noteText = 'Bu bilgiler sadece önerileri kişiselleştirmek için kullanılır. ChefRay verilerini üçüncü taraflarla paylaşmaz.';
+    String noteText =
+        'Bu bilgiler sadece önerileri kişiselleştirmek için kullanılır. ChefRay verilerini üçüncü taraflarla paylaşmaz.';
     if (_provider.currentStep == 0) {
-      noteText = 'Ray, yaş bilgini kalori ve öğün önerilerini kişiselleştirmek için kullanır.';
+      noteText =
+          'Ray, yaş bilgini kalori ve öğün önerilerini kişiselleştirmek için kullanır.';
     } else if (_provider.currentStep == 2) {
-      noteText = 'Boy ve kilo bilgilerini birlikte değerlendirerek daha isabetli öneriler sunabiliriz.';
+      noteText =
+          'Boy ve kilo bilgilerini birlikte değerlendirerek daha isabetli öneriler sunabiliriz.';
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
@@ -405,7 +425,8 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   Widget _buildAgeStep() {
     return _StepQuestion(
       title: 'Kaç yaşındasın?',
-      subtitle: 'Yaş bilgisi günlük ihtiyaçlarını ve tarif önerilerini daha doğru kişiselleştirmemize yardımcı olur.',
+      subtitle:
+          'Yaş bilgisi günlük ihtiyaçlarını ve tarif önerilerini daha doğru kişiselleştirmemize yardımcı olur.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -419,10 +440,7 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
           const SizedBox(height: 16),
           const Text(
             'Bu bilgiyi daha sonra profilinden değiştirebilirsin.',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF5F7373),
-            ),
+            style: TextStyle(fontSize: 12, color: Color(0xFF5F7373)),
           ),
         ],
       ),
@@ -434,7 +452,8 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   Widget _buildGenderStep() {
     return _StepQuestion(
       title: 'Cinsiyetini seç',
-      subtitle: 'Bu bilgi beslenme ihtiyaçlarını daha dengeli yorumlamamıza yardımcı olur.',
+      subtitle:
+          'Bu bilgi beslenme ihtiyaçlarını daha dengeli yorumlamamıza yardımcı olur.',
       child: Column(
         children: [
           SetupOptionCard(
@@ -483,15 +502,14 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   Widget _buildWeightStep() {
     return _StepQuestion(
       title: 'Kilon kaç kg?',
-      subtitle: 'Kilo bilgisi günlük enerji ihtiyacını daha doğru hesaplamamıza yardımcı olur.',
+      subtitle:
+          'Kilo bilgisi günlük enerji ihtiyacını daha doğru hesaplamamıza yardımcı olur.',
       child: _NumberInput(
         controller: _weightCtrl,
         unit: 'kg',
         hint: '70',
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-        ],
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
       ),
     );
   }
@@ -500,11 +518,31 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
 
   Widget _buildGoalTypeStep() {
     const goals = [
-      (Icons.trending_down_rounded, 'Kilo vermek', 'Daha hafif ve dengeli öğünler önerelim.'),
-      (Icons.balance_rounded, 'Kilo korumak', 'Günlük dengen için uygun tarifler sunalım.'),
-      (Icons.fitness_center_rounded, 'Kas kazanmak', 'Protein ağırlıklı öneriler hazırlayalım.'),
-      (Icons.restaurant_menu_rounded, 'Daha dengeli beslenmek', 'Öğünlerini daha dengeli planlayalım.'),
-      (Icons.explore_rounded, 'Sağlıklı tarifler keşfetmek', 'Yeni ve sağlıklı tarifleri öne çıkaralım.'),
+      (
+        Icons.trending_down_rounded,
+        'Kilo vermek',
+        'Daha hafif ve dengeli öğünler önerelim.',
+      ),
+      (
+        Icons.balance_rounded,
+        'Kilo korumak',
+        'Günlük dengen için uygun tarifler sunalım.',
+      ),
+      (
+        Icons.fitness_center_rounded,
+        'Kas kazanmak',
+        'Protein ağırlıklı öneriler hazırlayalım.',
+      ),
+      (
+        Icons.restaurant_menu_rounded,
+        'Daha dengeli beslenmek',
+        'Öğünlerini daha dengeli planlayalım.',
+      ),
+      (
+        Icons.explore_rounded,
+        'Sağlıklı tarifler keşfetmek',
+        'Yeni ve sağlıklı tarifleri öne çıkaralım.',
+      ),
     ];
 
     return _StepQuestion(
@@ -569,7 +607,11 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.warning_amber_rounded, size: 20, color: Color(0xFF5F7373)),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: Color(0xFF5F7373),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -604,7 +646,8 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
 
     return _StepQuestion(
       title: 'Alerjin veya kaçındığın\nbesinler var mı?',
-      subtitle: 'Tarif önerilerinde riskli içerikleri filtrelemek için kullanılır.',
+      subtitle:
+          'Tarif önerilerinde riskli içerikleri filtrelemek için kullanılır.',
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
@@ -654,9 +697,17 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
   Widget _buildActivityLevelStep() {
     const levels = [
       (Icons.weekend_rounded, 'Düşük', 'Günün çoğu oturarak geçiyor.'),
-      (Icons.directions_walk_rounded, 'Orta', 'Haftada birkaç kez hareket ediyorsun.'),
+      (
+        Icons.directions_walk_rounded,
+        'Orta',
+        'Haftada birkaç kez hareket ediyorsun.',
+      ),
       (Icons.run_circle_rounded, 'Yüksek', 'Düzenli egzersiz yapıyorsun.'),
-      (Icons.fitness_center_rounded, 'Çok aktif', 'Yoğun fiziksel aktiviten var.'),
+      (
+        Icons.fitness_center_rounded,
+        'Çok aktif',
+        'Yoğun fiziksel aktiviten var.',
+      ),
     ];
 
     return _StepQuestion(
@@ -701,7 +752,10 @@ class _HealthProfileSetupScreenState extends State<HealthProfileSetupScreen>
                 const Divider(color: Color(0xFFE8F3ED), height: 16),
                 _SummaryRow(label: 'Cinsiyet', value: _provider.gender ?? '-'),
                 const Divider(color: Color(0xFFE8F3ED), height: 16),
-                _SummaryRow(label: 'Boy', value: '${_provider.heightCm?.toInt()} cm'),
+                _SummaryRow(
+                  label: 'Boy',
+                  value: '${_provider.heightCm?.toInt()} cm',
+                ),
                 const Divider(color: Color(0xFFE8F3ED), height: 16),
                 _SummaryRow(label: 'Kilo', value: '${_provider.weightKg} kg'),
                 const Divider(color: Color(0xFFE8F3ED), height: 16),
@@ -762,10 +816,7 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF5F7373),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF5F7373)),
         ),
         Text(
           value,

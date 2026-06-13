@@ -21,18 +21,38 @@ class HealthCalculationService {
 
   static ({String status, String description}) getBMIDetail(double bmi) {
     if (bmi <= 0) {
-      return (status: 'Bilinmiyor', description: 'BMI hesaplanamadı. Boy ve kilo bilgilerinizi güncelleyin.');
+      return (
+        status: 'Bilinmiyor',
+        description:
+            'BMI hesaplanamadı. Boy ve kilo bilgilerinizi güncelleyin.',
+      );
     }
     if (bmi < 18.5) {
-      return (status: 'Zayıf', description: 'Vücut ağırlığınız boyunuza göre düşük. Dengeli bir beslenme programıyla ideal kilonuza ulaşabilirsiniz.');
+      return (
+        status: 'Zayıf',
+        description:
+            'Vücut ağırlığınız boyunuza göre düşük. Dengeli bir beslenme programıyla ideal kilonuza ulaşabilirsiniz.',
+      );
     }
     if (bmi < 25) {
-      return (status: 'Normal', description: 'Vücut ağırlığınız boyunuza göre ideal aralıkta. Bu durumu korumak sağlığınız için faydalıdır.');
+      return (
+        status: 'Normal',
+        description:
+            'Vücut ağırlığınız boyunuza göre ideal aralıkta. Bu durumu korumak sağlığınız için faydalıdır.',
+      );
     }
     if (bmi < 30) {
-      return (status: 'Fazla kilolu', description: 'Vücut ağırlığınız boyunuza göre ideal aralığın üzerinde. Dengeli beslenme ve düzenli aktivite ile ideal kilonuza yaklaşabilirsiniz.');
+      return (
+        status: 'Fazla kilolu',
+        description:
+            'Vücut ağırlığınız boyunuza göre ideal aralığın üzerinde. Dengeli beslenme ve düzenli aktivite ile ideal kilonuza yaklaşabilirsiniz.',
+      );
     }
-    return (status: 'Obez', description: 'Vücut ağırlığınız boyunuza göre yüksek. Bir sağlık uzmanına danışarak size özel bir plan oluşturmanız önerilir.');
+    return (
+      status: 'Obez',
+      description:
+          'Vücut ağırlığınız boyunuza göre yüksek. Bir sağlık uzmanına danışarak size özel bir plan oluşturmanız önerilir.',
+    );
   }
 
   // ── Ideal Weight Range ─────────────────────────────────────
@@ -44,7 +64,12 @@ class HealthCalculationService {
 
   // ── BMR (Mifflin-St Jeor) ──────────────────────────────────
 
-  static double calculateBMR(double weightKg, double heightCm, int age, String gender) {
+  static double calculateBMR(
+    double weightKg,
+    double heightCm,
+    int age,
+    String gender,
+  ) {
     final base = 10 * weightKg + 6.25 * heightCm - 5 * age;
     final g = gender.toLowerCase();
     if (g == 'erkek' || g == 'male') return base + 5;
@@ -83,11 +108,8 @@ class HealthCalculationService {
 
   // ── Daily Goals ────────────────────────────────────────────
 
-  static ({double calories, double proteinG, double waterMl}) calculateDailyGoals(
-    double dailyCalories,
-    double weightKg,
-    String? goalType,
-  ) {
+  static ({double calories, double proteinG, double waterMl})
+  calculateDailyGoals(double dailyCalories, double weightKg, String? goalType) {
     double calorieGoal = dailyCalories;
     double proteinG = weightKg * 1.6; // g/kg
     double waterMl = weightKg * 33; // ml/kg
@@ -118,7 +140,11 @@ class HealthCalculationService {
 
   // ── Suggestions ────────────────────────────────────────────
 
-  static List<String> getSuggestions(String? goalType, double bmi, String bmiStatus) {
+  static List<String> getSuggestions(
+    String? goalType,
+    double bmi,
+    String bmiStatus,
+  ) {
     final suggestions = <String>[];
 
     // Goal-based suggestions
@@ -126,18 +152,30 @@ class HealthCalculationService {
       case 'kilo vermek':
       case 'lose weight':
         suggestions.add('Gün içinde su tüketimini biraz daha artır.');
-        suggestions.add('Protein hedefini tamamlamak için dengeli ara öğün ekleyebilirsin.');
-        suggestions.add('Haftada birkaç gün hafif egzersiz eklemek hedefini destekleyebilir.');
+        suggestions.add(
+          'Protein hedefini tamamlamak için dengeli ara öğün ekleyebilirsin.',
+        );
+        suggestions.add(
+          'Haftada birkaç gün hafif egzersiz eklemek hedefini destekleyebilir.',
+        );
         break;
       case 'kas kazanmak':
       case 'gain muscle':
-        suggestions.add('Protein alımını artırmak için öğünlerine yumurta, tavuk veya baklagil ekle.');
-        suggestions.add('Düzenli ağırlık çalışması kas kazanımını hızlandırabilir.');
-        suggestions.add('Antrenman sonrası karbonhidrat ve protein dengesine dikkat et.');
+        suggestions.add(
+          'Protein alımını artırmak için öğünlerine yumurta, tavuk veya baklagil ekle.',
+        );
+        suggestions.add(
+          'Düzenli ağırlık çalışması kas kazanımını hızlandırabilir.',
+        );
+        suggestions.add(
+          'Antrenman sonrası karbonhidrat ve protein dengesine dikkat et.',
+        );
         break;
       case 'kilo korumak':
       case 'maintain weight':
-        suggestions.add('Mevcut beslenme düzenini koruyarak porsiyon kontrolüne devam et.');
+        suggestions.add(
+          'Mevcut beslenme düzenini koruyarak porsiyon kontrolüne devam et.',
+        );
         suggestions.add('Haftalık düzenli tartı takibi ile kilonu sabit tut.');
         suggestions.add('Farklı besin gruplarından dengeli öğünler oluştur.');
         break;
@@ -150,11 +188,15 @@ class HealthCalculationService {
     // BMI-based additions
     if (bmiStatus == 'Zayıf') {
       if (!suggestions.any((s) => s.contains('dengeli'))) {
-        suggestions.add('Dengeli bir beslenme programıyla ideal kilona ulaşabilirsin.');
+        suggestions.add(
+          'Dengeli bir beslenme programıyla ideal kilona ulaşabilirsin.',
+        );
       }
     } else if (bmiStatus == 'Fazla kilolu' || bmiStatus == 'Obez') {
       if (!suggestions.any((s) => s.contains('su'))) {
-        suggestions.add('Gün içinde su tüketimini artırarak metabolizmanı destekle.');
+        suggestions.add(
+          'Gün içinde su tüketimini artırarak metabolizmanı destekle.',
+        );
       }
     }
 

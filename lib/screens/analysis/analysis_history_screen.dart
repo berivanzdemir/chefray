@@ -39,8 +39,9 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
         _error = '';
       });
 
-      final list = await AnalysisHistoryRepository.instance.getUserAnalysisHistory();
-      
+      final list = await AnalysisHistoryRepository.instance
+          .getUserAnalysisHistory();
+
       setState(() {
         _history = list;
         _isLoading = false;
@@ -63,8 +64,18 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
 
   String _formatDate(DateTime dt) {
     final months = [
-      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
@@ -90,26 +101,40 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.2),
+                        ),
                       ),
-                      child: Icon(Icons.arrow_back_rounded,
-                          color: Theme.of(context).colorScheme.onSurface, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  Text('Geçmiş Analizlerim', style: AppTextStyles.h2.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    'Geçmiş Analizlerim',
+                    style: AppTextStyles.h2.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   const Spacer(),
                   const SizedBox(width: 42), // Balance spacing
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Daha önce yüklediğin diyet ve kan değeri analizlerini burada görebilirsin.',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -119,10 +144,10 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error.isNotEmpty
-                      ? _buildErrorState()
-                      : _history.isEmpty
-                          ? _buildEmptyState()
-                          : _buildHistoryList(),
+                  ? _buildErrorState()
+                  : _history.isEmpty
+                  ? _buildEmptyState()
+                  : _buildHistoryList(),
             ),
           ],
         ),
@@ -161,8 +186,11 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                 color: AppColors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.error_outline_rounded,
-                  color: AppColors.error, size: 32),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 32,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -174,7 +202,12 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
             TextButton.icon(
               onPressed: _loadHistory,
               icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
-              label: Text('Tekrar Dene', style: AppTextStyles.labelLarge.copyWith(color: AppColors.primary)),
+              label: Text(
+                'Tekrar Dene',
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
             ),
           ],
         ),
@@ -197,26 +230,35 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.history_rounded,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant, size: 40),
+              child: Icon(
+                Icons.history_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 40,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
               'Henüz analiz yok',
-              style: AppTextStyles.h1.copyWith(fontSize: 18, color: Theme.of(context).colorScheme.onSurface),
+              style: AppTextStyles.h1.copyWith(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Diyet listeni ve kan değerlerini yüklediğinde analiz sonuçların burada görünecek.',
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: 180,
               height: 48,
               child: ElevatedButton(
-                onPressed: () => context.push('/diet-upload?uploadType=dietPdf'),
+                onPressed: () =>
+                    context.push('/diet-upload?uploadType=dietPdf'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
@@ -240,10 +282,8 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
   Widget _buildHistoryList() {
     return AnimatedBuilder(
       animation: _fadeCtrl,
-      builder: (context, child) => Opacity(
-        opacity: _fadeCtrl.value,
-        child: child,
-      ),
+      builder: (context, child) =>
+          Opacity(opacity: _fadeCtrl.value, child: child),
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
         itemCount: _history.length,
@@ -252,7 +292,7 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
           final item = _history[index];
           final hasDiet = item.dietAnalysis != null;
           final hasBlood = item.bloodAnalysis != null;
-          
+
           return SoftCard(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -261,7 +301,11 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                 // Date & Document Badges
                 Row(
                   children: [
-                    Icon(Icons.event_note_rounded, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.event_note_rounded,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _formatDate(item.createdAt),
@@ -278,12 +322,10 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                   ],
                 ),
                 const SizedBox(height: 12),
-                
+
                 // General summary text
                 Text(
                   item.summary,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.bodySmall.copyWith(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -295,11 +337,17 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                 if (item.dietAnalysis?.dailyCalorieTarget != null) ...[
                   Row(
                     children: [
-                      const Icon(Icons.local_fire_department_rounded, size: 16, color: AppColors.primary),
+                      const Icon(
+                        Icons.local_fire_department_rounded,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Günlük Kalori Hedefi: ',
-                        style: AppTextStyles.labelSmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       Text(
                         '${item.dietAnalysis!.dailyCalorieTarget} kcal',
@@ -318,21 +366,29 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    children: item.nutritionPriorities.take(3).map((p) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        p,
-                        style: AppTextStyles.labelSmall.copyWith(
-                          fontSize: 9,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    )).toList(),
+                    children: item.nutritionPriorities
+                        .take(3)
+                        .map(
+                          (p) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              p,
+                              style: AppTextStyles.labelSmall.copyWith(
+                                fontSize: 9,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -344,11 +400,17 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                     decoration: BoxDecoration(
                       color: AppColors.warning.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppColors.warning.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.warning),
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          size: 14,
+                          color: AppColors.warning,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -358,8 +420,6 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                               color: AppColors.warning,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -373,9 +433,13 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                   width: double.infinity,
                   height: 40,
                   child: OutlinedButton(
-                    onPressed: () => context.push('/analysis-history-detail', extra: item),
+                    onPressed: () =>
+                        context.push('/analysis-history-detail', extra: item),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary, width: 1.2),
+                      side: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.2,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -392,7 +456,11 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.primary),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
                       ],
                     ),
                   ),
@@ -419,7 +487,9 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen>
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.bold,
-          color: active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+          color: active
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

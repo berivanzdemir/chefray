@@ -4,34 +4,55 @@ class AllergenFilterService {
   // Alerjen keyword map
   static const Map<String, List<String>> allergenKeywords = {
     'Gluten': [
-      'gluten', 'buğday', 'un', 'ekmek', 'makarna', 
-      'bulgur', 'irmik', 'yufka', 'galeta'
+      'gluten',
+      'buğday',
+      'un',
+      'ekmek',
+      'makarna',
+      'bulgur',
+      'irmik',
+      'yufka',
+      'galeta',
     ],
     'Laktoz': [
-      'süt', 'yoğurt', 'peynir', 'krema', 
-      'tereyağı', 'kefir', 'ayran', 'kaşar'
+      'süt',
+      'yoğurt',
+      'peynir',
+      'krema',
+      'tereyağı',
+      'kefir',
+      'ayran',
+      'kaşar',
     ],
     'Kuruyemiş': [
-      'ceviz', 'fındık', 'badem', 'fıstık', 
-      'kaju', 'antep fıstığı'
+      'ceviz',
+      'fındık',
+      'badem',
+      'fıstık',
+      'kaju',
+      'antep fıstığı',
     ],
     'Deniz ürünü': [
-      'balık', 'somon', 'ton balığı', 'levrek', 
-      'çipura', 'karides', 'midye'
+      'balık',
+      'somon',
+      'ton balığı',
+      'levrek',
+      'çipura',
+      'karides',
+      'midye',
     ],
-    'Yumurta': [
-      'yumurta', 'omlet', 'mayonez'
-    ],
-    'Soya': [
-      'soya', 'soya sosu', 'tofu'
-    ],
+    'Yumurta': ['yumurta', 'omlet', 'mayonez'],
+    'Soya': ['soya', 'soya sosu', 'tofu'],
   };
 
   bool containsUserAllergen({
     required RecipeModel recipe,
     required List<String> userAllergies,
   }) {
-    final warnings = detectAllergenWarnings(recipe: recipe, userAllergies: userAllergies);
+    final warnings = detectAllergenWarnings(
+      recipe: recipe,
+      userAllergies: userAllergies,
+    );
     return warnings.isNotEmpty;
   }
 
@@ -55,7 +76,9 @@ class AllergenFilterService {
       final keywords = allergenKeywords[allergy] ?? [];
       for (final keyword in keywords) {
         if (recipeText.contains(keyword)) {
-          warnings.add('Bu tarif $allergy içerebilir ("$keyword" tespit edildi).');
+          warnings.add(
+            'Bu tarif $allergy içerebilir ("$keyword" tespit edildi).',
+          );
           break; // Bir keyword bulunduysa o alerjen için aramayı durdur
         }
       }
@@ -69,7 +92,10 @@ class AllergenFilterService {
     required List<String> userAllergies,
   }) {
     return recipes.where((recipe) {
-      return !containsUserAllergen(recipe: recipe, userAllergies: userAllergies);
+      return !containsUserAllergen(
+        recipe: recipe,
+        userAllergies: userAllergies,
+      );
     }).toList();
   }
 }

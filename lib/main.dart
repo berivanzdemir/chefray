@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -11,9 +12,14 @@ import 'providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/supabase_config.dart';
 import 'services/fcm_service.dart';
+import 'services/notification_settings_sync_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
 
   // ── Çevre değişkenlerini yükle ──────────────────────────────────────────
   await dotenv.load(fileName: '.env');
@@ -22,7 +28,7 @@ Future<void> main() async {
   await Supabase.initialize(
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
-    debug: true, // Auth hatalarını görmek için açık
+    debug: false, // Release'de auth logları kapalı — güvenlik için
   );
 
   // ── Firebase'i başlat ───────────────────────────────────────────────────
@@ -33,6 +39,13 @@ Future<void> main() async {
     debugPrint('═══════════════════════════════════════════════════════');
   } catch (e) {
     debugPrint('❌ Firebase başlatma hatası: $e');
+  }
+
+  // ── Bildirim Ayarlarını Senkronize Et ──────────────────────────────────
+  try {
+    NotificationSettingsSyncService.instance.syncLocalToSupabase();
+  } catch (e) {
+    debugPrint('❌ Bildirim ayarları senkronizasyon hatası: $e');
   }
 
   // ── FCM bildirim altyapısını kur ────────────────────────────────────────
@@ -60,9 +73,7 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => UserProfileProvider()..refreshAll(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => ThemeProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const ChefRayApp(),
     ),

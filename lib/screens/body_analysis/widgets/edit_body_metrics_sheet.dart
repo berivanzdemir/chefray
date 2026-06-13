@@ -21,7 +21,8 @@ class EditBodyMetricsSheet extends StatefulWidget {
     required String gender,
     required String goalType,
     required String activityLevel,
-  }) onSave;
+  })
+  onSave;
 
   const EditBodyMetricsSheet({
     super.key,
@@ -49,7 +50,8 @@ class EditBodyMetricsSheet extends StatefulWidget {
       required String gender,
       required String goalType,
       required String activityLevel,
-    }) onSave,
+    })
+    onSave,
   }) {
     showModalBottomSheet(
       context: context,
@@ -98,9 +100,7 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
     _heightCtrl = TextEditingController(
       text: widget.currentHeightCm?.toString() ?? '',
     );
-    _ageCtrl = TextEditingController(
-      text: widget.currentAge?.toString() ?? '',
-    );
+    _ageCtrl = TextEditingController(text: widget.currentAge?.toString() ?? '');
     _gender = widget.currentGender;
     _goalType = widget.currentGoalType;
     _activityLevel = widget.currentActivityLevel;
@@ -119,7 +119,12 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
     final h = double.tryParse(_heightCtrl.text.replaceAll(',', '.'));
     final a = int.tryParse(_ageCtrl.text);
 
-    if (w == null || h == null || a == null || _gender == null || _goalType == null || _activityLevel == null) {
+    if (w == null ||
+        h == null ||
+        a == null ||
+        _gender == null ||
+        _goalType == null ||
+        _activityLevel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Lütfen tüm alanları doldurun.'),
@@ -164,7 +169,8 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 4),
               child: Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.divider,
                   borderRadius: BorderRadius.circular(2),
@@ -181,12 +187,17 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 32, height: 32,
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: AppColors.backgroundMint,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close_rounded, size: 18, color: AppColors.textMedium),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: AppColors.textMedium,
+                      ),
                     ),
                   ),
                 ],
@@ -195,7 +206,9 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
             const SizedBox(height: 4),
             Text(
               'Bu bilgiler vücut analizi hesaplamalarında kullanılır.',
-              style: AppTextStyles.labelSmall.copyWith(color: AppColors.textLight),
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textLight,
+              ),
             ),
             // Scrollable form
             Flexible(
@@ -207,7 +220,9 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
                       controller: _weightCtrl,
                       label: 'Kilo (kg)',
                       icon: Icons.monitor_weight_outlined,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     _textField(
@@ -272,7 +287,9 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
       style: AppTextStyles.bodyMedium,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: AppTextStyles.labelSmall.copyWith(color: AppColors.textLight),
+        labelStyle: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textLight,
+        ),
         prefixIcon: Icon(icon, color: AppColors.textLight, size: 20),
         filled: true,
         fillColor: Colors.white,
@@ -288,7 +305,10 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }
@@ -303,7 +323,9 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
       initialValue: options.contains(value) ? value : null,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: AppTextStyles.labelSmall.copyWith(color: AppColors.textLight),
+        labelStyle: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textLight,
+        ),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
@@ -318,9 +340,19 @@ class _EditBodyMetricsSheetState extends State<EditBodyMetricsSheet> {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
-      items: options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: AppTextStyles.bodyMedium))).toList(),
+      items: options
+          .map(
+            (o) => DropdownMenuItem(
+              value: o,
+              child: Text(o, style: AppTextStyles.bodyMedium),
+            ),
+          )
+          .toList(),
       onChanged: onChanged,
     );
   }

@@ -14,10 +14,6 @@ class TwinAvatarDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      avatarPath,
-      height: height,
-      fit: BoxFit.contain,
-    );
+    return Image.asset(avatarPath, height: height, fit: BoxFit.contain);
   }
 }

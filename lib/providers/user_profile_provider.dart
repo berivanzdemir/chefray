@@ -26,7 +26,11 @@ class UserProfileProvider extends ChangeNotifier {
     try {
       final user = _client.auth.currentUser;
       if (user == null) return;
-      final data = await _client.from('profiles').select().eq('id', user.id).maybeSingle();
+      final data = await _client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
       profile = data;
       notifyListeners();
     } catch (e) {
@@ -36,7 +40,8 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<void> loadHealthProfile() async {
     try {
-      healthProfile = await UserHealthProfileRepository.instance.getCurrentUserHealthProfile();
+      healthProfile = await UserHealthProfileRepository.instance
+          .getCurrentUserHealthProfile();
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
@@ -48,6 +53,7 @@ class UserProfileProvider extends ChangeNotifier {
       await _activityService.logAppOpen();
       activeWeekdays = await _activityService.getActiveDaysThisWeek();
       streakDays = await _activityService.getStreakDays();
+      await _goalsService.ensureTodayGoalsExists();
       todayGoals = await _goalsService.getGoalsForDate(DateTime.now());
       notifyListeners();
     } catch (e) {
@@ -58,7 +64,9 @@ class UserProfileProvider extends ChangeNotifier {
   /// Updates health profile in Supabase and refreshes local state.
   Future<bool> updateHealthProfile(UserHealthProfile updatedProfile) async {
     try {
-      await UserHealthProfileRepository.instance.upsertCurrentUserHealthProfile(updatedProfile);
+      await UserHealthProfileRepository.instance.upsertCurrentUserHealthProfile(
+        updatedProfile,
+      );
       await refreshAll();
       return true;
     } catch (e) {
@@ -84,7 +92,7 @@ class UserProfileProvider extends ChangeNotifier {
     debugPrint('waterGoal input: ${updatedGoals.waterTarget}');
     debugPrint('currentActivity input: ${updatedGoals.activityCompleted}');
     debugPrint('activityGoal input: ${updatedGoals.activityTarget}\n');
-    
+
     debugPrint('After save state:');
     debugPrint('currentCalories: ${todayGoals?.caloriesConsumed}');
     debugPrint('calorieGoal: ${todayGoals?.caloriesTarget}');
@@ -94,7 +102,7 @@ class UserProfileProvider extends ChangeNotifier {
     debugPrint('waterGoal: ${todayGoals?.waterTarget}');
     debugPrint('currentActivity: ${todayGoals?.activityCompleted}');
     debugPrint('activityGoal: ${todayGoals?.activityTarget}\n');
-    
+
     debugPrint('Widgets should rebuild with updated daily progress.\n');
 
     // Update notifications based on new goals
@@ -104,6 +112,7 @@ class UserProfileProvider extends ChangeNotifier {
     );
 
     try {
+      await _goalsService.ensureTodayGoalsExists(updatedGoals);
       final res = await _goalsService.upsertGoals(updatedGoals);
       if (res != null) {
         todayGoals = res;
@@ -124,7 +133,7 @@ class UserProfileProvider extends ChangeNotifier {
       debugPrint('--- Profile Picture Upload Started ---');
       final user = _client.auth.currentUser;
       debugPrint('Current user ID: ${user?.id}');
-      
+
       if (user == null) {
         debugPrint('Error: User is null');
         return false;
@@ -133,24 +142,25 @@ class UserProfileProvider extends ChangeNotifier {
       final fileExists = await imageFile.exists();
       debugPrint('File exists: $fileExists');
       debugPrint('File path: ${imageFile.path}');
-      
+
       if (fileExists) {
         final fileSize = await imageFile.length();
         debugPrint('File size: $fileSize bytes');
       }
 
       final fileExt = imageFile.path.split('.').last;
-      final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final fileName =
+          'avatar_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
       final filePath = '${user.id}/$fileName';
       const bucketName = 'profile-photos';
-      
+
       debugPrint('Bucket name: $bucketName');
       debugPrint('Upload path: $filePath');
 
       debugPrint('Starting storage upload...');
       await _client.storage.from(bucketName).upload(filePath, imageFile);
       debugPrint('Storage upload successful.');
-      
+
       final imageUrl = _client.storage.from(bucketName).getPublicUrl(filePath);
       debugPrint('Public URL generated: $imageUrl');
 

@@ -7,16 +7,11 @@ import '../../../widgets/common/soft_card.dart';
 class NutritionPreferenceCard extends StatelessWidget {
   final List<String> dietPreferences;
 
-  const NutritionPreferenceCard({
-    super.key,
-    required this.dietPreferences,
-  });
+  const NutritionPreferenceCard({super.key, required this.dietPreferences});
 
   @override
   Widget build(BuildContext context) {
-    final filtered = dietPreferences
-        .where((p) => p != 'Normal')
-        .toList();
+    final filtered = dietPreferences.where((p) => p != 'Normal').toList();
     final hasPrefs = filtered.isNotEmpty;
 
     return SoftCard(
@@ -27,11 +22,12 @@ class NutritionPreferenceCard extends StatelessWidget {
           // Header with restaurant icon
           Row(
             children: [
-              Icon(Icons.restaurant_rounded,
-                  size: 16, color: AppColors.carbs),
+              Icon(Icons.restaurant_rounded, size: 16, color: AppColors.carbs),
               const SizedBox(width: 6),
-              Text('Beslenme Tercihi',
-                  style: AppTextStyles.h3.copyWith(fontSize: 13)),
+              Text(
+                'Beslenme Tercihi',
+                style: AppTextStyles.h3.copyWith(fontSize: 13),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -40,22 +36,26 @@ class NutritionPreferenceCard extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: filtered
-                  .map((item) => Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.carbs.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
+                  .map(
+                    (item) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.carbs.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        item,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.carbs,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
                         ),
-                        child: Text(
-                          item,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.carbs,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ))
+                      ),
+                    ),
+                  )
                   .toList(),
             )
           else
@@ -76,9 +76,12 @@ class NutritionPreferenceCard extends StatelessWidget {
         children: [
           Icon(Icons.info_outline, size: 14, color: AppColors.textHint),
           const SizedBox(width: 8),
-          Text(text,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            text,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

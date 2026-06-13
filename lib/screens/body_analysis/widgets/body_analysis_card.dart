@@ -198,10 +198,6 @@ class BodyAnalysisCard extends StatelessWidget {
   }
 
   Widget _rowDivider() {
-    return const Divider(
-      height: 1,
-      thickness: 1,
-      color: AppColors.divider,
-    );
+    return const Divider(height: 1, thickness: 1, color: AppColors.divider);
   }
 }

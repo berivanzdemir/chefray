@@ -35,6 +35,7 @@ import '../screens/analysis/analysis_history_detail_screen.dart';
 import '../models/analysis/analysis_history_item.dart';
 import '../screens/home/notifications_page.dart';
 import '../screens/favorites/favorite_recipes_screen.dart';
+import '../screens/ray_assistant/ray_assistant_screen.dart';
 
 /// GoRouter configuration for ChefRay app flow:
 /// Splash → Onboarding → Auth → Home
@@ -47,10 +48,7 @@ class AppRouter {
     initialLocation: '/',
     redirect: _authRedirect,
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const SplashScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
       GoRoute(
         path: '/onboarding',
         pageBuilder: (context, state) => _fade(state, const OnboardingScreen()),
@@ -76,19 +74,22 @@ class AppRouter {
             previousDietAnalysis: state.extra is DietAnalysisResult
                 ? state.extra as DietAnalysisResult
                 : (state.extra is Map<String, dynamic>
-                    ? (state.extra as Map<String, dynamic>)['dietAnalysis'] as DietAnalysisResult?
-                    : null),
+                      ? (state.extra as Map<String, dynamic>)['dietAnalysis']
+                            as DietAnalysisResult?
+                      : null),
             previousDietFile: state.extra is Map<String, dynamic>
                 ? (state.extra as Map<String, dynamic>)['dietFile'] as File?
                 : null,
           ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                  parent: animation, curve: Curves.easeOut)),
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                  ),
               child: child,
             );
           },
@@ -100,7 +101,8 @@ class AppRouter {
       ),
       GoRoute(
         path: '/analysis-history',
-        pageBuilder: (context, state) => _fade(state, const AnalysisHistoryScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const AnalysisHistoryScreen()),
       ),
       GoRoute(
         path: '/analysis-history-detail',
@@ -115,14 +117,15 @@ class AppRouter {
         path: '/processing',
         pageBuilder: (context, state) => _fade(
           state,
-          ProcessingScreen(
-            params: state.extra as Map<String, dynamic>?,
-          ),
+          ProcessingScreen(params: state.extra as Map<String, dynamic>?),
         ),
       ),
       GoRoute(
         path: '/analysis',
-        pageBuilder: (context, state) => _fade(state, AnalysisScreen(analysisData: state.extra as Map<String, dynamic>?)),
+        pageBuilder: (context, state) => _fade(
+          state,
+          AnalysisScreen(analysisData: state.extra as Map<String, dynamic>?),
+        ),
       ),
       GoRoute(
         path: '/recipe-list',
@@ -133,7 +136,9 @@ class AppRouter {
                 ? (state.extra as List).whereType<RecipeModel>().toList()
                 : null,
             recommendedRecipes: state.extra is List
-                ? (state.extra as List).whereType<RecommendedRecipeViewModel>().toList()
+                ? (state.extra as List)
+                      .whereType<RecommendedRecipeViewModel>()
+                      .toList()
                 : null,
             initialMealType: state.uri.queryParameters['mealType'],
           ),
@@ -141,15 +146,22 @@ class AppRouter {
       ),
       GoRoute(
         path: '/exploded-recipe',
-        pageBuilder: (context, state) => _fade(state, ExplodedRecipeScreen(recipe: state.extra as RecipeModel?)),
+        pageBuilder: (context, state) => _fade(
+          state,
+          ExplodedRecipeScreen(recipe: state.extra as RecipeModel?),
+        ),
       ),
       GoRoute(
         path: '/recipe-show',
-        pageBuilder: (context, state) => _fade(state, RecipeShowScreen(recipe: state.extra as RecipeModel?)),
+        pageBuilder: (context, state) =>
+            _fade(state, RecipeShowScreen(recipe: state.extra as RecipeModel?)),
       ),
       GoRoute(
         path: '/recipe-detail',
-        pageBuilder: (context, state) => _fade(state, RecipeDetailScreen(recipe: state.extra as RecipeModel?)),
+        pageBuilder: (context, state) => _fade(
+          state,
+          RecipeDetailScreen(recipe: state.extra as RecipeModel?),
+        ),
       ),
       GoRoute(
         path: '/cooking-mode',
@@ -163,12 +175,16 @@ class AppRouter {
           } else if (state.extra is RecipeModel) {
             recipe = state.extra as RecipeModel?;
           }
-          return _fade(state, CookingModeScreen(recipe: recipe, servingMultiplier: multiplier));
+          return _fade(
+            state,
+            CookingModeScreen(recipe: recipe, servingMultiplier: multiplier),
+          );
         },
       ),
       GoRoute(
         path: '/completion',
-        pageBuilder: (context, state) => _fade(state, CompletionScreen(recipe: state.extra as RecipeModel?)),
+        pageBuilder: (context, state) =>
+            _fade(state, CompletionScreen(recipe: state.extra as RecipeModel?)),
       ),
       GoRoute(
         path: '/profile',
@@ -176,44 +192,65 @@ class AppRouter {
       ),
       GoRoute(
         path: '/health-profile',
-        pageBuilder: (context, state) => _fade(state, const HealthProfileScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const HealthProfileScreen()),
       ),
       GoRoute(
         path: '/health-profile-setup',
-        pageBuilder: (context, state) => _fade(state, const HealthProfileSetupScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const HealthProfileSetupScreen()),
       ),
       GoRoute(
         path: '/profile/edit',
-        pageBuilder: (context, state) => _fade(state, const ProfileEditScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const ProfileEditScreen()),
       ),
       GoRoute(
         path: '/body-analysis',
-        pageBuilder: (context, state) => _fade(state, const BodyAnalysisScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const BodyAnalysisScreen()),
       ),
       GoRoute(
         path: '/product-scan',
-        pageBuilder: (context, state) => _fade(state, const BarcodeScanScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const BarcodeScanScreen()),
       ),
       GoRoute(
         path: '/product-analysis',
-        pageBuilder: (context, state) => _fade(state, ProductAnalysisScreen(product: state.extra as ProductModel?)),
+        pageBuilder: (context, state) => _fade(
+          state,
+          ProductAnalysisScreen(product: state.extra as ProductModel?),
+        ),
       ),
       GoRoute(
         path: '/personal-diet',
-        pageBuilder: (context, state) => _fade(state, const PersonalDietScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const PersonalDietScreen()),
       ),
       GoRoute(
         path: '/notifications',
-        pageBuilder: (context, state) => _fade(state, const NotificationsPage()),
+        pageBuilder: (context, state) =>
+            _fade(state, const NotificationsPage()),
       ),
       GoRoute(
         path: '/favorites',
-        pageBuilder: (context, state) => _fade(state, const FavoriteRecipesScreen()),
+        pageBuilder: (context, state) =>
+            _fade(state, const FavoriteRecipesScreen()),
+      ),
+      GoRoute(
+        path: '/ray-assistant',
+        pageBuilder: (context, state) =>
+            _fade(state, const RayAssistantScreen()),
       ),
     ],
   );
 
-  static const _publicRoutes = ['/onboarding', '/auth', '/register', '/health-profile'];
+  static const _publicRoutes = [
+    '/onboarding',
+    '/auth',
+    '/register',
+    '/health-profile',
+  ];
 
   static String? _authRedirect(BuildContext context, GoRouterState state) {
     final loc = state.uri.toString();

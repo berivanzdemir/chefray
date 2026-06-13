@@ -47,28 +47,18 @@ class AppColors {
   static const LinearGradient splashGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFF7FBF9),
-      Color(0xFFF0FBF6),
-      Color(0xFFE4F5EC),
-    ],
+    colors: [Color(0xFFF7FBF9), Color(0xFFF0FBF6), Color(0xFFE4F5EC)],
   );
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [
-      Color(0xFF25E58A),
-      Color(0xFF0DBD6D),
-    ],
+    colors: [Color(0xFF25E58A), Color(0xFF0DBD6D)],
   );
 
   static const LinearGradient cardGlowGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0x0017C878),
-      Color(0x1A17C878),
-    ],
+    colors: [Color(0x0017C878), Color(0x1A17C878)],
   );
 }

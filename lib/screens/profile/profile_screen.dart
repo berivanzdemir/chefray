@@ -8,6 +8,7 @@ import '../../providers/user_profile_provider.dart';
 import '../../services/calculations/health_calculation_service.dart';
 import '../../services/calculations/health_score_service.dart';
 import '../../services/daily_nutrition_service.dart';
+import '../../services/notification_service.dart';
 
 import 'widgets/profile_header.dart';
 import 'widgets/digital_twin_card.dart';
@@ -24,17 +25,29 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserver {
+class _ProfileScreenState extends State<ProfileScreen>
+    with WidgetsBindingObserver {
   DailyNutritionTotals _nutritionTotals = DailyNutritionTotals.zero();
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _fetchNutrition();
+    _loadUnreadCount();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProfileProvider>().refreshAll();
     });
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final count = await NotificationService().getUnreadNotificationCount();
+    if (mounted) {
+      setState(() {
+        _unreadCount = count;
+      });
+    }
   }
 
   @override
@@ -47,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _fetchNutrition();
+      _loadUnreadCount();
       context.read<UserProfileProvider>().refreshAll();
     }
   }
@@ -66,11 +80,19 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
     }
   }
 
-  String _generateSuggestion(double water, double cal, double prot, double act) {
+  String _generateSuggestion(
+    double water,
+    double cal,
+    double prot,
+    double act,
+  ) {
     if (water < 0.50) return "Bugün biraz daha su içmeyi hedefleyebilirsin.";
-    if (cal < 0.45) return "Enerjin düşük kalmış olabilir. Dengeli bir ara öğün ekleyebilirsin.";
-    if (prot < 0.55) return "Akşam öğününde protein ağırlıklı bir tarif tercih edebilirsin.";
-    if (act < 0.50) return "Bugün 15-20 dakikalık hafif tempolu yürüyüş iyi olabilir.";
+    if (cal < 0.45)
+      return "Enerjin düşük kalmış olabilir. Dengeli bir ara öğün ekleyebilirsin.";
+    if (prot < 0.55)
+      return "Akşam öğününde protein ağırlıklı bir tarif tercih edebilirsin.";
+    if (act < 0.50)
+      return "Bugün 15-20 dakikalık hafif tempolu yürüyüş iyi olabilir.";
     return "Bugün dengeli ilerliyorsun. Mevcut planını koruyabilirsin.";
   }
 
@@ -80,16 +102,31 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.auto_awesome_rounded, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.auto_awesome_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
-            Text('Günlük Öneri', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 16)),
+            Text(
+              'Günlük Öneri',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
-        content: Text(suggestion, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text(
+          suggestion,
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Tamam', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            child: Text(
+              'Tamam',
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -100,7 +137,9 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Çok açık gri/beyaz arka plan
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // Çok açık gri/beyaz arka plan
       body: SafeArea(
         bottom: false,
         child: Consumer<UserProfileProvider>(
@@ -108,7 +147,8 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
             // -- 1. Dynamic User Name & Avatar --
             final authUser = Supabase.instance.client.auth.currentUser;
             final authName = authUser?.userMetadata?['name'] as String?;
-            final authFullName = authUser?.userMetadata?['full_name'] as String?;
+            final authFullName =
+                authUser?.userMetadata?['full_name'] as String?;
             final profileName = provider.profile?['name'] as String?;
             final avatarUrl = provider.profile?['avatar_url'] as String?;
             final email = authUser?.email;
@@ -124,41 +164,78 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               displayName = email.split('@').first;
             }
 
-            String avatarInitial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'K';
+            String avatarInitial = displayName.isNotEmpty
+                ? displayName[0].toUpperCase()
+                : 'K';
 
             // -- 2. Health Profile & Calculations --
             final hp = provider.healthProfile;
-            final hasData = hp != null && hp.weightKg != null && hp.heightCm != null;
+            final hasData =
+                hp != null && hp.weightKg != null && hp.heightCm != null;
 
-            final double bmi = hasData ? HealthCalculationService.calculateBMI(hp.weightKg!, hp.heightCm!) : 22.0;
-            final String bmiStatus = hasData ? HealthCalculationService.getBMIStatus(bmi) : 'Normal';
-            final double bmr = hasData ? HealthCalculationService.calculateBMR(hp.weightKg!, hp.heightCm!, hp.age ?? 22, hp.gender ?? 'Kadın') : 1410.0;
-            final double dailyCal = hasData ? HealthCalculationService.calculateDailyCalories(bmr, hp.activityLevel) : 1650.0;
-            final idealRange = hasData ? HealthCalculationService.calculateIdealWeightRange(hp.heightCm!) : (min: 56.0, max: 66.0);
-            
+            final double bmi = hasData
+                ? HealthCalculationService.calculateBMI(
+                    hp.weightKg!,
+                    hp.heightCm!,
+                  )
+                : 22.0;
+            final String bmiStatus = hasData
+                ? HealthCalculationService.getBMIStatus(bmi)
+                : 'Normal';
+            final double bmr = hasData
+                ? HealthCalculationService.calculateBMR(
+                    hp.weightKg!,
+                    hp.heightCm!,
+                    hp.age ?? 22,
+                    hp.gender ?? 'Kadın',
+                  )
+                : 1410.0;
+            final double dailyCal = hasData
+                ? HealthCalculationService.calculateDailyCalories(
+                    bmr,
+                    hp.activityLevel,
+                  )
+                : 1650.0;
+            final idealRange = hasData
+                ? HealthCalculationService.calculateIdealWeightRange(
+                    hp.heightCm!,
+                  )
+                : (min: 56.0, max: 66.0);
+
             // -- 3. Daily Goals --
             final todayGoals = provider.todayGoals;
             final calorieTarget = todayGoals?.caloriesTarget ?? dailyCal;
-            final proteinTarget = todayGoals?.proteinTarget ?? (hasData ? hp.weightKg! * 1.6 : 100.0);
+            final proteinTarget =
+                todayGoals?.proteinTarget ??
+                (hasData ? hp.weightKg! * 1.6 : 100.0);
             final waterTargetMl = todayGoals?.waterTarget ?? 2000.0;
             final activityTarget = todayGoals?.activityTarget ?? 60.0;
-            
+
             final waterTargetLiters = waterTargetMl / 1000.0;
-            final waterConsumedLiters = (todayGoals?.waterConsumed ?? 0) / 1000.0;
+            final waterConsumedLiters =
+                (todayGoals?.waterConsumed ?? 0) / 1000.0;
 
             // For backward compatibility: if todayGoals consumed is 0 but we have nutrition logs, use the logs.
-            final double currentCalories = (todayGoals?.caloriesConsumed ?? 0.0) > 0 
-                ? todayGoals!.caloriesConsumed 
+            final double currentCalories =
+                (todayGoals?.caloriesConsumed ?? 0.0) > 0
+                ? todayGoals!.caloriesConsumed
                 : _nutritionTotals.calories;
-            
-            final double currentProtein = (todayGoals?.proteinConsumed ?? 0.0) > 0 
-                ? todayGoals!.proteinConsumed 
+
+            final double currentProtein =
+                (todayGoals?.proteinConsumed ?? 0.0) > 0
+                ? todayGoals!.proteinConsumed
                 : _nutritionTotals.protein;
 
-            final double waterPercent = (todayGoals?.waterConsumed ?? 0) / (waterTargetMl > 0 ? waterTargetMl : 2000.0);
-            final double caloriePercent = currentCalories / (calorieTarget > 0 ? calorieTarget : 2000);
-            final double proteinPercent = currentProtein / (proteinTarget > 0 ? proteinTarget : 100);
-            final double activityPercent = (todayGoals?.activityCompleted ?? 0) / (activityTarget > 0 ? activityTarget : 60);
+            final double waterPercent =
+                (todayGoals?.waterConsumed ?? 0) /
+                (waterTargetMl > 0 ? waterTargetMl : 2000.0);
+            final double caloriePercent =
+                currentCalories / (calorieTarget > 0 ? calorieTarget : 2000);
+            final double proteinPercent =
+                currentProtein / (proteinTarget > 0 ? proteinTarget : 100);
+            final double activityPercent =
+                (todayGoals?.activityCompleted ?? 0) /
+                (activityTarget > 0 ? activityTarget : 60);
 
             debugPrint('Digital Twin recalculated:');
             debugPrint('currentCalories: $currentCalories');
@@ -175,12 +252,23 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
               proteinPercent: proteinPercent,
               activityPercent: activityPercent,
             );
-            final String healthStatusText = HealthScoreService.getHealthScoreStatus(healthScore);
+            final String healthStatusText =
+                HealthScoreService.getHealthScoreStatus(healthScore);
 
-            final suggestion = _generateSuggestion(waterPercent, caloriePercent, proteinPercent, activityPercent);
+            final suggestion = _generateSuggestion(
+              waterPercent,
+              caloriePercent,
+              proteinPercent,
+              activityPercent,
+            );
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: 120,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -190,7 +278,11 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     avatarUrl: avatarUrl,
                     goalText: hp?.goalType ?? 'Sağlıklı tarifler keşfetmek',
                     streakDays: provider.streakDays,
-                    onNotificationTap: () => context.push('/notifications'),
+                    unreadCount: _unreadCount,
+                    onNotificationTap: () async {
+                      await context.push('/notifications');
+                      _loadUnreadCount();
+                    },
                   ),
                   const SizedBox(height: 24),
                   DigitalTwinCard(
@@ -208,13 +300,12 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     calorieGoalStr: calorieTarget.toInt().toString(),
                     proteinCurrentStr: currentProtein.toInt().toString(),
                     proteinGoalStr: proteinTarget.toInt().toString(),
-                    activityCurrentStr: (todayGoals?.activityCompleted.toInt() ?? 0).toString(),
+                    activityCurrentStr:
+                        (todayGoals?.activityCompleted.toInt() ?? 0).toString(),
                     activityGoalStr: activityTarget.toInt().toString(),
                   ),
                   const SizedBox(height: 16),
-                  WeightGoalTrackerCard(
-                    fallbackWeight: hp?.weightKg ?? 85.0,
-                  ),
+                  WeightGoalTrackerCard(fallbackWeight: hp?.weightKg ?? 85.0),
                   const SizedBox(height: 16),
                   ProfileBasicInfoCard(
                     age: hp?.age ?? 22,
@@ -276,14 +367,16 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
       icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
       label: const Text(
         'Çıkış Yap',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.red.shade400,
         padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 0,
       ),
     );

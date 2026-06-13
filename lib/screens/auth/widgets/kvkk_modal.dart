@@ -22,8 +22,11 @@ class KvkkModal extends StatelessWidget {
     return _show(context, title: 'Gizlilik Politikası', content: _privacyText);
   }
 
-  static Future<void> _show(BuildContext context,
-      {required String title, required String content}) {
+  static Future<void> _show(
+    BuildContext context, {
+    required String title,
+    required String content,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -74,15 +77,19 @@ class KvkkModal extends StatelessWidget {
                         color: AppColors.backgroundMint,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.shield_outlined,
-                          color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        Icons.shield_outlined,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         title,
-                        style: AppTextStyles.h3
-                            .copyWith(fontWeight: FontWeight.w700),
+                        style: AppTextStyles.h3.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     GestureDetector(
@@ -94,8 +101,11 @@ class KvkkModal extends StatelessWidget {
                           color: AppColors.backgroundMint,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.close_rounded,
-                            size: 16, color: AppColors.textMedium),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: AppColors.textMedium,
+                        ),
                       ),
                     ),
                   ],
@@ -119,7 +129,11 @@ class KvkkModal extends StatelessWidget {
               // ── Footer CTA ────────────────────────────────────────────
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                    24, 8, 24, 16 + MediaQuery.paddingOf(context).bottom),
+                  24,
+                  8,
+                  24,
+                  16 + MediaQuery.paddingOf(context).bottom,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -129,12 +143,16 @@ class KvkkModal extends StatelessWidget {
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textDark,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
-                    child: Text('Anladım, Kapat',
-                        style: AppTextStyles.button
-                            .copyWith(color: AppColors.textDark)),
+                    child: Text(
+                      'Anladım, Kapat',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.textDark,
+                      ),
+                    ),
                   ),
                 ),
               ),

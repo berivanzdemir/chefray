@@ -32,14 +32,19 @@ class PrimaryButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 1.5,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
             ),
           ),
           child: Text(
             text,
-            style: AppTextStyles.button.copyWith(color: Theme.of(context).colorScheme.primary),
+            style: AppTextStyles.button.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
       );
@@ -72,8 +77,9 @@ class PrimaryButton extends StatelessWidget {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onSurface),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   )
                 : Row(

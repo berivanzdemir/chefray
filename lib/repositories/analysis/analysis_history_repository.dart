@@ -6,7 +6,7 @@ import '../../models/ai/analysis_results.dart';
 import '../../models/analysis/analysis_history_item.dart';
 
 /// SQL Schema TODO for developer reference:
-/// 
+///
 /// ```sql
 /// -- TODO: SQL Table Setup in Supabase
 /// CREATE TABLE IF NOT EXISTS combined_analysis_results (
@@ -20,21 +20,22 @@ import '../../models/analysis/analysis_history_item.dart';
 ///   blood_analysis JSONB,
 ///   combined_analysis JSONB
 /// );
-/// 
+///
 /// -- Enable RLS
 /// ALTER TABLE combined_analysis_results ENABLE ROW LEVEL SECURITY;
-/// 
+///
 /// -- Select Policy
 /// CREATE POLICY "Users can read own analysis history" ON combined_analysis_results
 ///   FOR SELECT USING (auth.uid() = user_id);
-/// 
+///
 /// -- Insert Policy
 /// CREATE POLICY "Users can insert own analysis history" ON combined_analysis_results
 ///   FOR INSERT WITH CHECK (auth.uid() = user_id);
 /// ```
 class AnalysisHistoryRepository {
   AnalysisHistoryRepository._();
-  static final AnalysisHistoryRepository instance = AnalysisHistoryRepository._();
+  static final AnalysisHistoryRepository instance =
+      AnalysisHistoryRepository._();
 
   static const String _localPrefsKey = 'chefray_local_analysis_history';
 
@@ -59,7 +60,10 @@ class AnalysisHistoryRepository {
   }
 
   // ── Write History to local SharedPreferences ──────────────
-  Future<void> _saveLocalHistory(String userId, List<AnalysisHistoryItem> list) async {
+  Future<void> _saveLocalHistory(
+    String userId,
+    List<AnalysisHistoryItem> list,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final encoded = list.map((item) => item.toJson()).toList();
@@ -73,7 +77,9 @@ class AnalysisHistoryRepository {
   Future<List<AnalysisHistoryItem>> getUserAnalysisHistory() async {
     final userId = _getUserId();
     if (userId == null) {
-      debugPrint('Warning: getUserAnalysisHistory called with no signed in user.');
+      debugPrint(
+        'Warning: getUserAnalysisHistory called with no signed in user.',
+      );
       return [];
     }
 
@@ -93,7 +99,9 @@ class AnalysisHistoryRepository {
       await _saveLocalHistory(userId, remoteItems);
       return remoteItems;
     } catch (e) {
-      debugPrint('Supabase history fetch failed (database table likely missing or offline). Falling back to local storage. Error: $e');
+      debugPrint(
+        'Supabase history fetch failed (database table likely missing or offline). Falling back to local storage. Error: $e',
+      );
       // Fallback to SharedPreferences
       final localItems = await _getLocalHistory(userId);
       // Sort by date descending
@@ -110,7 +118,9 @@ class AnalysisHistoryRepository {
   }) async {
     final userId = _getUserId();
     if (userId == null) {
-      throw Exception('Analiz sonucunun kaydedilebilmesi için oturum açmış olmanız gerekmektedir.');
+      throw Exception(
+        'Analiz sonucunun kaydedilebilmesi için oturum açmış olmanız gerekmektedir.',
+      );
     }
 
     final newItem = AnalysisHistoryItem(
@@ -122,7 +132,9 @@ class AnalysisHistoryRepository {
       combinedAnalysis: combinedAnalysis,
       summary: combinedAnalysis.combinedSummary.isNotEmpty
           ? combinedAnalysis.combinedSummary
-          : (dietAnalysis.dietSummary.isNotEmpty ? dietAnalysis.dietSummary : 'Diyet ve kan tahlili analizi tamamlandı.'),
+          : (dietAnalysis.dietSummary.isNotEmpty
+                ? dietAnalysis.dietSummary
+                : 'Diyet ve kan tahlili analizi tamamlandı.'),
       nutritionPriorities: combinedAnalysis.nutritionPriorities,
       safetyNotes: combinedAnalysis.safetyNotes,
     );
@@ -139,7 +151,9 @@ class AnalysisHistoryRepository {
           .insert(newItem.toJson());
       debugPrint('Successfully saved analysis result to Supabase.');
     } catch (e) {
-      debugPrint('Supabase insert failed. Kept locally in SharedPreferences fallback. SQL error detail: $e');
+      debugPrint(
+        'Supabase insert failed. Kept locally in SharedPreferences fallback. SQL error detail: $e',
+      );
       // Graceful notification: throw a custom exception with user message that gets caught smoothly by downstream handlers
       throw Exception('Analiz sonucu kaydedilemedi, ancak analiz tamamlandı.');
     }
@@ -168,13 +182,16 @@ class AnalysisHistoryRepository {
         }
       }
     } catch (e) {
-      debugPrint('Supabase latest blood analysis fetch failed, checking local storage. Error: $e');
+      debugPrint(
+        'Supabase latest blood analysis fetch failed, checking local storage. Error: $e',
+      );
     }
 
     // Local fallback
     final localList = await _getLocalHistory(userId);
     for (final item in localList) {
-      if (item.bloodAnalysis != null && item.bloodAnalysis!.markers.isNotEmpty) {
+      if (item.bloodAnalysis != null &&
+          item.bloodAnalysis!.markers.isNotEmpty) {
         return item.bloodAnalysis;
       }
     }
@@ -203,7 +220,9 @@ class AnalysisHistoryRepository {
         }
       }
     } catch (e) {
-      debugPrint('Supabase latest diet analysis fetch failed, checking local storage. Error: $e');
+      debugPrint(
+        'Supabase latest diet analysis fetch failed, checking local storage. Error: $e',
+      );
     }
 
     // Local fallback

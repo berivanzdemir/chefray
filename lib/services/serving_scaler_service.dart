@@ -12,9 +12,15 @@ class ParsedIngredient {
 
 class ServingScalerService {
   static String normalizeIngredientName(String name) {
-    return name.toLowerCase().trim()
-        .replaceAll('ç', 'c').replaceAll('ğ', 'g').replaceAll('ı', 'i')
-        .replaceAll('ö', 'o').replaceAll('ş', 's').replaceAll('ü', 'u');
+    return name
+        .toLowerCase()
+        .trim()
+        .replaceAll('ç', 'c')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ı', 'i')
+        .replaceAll('ö', 'o')
+        .replaceAll('ş', 's')
+        .replaceAll('ü', 'u');
   }
 
   static bool _isMeat(String normalized) {
@@ -154,7 +160,7 @@ class ServingScalerService {
       if (amount > 10) return 'g';
       return 'adet';
     }
-    
+
     if (_isGarnish(normalized)) {
       if (amount > 10) return 'g';
       return 'yemek kaşığı';
@@ -166,8 +172,13 @@ class ServingScalerService {
     }
 
     // Default catch-all cases
-    if (normalized.contains('makarna') || normalized.contains('eriste')) return 'g';
-    if (normalized.contains('yulaf') || normalized.contains('kakao') || normalized.contains('bal') || normalized.contains('pekmez') || normalized.contains('tahin')) {
+    if (normalized.contains('makarna') || normalized.contains('eriste'))
+      return 'g';
+    if (normalized.contains('yulaf') ||
+        normalized.contains('kakao') ||
+        normalized.contains('bal') ||
+        normalized.contains('pekmez') ||
+        normalized.contains('tahin')) {
       if (amount > 10) return 'g';
       return 'yemek kaşığı';
     }
@@ -175,7 +186,9 @@ class ServingScalerService {
       if (amount > 20) return 'g';
       return 'yemek kaşığı';
     }
-    if (normalized.contains('vanilya') || normalized.contains('kabartma tozu') || normalized.contains('maya')) {
+    if (normalized.contains('vanilya') ||
+        normalized.contains('kabartma tozu') ||
+        normalized.contains('maya')) {
       return 'paket';
     }
 
@@ -183,14 +196,18 @@ class ServingScalerService {
   }
 
   static int getOriginalServings(Map<String, dynamic> rawJson) {
-    final servingsRaw = rawJson['servings'] ??
+    final servingsRaw =
+        rawJson['servings'] ??
         rawJson['portion_count'] ??
         rawJson['serving_count'] ??
         rawJson['yield'];
     return int.tryParse(servingsRaw?.toString() ?? '') ?? 1;
   }
 
-  static double calculateMultiplier(int originalServings, int selectedServings) {
+  static double calculateMultiplier(
+    int originalServings,
+    int selectedServings,
+  ) {
     if (originalServings <= 0) return 1.0;
     return selectedServings / originalServings;
   }
@@ -215,7 +232,10 @@ class ServingScalerService {
       if (name.isNotEmpty) {
         final capitalName = name[0].toUpperCase() + name.substring(1);
         return ParsedIngredient(
-            name: capitalName, amount: amount, originalRaw: raw.trim());
+          name: capitalName,
+          amount: amount,
+          originalRaw: raw.trim(),
+        );
       }
     }
 
@@ -224,14 +244,18 @@ class ServingScalerService {
         ? trimmed[0].toUpperCase() + trimmed.substring(1)
         : trimmed;
     return ParsedIngredient(
-        name: capitalName, amount: '', originalRaw: raw.trim());
+      name: capitalName,
+      amount: '',
+      originalRaw: raw.trim(),
+    );
   }
 
   static String scaleIngredientAmount(String amount, double multiplier) {
     if (multiplier == 1.0 || amount.isEmpty) return amount;
 
-    final numMatch = RegExp(r'^([\d½¼¾⅓⅔]+(?:[.,/][\d]+)?|yarım|çeyrek)')
-        .firstMatch(amount);
+    final numMatch = RegExp(
+      r'^([\d½¼¾⅓⅔]+(?:[.,/][\d]+)?|yarım|çeyrek)',
+    ).firstMatch(amount);
     if (numMatch == null) return amount;
 
     final numStr = numMatch.group(1)!;

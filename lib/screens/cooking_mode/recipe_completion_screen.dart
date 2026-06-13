@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/recipe_model.dart';
 import '../../services/daily_nutrition_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/favorite_service.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_profile_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -22,16 +23,17 @@ class RecipeCompletionScreen extends StatefulWidget {
   State<RecipeCompletionScreen> createState() => _RecipeCompletionScreenState();
 }
 
-class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with SingleTickerProviderStateMixin {
+class _RecipeCompletionScreenState extends State<RecipeCompletionScreen>
+    with SingleTickerProviderStateMixin {
   bool _hasLoggedCompletion = false;
   DailyNutritionTotals _todayTotals = DailyNutritionTotals.zero();
-  
+
   bool _isFavorite = false;
-  
+
   // Fallback Goals
   final double dailyCalorieGoal = 2250;
   final double dailyProteinGoal = 80;
-  
+
   int _rating = 0;
   late AnimationController _animCtrl;
   late Animation<double> _scaleAnim;
@@ -39,61 +41,71 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
   @override
   void initState() {
     super.initState();
-    _animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _scaleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutBack));
-    
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnim = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutBack));
+
     _checkFavorite();
     _logAndFetchNutrition();
     _animCtrl.forward();
   }
 
   Future<void> _checkFavorite() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
-      return;
-    }
-    try {
-      final response = await Supabase.instance.client
-          .from('favorite_recipes')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('recipe_id', widget.recipe.id)
-          .maybeSingle();
-          
-      if (mounted) {
-        setState(() {
-          _isFavorite = response != null;
-        });
-      }
-    } catch (e) {
-      debugPrint('Favori kontrol hatası: $e');
+    final isFav = await FavoriteService.isFavorite(widget.recipe.id);
+    if (mounted) {
+      setState(() {
+        _isFavorite = isFav;
+      });
     }
   }
 
   Future<void> _toggleFavorite() async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-    
+    if (user == null) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Favorilere eklemek için giriş yapmalısınız.'),
+          ),
+        );
+      return;
+    }
+
     final wasFavorite = _isFavorite;
     setState(() => _isFavorite = !_isFavorite);
-    
+
     try {
-      if (_isFavorite) {
-        await Supabase.instance.client.from('favorite_recipes').insert({'user_id': user.id, 'recipe_id': widget.recipe.id});
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Favorilere eklendi')));
-      } else {
-        await Supabase.instance.client.from('favorite_recipes').delete().eq('user_id', user.id).eq('recipe_id', widget.recipe.id);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Favorilerden çıkarıldı')));
+      final newStatus = await FavoriteService.toggleFavorite(widget.recipe.id);
+      if (mounted) {
+        setState(() => _isFavorite = newStatus);
+        if (newStatus) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Favorilere eklendi')));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Favorilerden çıkarıldı')),
+          );
+        }
       }
     } catch (e) {
       setState(() => _isFavorite = wasFavorite);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Favori işlemi tamamlanamadı.')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Favori işlemi tamamlanamadı.')),
+        );
     }
   }
-  
+
   void _shareRecipe() {
     final title = widget.recipe.shownTitle;
-    final text = 'ChefRay\'de $title tarifini tamamladım! 🎉\nBu öğün: ${scaledCalories.toInt()} kcal, ${scaledProtein.toInt()}g protein.';
+    final text =
+        'ChefRay\'de $title tarifini tamamladım! 🎉\nBu öğün: ${scaledCalories.toInt()} kcal, ${scaledProtein.toInt()}g protein.';
     Share.share(text);
   }
 
@@ -105,22 +117,25 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
 
   Future<void> _logAndFetchNutrition() async {
     if (_hasLoggedCompletion) return;
-    
-    final success = await DailyNutritionService.logCompletedRecipe(widget.recipe, widget.servingMultiplier);
+
+    final success = await DailyNutritionService.logCompletedRecipe(
+      widget.recipe,
+      widget.servingMultiplier,
+    );
     if (success) {
       _hasLoggedCompletion = true;
     }
-    
+
     final totals = await DailyNutritionService.getTodayNutritionTotals();
-    
+
     if (mounted) {
       final provider = context.read<UserProfileProvider>();
       final currentGoals = provider.todayGoals;
-      
+
       if (currentGoals != null) {
         double newCalories = totals.calories;
         double newProtein = totals.protein;
-        
+
         // If the user has manually overridden the values, we add to their override
         if (currentGoals.caloriesConsumed > 0) {
           newCalories = currentGoals.caloriesConsumed + scaledCalories;
@@ -128,12 +143,12 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
         if (currentGoals.proteinConsumed > 0) {
           newProtein = currentGoals.proteinConsumed + scaledProtein;
         }
-        
+
         final updatedGoals = currentGoals.copyWith(
           caloriesConsumed: newCalories,
           proteinConsumed: newProtein,
         );
-        
+
         // Fire and forget update
         provider.updateDailyGoals(updatedGoals);
       }
@@ -144,11 +159,19 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
     }
   }
 
-  double get scaledCalories => (double.tryParse(widget.recipe.calories.toString()) ?? 0.0) * widget.servingMultiplier;
-  double get scaledProtein => (double.tryParse(widget.recipe.protein.toString()) ?? 0.0) * widget.servingMultiplier;
-  double get scaledCarbs => (double.tryParse(widget.recipe.carbs.toString()) ?? 0.0) * widget.servingMultiplier;
-  double get scaledFat => (double.tryParse(widget.recipe.fat.toString()) ?? 0.0) * widget.servingMultiplier;
-  
+  double get scaledCalories =>
+      (double.tryParse(widget.recipe.calories.toString()) ?? 0.0) *
+      widget.servingMultiplier;
+  double get scaledProtein =>
+      (double.tryParse(widget.recipe.protein.toString()) ?? 0.0) *
+      widget.servingMultiplier;
+  double get scaledCarbs =>
+      (double.tryParse(widget.recipe.carbs.toString()) ?? 0.0) *
+      widget.servingMultiplier;
+  double get scaledFat =>
+      (double.tryParse(widget.recipe.fat.toString()) ?? 0.0) *
+      widget.servingMultiplier;
+
   String _getChefRayComment() {
     if (_todayTotals.calories > dailyCalorieGoal * 1.1) {
       return 'Bugün kalori hedefinin üzerine çıktın. Akşam için daha hafif ve sebze ağırlıklı seçimler iyi olabilir.';
@@ -167,12 +190,18 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.ios_share_rounded, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(
+              Icons.ios_share_rounded,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: _shareRecipe,
           ),
         ],
@@ -219,21 +248,38 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                 color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3), blurRadius: 20, offset: Offset(0, 10)),
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: Offset(0, 10),
+                  ),
                 ],
               ),
-              child: Icon(Icons.check_rounded, color: Theme.of(context).colorScheme.surface, size: 40),
+              child: Icon(
+                Icons.check_rounded,
+                color: Theme.of(context).colorScheme.surface,
+                size: 40,
+              ),
             ),
             const SizedBox(height: 20),
             Text(
               'Afiyet Olsun! 🎉',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 28, fontWeight: FontWeight.w900),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '${widget.recipe.shownTitle} tarifini başarıyla tamamladın.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -250,9 +296,16 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35), width: 1.5),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
@@ -267,24 +320,47 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                 CircularProgressIndicator(
                   value: progress,
                   strokeWidth: 8,
-                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(scaledCalories.toInt().toString(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Theme.of(context).colorScheme.onSurface)),
-                      Text('kcal', style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      Text(
+                        scaledCalories.toInt().toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'kcal',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 Positioned(
-                  top: 0, right: 0,
+                  top: 0,
+                  right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle),
-                    child: Icon(Icons.local_fire_department_rounded, color: Theme.of(context).colorScheme.surface, size: 12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.local_fire_department_rounded,
+                      color: Theme.of(context).colorScheme.surface,
+                      size: 12,
+                    ),
                   ),
                 ),
               ],
@@ -296,13 +372,33 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Harika iş çıkardın! 💪', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
+                Text(
+                  'Harika iş çıkardın! 💪',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Günlük hedefine eklendi.', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                    Text('%$percent', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 16)),
+                    Text(
+                      'Günlük hedefine eklendi.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      '%$percent',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -311,7 +407,9 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6,
-                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -323,7 +421,15 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text('🔥 ${_todayTotals.calories.toInt()} / ${dailyCalorieGoal.toInt()} kcal', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        child: Text(
+                          '🔥 ${_todayTotals.calories.toInt()} / ${dailyCalorieGoal.toInt()} kcal',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -331,7 +437,15 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
-                        child: Text('Kalan: ${(dailyCalorieGoal - _todayTotals.calories).clamp(0, 9999).toInt()} kcal', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        child: Text(
+                          'Kalan: ${(dailyCalorieGoal - _todayTotals.calories).clamp(0, 9999).toInt()} kcal',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -347,32 +461,81 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
   Widget _buildMacrosRow() {
     return Row(
       children: [
-        Expanded(child: _buildMacroItem('Protein', scaledProtein, Icons.fitness_center_rounded, dailyProteinGoal)),
+        Expanded(
+          child: _buildMacroItem(
+            'Protein',
+            scaledProtein,
+            Icons.fitness_center_rounded,
+            dailyProteinGoal,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildMacroItem('Karb.', scaledCarbs, Icons.grass_rounded, 250)),
+        Expanded(
+          child: _buildMacroItem(
+            'Karb.',
+            scaledCarbs,
+            Icons.grass_rounded,
+            250,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildMacroItem('Yağ', scaledFat, Icons.water_drop_rounded, 70)),
+        Expanded(
+          child: _buildMacroItem(
+            'Yağ',
+            scaledFat,
+            Icons.water_drop_rounded,
+            70,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildMacroItem(String label, double amount, IconData icon, double goal) {
+  Widget _buildMacroItem(
+    String label,
+    double amount,
+    IconData icon,
+    double goal,
+  ) {
     int pct = goal > 0 ? ((amount / goal) * 100).toInt() : 0;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35), width: 1.5),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
       ),
       child: Column(
         children: [
           Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
           const SizedBox(height: 8),
-          Text('+${amount.toInt()}g', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
-          Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            '+${amount.toInt()}g',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text('Hedefin %$pct\'si', style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+          Text(
+            'Hedefin %$pct\'si',
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -384,7 +547,9 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,7 +558,9 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: ClipOval(
@@ -404,7 +571,11 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
                     debugPrint('Mascot asset not found, fallback icon used.');
-                    return Icon(Icons.smart_toy_rounded, color: Theme.of(context).colorScheme.primary, size: 28);
+                    return Icon(
+                      Icons.smart_toy_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 28,
+                    );
                   },
                 ),
               ),
@@ -417,12 +588,30 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
               children: [
                 Row(
                   children: [
-                    Text('ChefRay Yorumu ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
-                    Icon(Icons.auto_awesome_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
+                    Text(
+                      'ChefRay Yorumu ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 16,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(_getChefRayComment(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4)),
+                Text(
+                  _getChefRayComment(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
@@ -438,13 +627,28 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+        ),
       ),
       child: Column(
         children: [
-          Text('Tarifi beğendin mi?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.onSurface)),
+          Text(
+            'Tarifi beğendin mi?',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('Deneyimini bizimle paylaş.', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            'Deneyimini bizimle paylaş.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -453,7 +657,10 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
               return GestureDetector(
                 onTap: () async {
                   setState(() => _rating = index + 1);
-                  final success = await DailyNutritionService.rateRecipe(widget.recipe.id, _rating);
+                  final success = await DailyNutritionService.rateRecipe(
+                    widget.recipe.id,
+                    _rating,
+                  );
                   if (!mounted) return;
                   if (success) {
                     String msg = '';
@@ -462,20 +669,32 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
                     } else if (_rating == 4) {
                       msg = 'Geri bildirimin için teşekkürler 💚';
                     } else if (_rating == 3) {
-                      msg = 'Teşekkürler, deneyimini geliştirmeye devam edeceğiz.';
+                      msg =
+                          'Teşekkürler, deneyimini geliştirmeye devam edeceğiz.';
                     } else {
-                      msg = 'Geri bildirimin bizim için değerli. Bu tarifi iyileştireceğiz.';
+                      msg =
+                          'Geri bildirimin bizim için değerli. Bu tarifi iyileştireceğiz.';
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(msg)));
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Puan kaydedilemedi, tekrar deneyin.')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Puan kaydedilemedi, tekrar deneyin.'),
+                      ),
+                    );
                   }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Icon(
                     isSelected ? Icons.star_rounded : Icons.star_border_rounded,
-                    color: isSelected ? Colors.amber : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: isSelected
+                        ? Colors.amber
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     size: 36,
                   ),
                 ),
@@ -492,8 +711,12 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
       children: [
         Expanded(
           child: _actionBtn(
-            icon: _isFavorite ? Icons.favorite_rounded : Icons.bookmark_border_rounded,
-            iconColor: _isFavorite ? Colors.redAccent : Theme.of(context).colorScheme.primary,
+            icon: _isFavorite
+                ? Icons.favorite_rounded
+                : Icons.bookmark_border_rounded,
+            iconColor: _isFavorite
+                ? Colors.redAccent
+                : Theme.of(context).colorScheme.primary,
             label: _isFavorite ? 'Favorilerde' : 'Favorilere Ekle',
             onTap: _toggleFavorite,
           ),
@@ -518,7 +741,12 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
     );
   }
 
-  Widget _actionBtn({required IconData icon, required String label, required VoidCallback onTap, Color? iconColor}) {
+  Widget _actionBtn({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -526,13 +754,29 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35), width: 1.5),
+          border: Border.all(
+            color: Theme.of(
+              context,
+            ).colorScheme.outline.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
         ),
         child: Column(
           children: [
-            Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.primary, size: 24),
+            Icon(
+              icon,
+              color: iconColor ?? Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -543,21 +787,36 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
     return Column(
       children: [
         ElevatedButton(
-          onPressed: () => context.go('/recipes'),
+          onPressed: () => context.go('/recipe-list'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 18),
             minimumSize: const Size(double.infinity, 56),
             elevation: 8,
-            shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+            shadowColor: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.4),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Yeni Tarif Planla', style: TextStyle(color: Theme.of(context).colorScheme.surface, fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                'Yeni Tarif Planla',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.surface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(width: 8),
-              Icon(Icons.restaurant_menu_rounded, color: Theme.of(context).colorScheme.surface, size: 20),
+              Icon(
+                Icons.restaurant_menu_rounded,
+                color: Theme.of(context).colorScheme.surface,
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -568,9 +827,19 @@ class _RecipeCompletionScreenState extends State<RecipeCompletionScreen> with Si
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.home_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
+              Icon(
+                Icons.home_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 18,
+              ),
               const SizedBox(width: 8),
-              Text('Ana Sayfaya Dön', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+              Text(
+                'Ana Sayfaya Dön',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),

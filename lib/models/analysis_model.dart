@@ -65,8 +65,16 @@ class AnalysisMockData {
     caloriePercentage: 0.66,
     remainingCalories: 750,
     goals: [
-      GoalStatus(name: 'Yüksek Protein', status: 'uygun', label: 'Hedefe uygun'),
-      GoalStatus(name: 'Glutensiz', status: 'uygun_degil', label: 'Hedefe uygun değil'),
+      GoalStatus(
+        name: 'Yüksek Protein',
+        status: 'uygun',
+        label: 'Hedefe uygun',
+      ),
+      GoalStatus(
+        name: 'Glutensiz',
+        status: 'uygun_degil',
+        label: 'Hedefe uygun değil',
+      ),
       GoalStatus(name: 'Düşük Şeker', status: 'uygun', label: 'Hedefe uygun'),
       GoalStatus(name: 'Düşük Yağ', status: 'kismen', label: 'Kısmen uygun'),
     ],

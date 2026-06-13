@@ -27,7 +27,9 @@ class DocumentHistoryService {
           .eq('user_id', uid)
           .order('created_at', ascending: false);
 
-      return (response as List).map((e) => UploadedDocumentModel.fromJson(e)).toList();
+      return (response as List)
+          .map((e) => UploadedDocumentModel.fromJson(e))
+          .toList();
     } catch (e) {
       debugPrint('Error getting user documents: $e');
       return [];
@@ -50,7 +52,9 @@ class DocumentHistoryService {
           .eq('document_type', type)
           .order('created_at', ascending: false);
 
-      return (response as List).map((e) => UploadedDocumentModel.fromJson(e)).toList();
+      return (response as List)
+          .map((e) => UploadedDocumentModel.fromJson(e))
+          .toList();
     } catch (e) {
       debugPrint('Error getting documents by type: $e');
       return [];

@@ -30,9 +30,7 @@ class OptionCard extends StatelessWidget {
           color: AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.divider,
+            color: isSelected ? AppColors.primary : AppColors.divider,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -86,10 +84,7 @@ class OptionCard extends StatelessWidget {
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: AppTextStyles.bodySmall,
-                    ),
+                    Text(subtitle!, style: AppTextStyles.bodySmall),
                   ],
                 ],
               ),
@@ -111,7 +106,11 @@ class OptionCard extends StatelessWidget {
                         color: AppColors.textDark,
                       ),
                     )
-                  : const SizedBox(key: ValueKey('empty'), width: 28, height: 28),
+                  : const SizedBox(
+                      key: ValueKey('empty'),
+                      width: 28,
+                      height: 28,
+                    ),
             ),
           ],
         ),

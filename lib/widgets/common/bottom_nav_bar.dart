@@ -98,13 +98,17 @@ class _NavItem extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: isActive ? Theme.of(context).colorScheme.primary : AppColors.navInactive,
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary
+                  : AppColors.navInactive,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: AppTextStyles.labelSmall.copyWith(
-                color: isActive ? Theme.of(context).colorScheme.primary : AppColors.navInactive,
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : AppColors.navInactive,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                 fontSize: 10,
               ),
@@ -137,13 +141,17 @@ class _CenterFab extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.4),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                   spreadRadius: 0,
                 ),
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.15),
                   blurRadius: 30,
                   offset: const Offset(0, 2),
                   spreadRadius: 4,

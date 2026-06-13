@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../widgets/common/goal_reached_popup.dart';
+import '../../../../providers/user_profile_provider.dart';
+import '../../../../models/user_health_profile.dart';
 
 class WeightGoalTrackerCard extends StatefulWidget {
   final double fallbackWeight;
 
-  const WeightGoalTrackerCard({
-    super.key,
-    required this.fallbackWeight,
-  });
+  const WeightGoalTrackerCard({super.key, required this.fallbackWeight});
 
   @override
   State<WeightGoalTrackerCard> createState() => _WeightGoalTrackerCardState();
@@ -15,7 +17,6 @@ class WeightGoalTrackerCard extends StatefulWidget {
 
 class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
   double? _startWeight;
-  double? _currentWeight;
   double? _targetWeight;
   bool _isInitialized = false;
 
@@ -29,7 +30,6 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _startWeight = prefs.getDouble('wgt_startWeight');
-      _currentWeight = prefs.getDouble('wgt_currentWeight');
       _targetWeight = prefs.getDouble('wgt_targetWeight');
       _isInitialized = true;
     });
@@ -38,29 +38,121 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
   Future<void> _saveData(double start, double current, double target) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('wgt_startWeight', start);
-    await prefs.setDouble('wgt_currentWeight', current);
     await prefs.setDouble('wgt_targetWeight', target);
-    await prefs.setString('wgt_lastUpdatedDate', DateTime.now().toIso8601String());
+    await prefs.setString(
+      'wgt_lastUpdatedDate',
+      DateTime.now().toIso8601String(),
+    );
+
     setState(() {
       _startWeight = start;
-      _currentWeight = current;
       _targetWeight = target;
     });
+
+    debugPrint('Weight update started: newWeight: $current, source: _saveData');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowGoalReachedPopup(current);
+    });
+
+    if (!mounted) return;
+    final provider = context.read<UserProfileProvider>();
+    UserHealthProfile? hp = provider.healthProfile;
+
+    if (hp == null) {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        hp = UserHealthProfile(userId: userId, weightKg: current);
+      }
+    } else {
+      hp = hp.copyWith(weightKg: current);
+    }
+
+    if (hp != null) {
+      final success = await provider.updateHealthProfile(hp);
+      debugPrint(
+        'Weight update saved: success: $success, error: ${provider.errorMessage}, updatedProfileWeight: ${provider.healthProfile?.weightKg}',
+      );
+
+      debugPrint('Body analysis recalculated:');
+      debugPrint('weight: ${hp.weightKg}');
+      debugPrint('height: ${hp.heightCm}');
+      debugPrint('bmi: ${hp.bmi}');
+    }
   }
 
   Future<void> _saveCurrentWeightOnly(double current) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('wgt_currentWeight', current);
-    await prefs.setString('wgt_lastUpdatedDate', DateTime.now().toIso8601String());
-    setState(() {
-      _currentWeight = current;
+    await prefs.setString(
+      'wgt_lastUpdatedDate',
+      DateTime.now().toIso8601String(),
+    );
+
+    debugPrint(
+      'Weight update started: newWeight: $current, source: _saveCurrentWeightOnly',
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowGoalReachedPopup(current);
     });
+
+    if (!mounted) return;
+    final provider = context.read<UserProfileProvider>();
+    UserHealthProfile? hp = provider.healthProfile;
+
+    if (hp == null) {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        hp = UserHealthProfile(userId: userId, weightKg: current);
+      }
+    } else {
+      hp = hp.copyWith(weightKg: current);
+    }
+
+    if (hp != null) {
+      final success = await provider.updateHealthProfile(hp);
+      debugPrint(
+        'Weight update saved: success: $success, error: ${provider.errorMessage}, updatedProfileWeight: ${provider.healthProfile?.weightKg}',
+      );
+
+      debugPrint('Body analysis recalculated:');
+      debugPrint('weight: ${hp.weightKg}');
+      debugPrint('height: ${hp.heightCm}');
+      debugPrint('bmi: ${hp.bmi}');
+    }
   }
 
-  bool get _hasData => _startWeight != null && _currentWeight != null && _targetWeight != null;
+  Future<void> _checkAndShowGoalReachedPopup(double latestCurrentWeight) async {
+    if (!_hasData) return;
+
+    // Sadece mevcut kilo hedefe çok yakınsa/eşitse göster
+    final isGoalReached = (latestCurrentWeight - targetWeight).abs() < 0.1;
+
+    if (isGoalReached) {
+      if (mounted) {
+        debugPrint('Goal popup trigger:');
+        debugPrint('- weightSavedClicked: true');
+        debugPrint('- currentWeight: $latestCurrentWeight');
+        debugPrint('- targetWeight: $targetWeight');
+        debugPrint('- isGoalReached: $isGoalReached');
+        debugPrint('- popupScheduledAt: ${DateTime.now().toIso8601String()}');
+        debugPrint('- popupShownAt: ${DateTime.now().toIso8601String()}');
+        debugPrint('- delayMs: 0');
+
+        GoalReachedPopup.show(
+          context,
+          onNewGoalTap: () {
+            _openWeightForm(isEditTarget: true);
+          },
+        );
+      }
+    }
+  }
+
+  bool get _hasData => _startWeight != null && _targetWeight != null;
 
   double get startWeight => _startWeight ?? widget.fallbackWeight;
-  double get currentWeight => _currentWeight ?? widget.fallbackWeight;
+  double get currentWeight => widget.fallbackWeight;
   double get targetWeight => _targetWeight ?? (widget.fallbackWeight - 5.0);
 
   double get _diff => currentWeight - startWeight;
@@ -69,13 +161,12 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
 
   double get _progress {
     if (_totalGoal == 0) return 0.0;
-    // Eğer kilo verme hedefi ise (start > target)
     if (startWeight > targetWeight) {
-      return ((startWeight - currentWeight) / (startWeight - targetWeight)).clamp(0.0, 1.0);
-    } 
-    // Eğer kilo alma hedefi ise (target > start)
-    else if (targetWeight > startWeight) {
-      return ((currentWeight - startWeight) / (targetWeight - startWeight)).clamp(0.0, 1.0);
+      return ((startWeight - currentWeight) / (startWeight - targetWeight))
+          .clamp(0.0, 1.0);
+    } else if (targetWeight > startWeight) {
+      return ((currentWeight - startWeight) / (targetWeight - startWeight))
+          .clamp(0.0, 1.0);
     }
     return 0.0;
   }
@@ -96,9 +187,9 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => _FullWeightForm(
-        initialStart: _startWeight ?? widget.fallbackWeight,
-        initialCurrent: _currentWeight ?? widget.fallbackWeight,
-        initialTarget: _targetWeight ?? (widget.fallbackWeight - 5.0),
+        initialStart: startWeight,
+        initialCurrent: currentWeight,
+        initialTarget: targetWeight,
         onSave: (start, current, target) {
           _saveData(start, current, target);
         },
@@ -123,7 +214,10 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const SizedBox(height: 250, child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(
+        height: 250,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     final cs = Theme.of(context).colorScheme;
@@ -136,7 +230,7 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -170,10 +264,7 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
                   splashRadius: 20,
                 ),
               if (_hasData) const SizedBox(width: 8),
-              _AddWeightButton(
-                onTap: () => _openWeightForm(),
-                colorScheme: cs,
-              ),
+              _AddWeightButton(onTap: () => _openWeightForm(), colorScheme: cs),
             ],
           ),
           const SizedBox(height: 20),
@@ -196,7 +287,9 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
                 value: '${currentWeight.toStringAsFixed(1)} kg',
                 subtitle: _getDiffSubtitle(),
                 icon: Icons.monitor_weight_outlined,
-                accentColor: _diff <= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE53935),
+                accentColor: _diff <= 0
+                    ? const Color(0xFF4CAF50)
+                    : const Color(0xFFE53935),
                 colorScheme: cs,
                 isDark: isDark,
               ),
@@ -259,9 +352,11 @@ class _WeightGoalTrackerCardState extends State<WeightGoalTrackerCard> {
 
   String _getStatusMessage() {
     if (!_hasData) return 'Kilo takibini başlat. ✨';
-    if (_progressPercent >= 100) return 'Hedefine ulaştın, harika gidiyorsun! 🏆';
+    if (_progressPercent >= 100)
+      return 'Hedefine ulaştın, harika gidiyorsun! 🏆';
     if (_progressPercent > 0) return 'Hedefe doğru ilerliyorsun. 💚';
-    if (_progressPercent == 0 && _diff != 0) return 'Takibe devam et, küçük adımlar önemli. 🌱';
+    if (_progressPercent == 0 && _diff != 0)
+      return 'Takibe devam et, küçük adımlar önemli. 🌱';
     return 'Kilo takibini başlat. ✨';
   }
 }
@@ -285,7 +380,7 @@ class _AddWeightButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: colorScheme.primary.withValues(alpha:0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
               width: 1.2,
             ),
           ),
@@ -339,12 +434,12 @@ class _StatBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark
               ? colorScheme.surfaceContainerHighest
-              : accentColor.withValues(alpha:0.06),
+              : accentColor.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isDark
-                ? colorScheme.outline.withValues(alpha:0.15)
-                : accentColor.withValues(alpha:0.12),
+                ? colorScheme.outline.withValues(alpha: 0.15)
+                : accentColor.withValues(alpha: 0.12),
             width: 0.8,
           ),
         ),
@@ -367,15 +462,16 @@ class _StatBox extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurfaceVariant,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
             FittedBox(
@@ -399,7 +495,7 @@ class _StatBox extends StatelessWidget {
 
 // ── Timeline Painter ──
 class TimelineTrackPainter extends CustomPainter {
-  final double progress; 
+  final double progress;
   final Color activeColor;
   final Color inactiveColor;
 
@@ -421,7 +517,11 @@ class TimelineTrackPainter extends CustomPainter {
       ..strokeWidth = 4.0
       ..strokeCap = StrokeCap.round;
     if (activeWidth > 0) {
-      canvas.drawLine(Offset(0, centerY), Offset(activeWidth, centerY), activePaint);
+      canvas.drawLine(
+        Offset(0, centerY),
+        Offset(activeWidth, centerY),
+        activePaint,
+      );
     }
 
     // Inactive dotted/dashed line
@@ -436,16 +536,20 @@ class TimelineTrackPainter extends CustomPainter {
     while (startX < trackWidth) {
       double endX = startX + dashWidth;
       if (endX > trackWidth) endX = trackWidth;
-      canvas.drawLine(Offset(startX, centerY), Offset(endX, centerY), inactivePaint);
+      canvas.drawLine(
+        Offset(startX, centerY),
+        Offset(endX, centerY),
+        inactivePaint,
+      );
       startX += dashWidth + dashSpace;
     }
   }
 
   @override
-  bool shouldRepaint(covariant TimelineTrackPainter oldDelegate) => 
-    oldDelegate.progress != progress ||
-    oldDelegate.activeColor != activeColor ||
-    oldDelegate.inactiveColor != inactiveColor;
+  bool shouldRepaint(covariant TimelineTrackPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.activeColor != activeColor ||
+      oldDelegate.inactiveColor != inactiveColor;
 }
 
 // ── Progress Section (Timeline Journey) ──
@@ -470,7 +574,8 @@ class _ProgressSection extends StatelessWidget {
   Widget build(BuildContext context) {
     double safeProgress = 0.0;
     if (startWeight != targetWeight) {
-      safeProgress = (currentWeight - startWeight) / (targetWeight - startWeight);
+      safeProgress =
+          (currentWeight - startWeight) / (targetWeight - startWeight);
       safeProgress = safeProgress.clamp(0.0, 1.0);
     } else {
       safeProgress = 1.0;
@@ -479,7 +584,7 @@ class _ProgressSection extends StatelessWidget {
     List<int> interWeights = [];
     List<double> placeholderRatios = [];
     double diff = (startWeight - targetWeight).abs();
-    
+
     if (diff > 0 && diff <= 12) {
       int startInt = startWeight.round();
       int targetInt = targetWeight.round();
@@ -498,7 +603,9 @@ class _ProgressSection extends StatelessWidget {
       }
     }
 
-    Color inactiveColor = isDark ? colorScheme.outline.withAlpha(80) : const Color(0xFFCFD8DC);
+    Color inactiveColor = isDark
+        ? colorScheme.outline.withAlpha(80)
+        : const Color(0xFFCFD8DC);
 
     return Container(
       width: double.infinity,
@@ -537,7 +644,8 @@ class _ProgressSection extends StatelessWidget {
 
                 // 2) Intermediate Dots & Texts
                 ...interWeights.map((w) {
-                  double ratio = (w - startWeight) / (targetWeight - startWeight);
+                  double ratio =
+                      (w - startWeight) / (targetWeight - startWeight);
                   ratio = ratio.clamp(0.0, 1.0);
                   double dotLeft = 36.0 + ratio * trackWidth;
                   bool isPassed = ratio <= safeProgress;
@@ -545,7 +653,8 @@ class _ProgressSection extends StatelessWidget {
                     top: 56 - 4, // center at 56, size 8 => top 52
                     left: dotLeft - 4,
                     child: Container(
-                      width: 8, height: 8,
+                      width: 8,
+                      height: 8,
                       decoration: BoxDecoration(
                         color: isPassed ? colorScheme.primary : inactiveColor,
                         shape: BoxShape.circle,
@@ -554,7 +663,8 @@ class _ProgressSection extends StatelessWidget {
                   );
                 }),
                 ...interWeights.map((w) {
-                  double ratio = (w - startWeight) / (targetWeight - startWeight);
+                  double ratio =
+                      (w - startWeight) / (targetWeight - startWeight);
                   ratio = ratio.clamp(0.0, 1.0);
                   double dotLeft = 36.0 + ratio * trackWidth;
                   return Positioned(
@@ -578,10 +688,11 @@ class _ProgressSection extends StatelessWidget {
                   double dotLeft = 36.0 + ratio * trackWidth;
                   bool isPassed = ratio <= safeProgress;
                   return Positioned(
-                    top: 56 - 4, 
+                    top: 56 - 4,
                     left: dotLeft - 4,
                     child: Container(
-                      width: 8, height: 8,
+                      width: 8,
+                      height: 8,
                       decoration: BoxDecoration(
                         color: isPassed ? colorScheme.primary : inactiveColor,
                         shape: BoxShape.circle,
@@ -592,67 +703,125 @@ class _ProgressSection extends StatelessWidget {
 
                 // 3) Start Node Elements
                 Positioned(
-                  top: 24, left: 0, width: 72,
+                  top: 24,
+                  left: 0,
+                  width: 72,
                   child: Text(
                     '${startWeight.toStringAsFixed(1)} kg',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                  ),
-                ),
-                Positioned(
-                  top: 56 - 8, left: 36 - 8,
-                  child: Container(
-                    width: 16, height: 16,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.primary, width: 3.5),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 68, left: 0, width: 72,
+                  top: 56 - 8,
+                  left: 36 - 8,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colorScheme.primary,
+                        width: 3.5,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 68,
+                  left: 0,
+                  width: 72,
                   child: Column(
                     children: [
-                      Text(startWeight.round().toString(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                      Text('Başlangıç', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant)),
+                      Text(
+                        startWeight.round().toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'Başlangıç',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
                 // 4) Target Node Elements
                 Positioned(
-                  top: 24, right: 0, width: 72,
+                  top: 24,
+                  right: 0,
+                  width: 72,
                   child: Text(
                     '${targetWeight.toStringAsFixed(1)} kg',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                  ),
-                ),
-                Positioned(
-                  top: 56 - 8, right: 36 - 8,
-                  child: Container(
-                    width: 16, height: 16,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: safeProgress >= 1.0 ? colorScheme.primary : inactiveColor, width: 3.5),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 68, right: 0, width: 72,
+                  top: 56 - 8,
+                  right: 36 - 8,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: safeProgress >= 1.0
+                            ? colorScheme.primary
+                            : inactiveColor,
+                        width: 3.5,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 68,
+                  right: 0,
+                  width: 72,
                   child: Column(
                     children: [
-                      Text(targetWeight.round().toString(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                      Text('Hedef', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant)),
+                      Text(
+                        targetWeight.round().toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'Hedef',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
                 // 5) Current Node & Badge
                 Positioned(
-                  top: 0, left: badgeLeft, width: 56,
+                  top: 0,
+                  left: badgeLeft,
+                  width: 56,
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
@@ -662,25 +831,43 @@ class _ProgressSection extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       '${currentWeight.toStringAsFixed(1)} kg',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
                 // Badge tail (tiny arrow down)
                 Positioned(
-                  top: 18, left: pinLeft - 12,
-                  child: Icon(Icons.arrow_drop_down, size: 24, color: colorScheme.primary),
+                  top: 18,
+                  left: pinLeft - 12,
+                  child: Icon(
+                    Icons.arrow_drop_down,
+                    size: 24,
+                    color: colorScheme.primary,
+                  ),
                 ),
                 Positioned(
-                  top: 56 - 7, left: pinLeft - 7,
+                  top: 56 - 7,
+                  left: pinLeft - 7,
                   child: Container(
-                    width: 14, height: 14,
+                    width: 14,
+                    height: 14,
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.surface,
+                        width: 2,
+                      ),
                       boxShadow: [
-                        BoxShadow(color: colorScheme.primary.withAlpha(80), blurRadius: 4, spreadRadius: 1)
+                        BoxShadow(
+                          color: colorScheme.primary.withAlpha(80),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
                       ],
                     ),
                   ),
@@ -718,21 +905,21 @@ class _BottomSection extends StatelessWidget {
           end: Alignment.centerRight,
           colors: isDark
               ? [
-                  colorScheme.primary.withValues(alpha:0.08),
-                  colorScheme.surfaceContainerHighest.withValues(alpha:0.6),
-                  colorScheme.primary.withValues(alpha:0.05),
+                  colorScheme.primary.withValues(alpha: 0.08),
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                  colorScheme.primary.withValues(alpha: 0.05),
                 ]
               : [
-                  const Color(0xFFE8F5E9).withValues(alpha:0.7),
-                  const Color(0xFFF1F8E9).withValues(alpha:0.5),
-                  const Color(0xFFE0F2F1).withValues(alpha:0.6),
+                  const Color(0xFFE8F5E9).withValues(alpha: 0.7),
+                  const Color(0xFFF1F8E9).withValues(alpha: 0.5),
+                  const Color(0xFFE0F2F1).withValues(alpha: 0.6),
                 ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark
-              ? colorScheme.primary.withValues(alpha:0.12)
-              : const Color(0xFFC8E6C9).withValues(alpha:0.6),
+              ? colorScheme.primary.withValues(alpha: 0.12)
+              : const Color(0xFFC8E6C9).withValues(alpha: 0.6),
           width: 0.8,
         ),
       ),
@@ -748,7 +935,9 @@ class _BottomSection extends StatelessWidget {
             errorBuilder: (_, _, _) => Icon(
               Icons.star_rounded,
               size: 36,
-              color: isDark ? colorScheme.primary.withValues(alpha:0.6) : const Color(0xFFFFC107),
+              color: isDark
+                  ? colorScheme.primary.withValues(alpha: 0.6)
+                  : const Color(0xFFFFC107),
             ),
           ),
           const SizedBox(width: 8),
@@ -759,9 +948,14 @@ class _BottomSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha:isDark ? 0.18 : 0.10),
+                    color: colorScheme.primary.withValues(
+                      alpha: isDark ? 0.18 : 0.10,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -797,7 +991,9 @@ class _BottomSection extends StatelessWidget {
             errorBuilder: (_, _, _) => Icon(
               Icons.monitor_weight_outlined,
               size: 64,
-              color: isDark ? colorScheme.onSurfaceVariant.withValues(alpha:0.5) : const Color(0xFF81C784),
+              color: isDark
+                  ? colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                  : const Color(0xFF81C784),
             ),
           ),
         ],
@@ -833,9 +1029,15 @@ class _FullWeightFormState extends State<_FullWeightForm> {
   @override
   void initState() {
     super.initState();
-    _startCtrl = TextEditingController(text: widget.initialStart.toStringAsFixed(1));
-    _currentCtrl = TextEditingController(text: widget.initialCurrent.toStringAsFixed(1));
-    _targetCtrl = TextEditingController(text: widget.initialTarget.toStringAsFixed(1));
+    _startCtrl = TextEditingController(
+      text: widget.initialStart.toStringAsFixed(1),
+    );
+    _currentCtrl = TextEditingController(
+      text: widget.initialCurrent.toStringAsFixed(1),
+    );
+    _targetCtrl = TextEditingController(
+      text: widget.initialTarget.toStringAsFixed(1),
+    );
   }
 
   @override
@@ -874,7 +1076,12 @@ class _FullWeightFormState extends State<_FullWeightForm> {
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: bottomInset + 24),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: bottomInset + 24,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -883,7 +1090,11 @@ class _FullWeightFormState extends State<_FullWeightForm> {
           children: [
             Text(
               'Hedef Kilo Kurulumu',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -900,8 +1111,12 @@ class _FullWeightFormState extends State<_FullWeightForm> {
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      side: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      side: BorderSide(
+                        color: cs.outline.withValues(alpha: 0.5),
+                      ),
                     ),
                     child: Text('İptal', style: TextStyle(color: cs.onSurface)),
                   ),
@@ -914,7 +1129,9 @@ class _FullWeightFormState extends State<_FullWeightForm> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: const Text('Kaydet'),
                   ),
@@ -937,11 +1154,11 @@ class _FullWeightFormState extends State<_FullWeightForm> {
         fillColor: cs.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+          borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+          borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -957,7 +1174,10 @@ class _CurrentWeightForm extends StatefulWidget {
   final double initialCurrent;
   final Function(double) onSave;
 
-  const _CurrentWeightForm({required this.initialCurrent, required this.onSave});
+  const _CurrentWeightForm({
+    required this.initialCurrent,
+    required this.onSave,
+  });
 
   @override
   State<_CurrentWeightForm> createState() => _CurrentWeightFormState();
@@ -970,7 +1190,9 @@ class _CurrentWeightFormState extends State<_CurrentWeightForm> {
   @override
   void initState() {
     super.initState();
-    _currentCtrl = TextEditingController(text: widget.initialCurrent.toStringAsFixed(1));
+    _currentCtrl = TextEditingController(
+      text: widget.initialCurrent.toStringAsFixed(1),
+    );
   }
 
   @override
@@ -1005,7 +1227,12 @@ class _CurrentWeightFormState extends State<_CurrentWeightForm> {
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: bottomInset + 24),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: bottomInset + 24,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -1014,24 +1241,34 @@ class _CurrentWeightFormState extends State<_CurrentWeightForm> {
           children: [
             Text(
               'Yeni Tartı Kaydı',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             TextFormField(
               controller: _currentCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 labelText: 'Mevcut Kilo (kg)',
                 filled: true,
                 fillColor: cs.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+                  borderSide: BorderSide(
+                    color: cs.outline.withValues(alpha: 0.5),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+                  borderSide: BorderSide(
+                    color: cs.outline.withValues(alpha: 0.5),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -1048,8 +1285,12 @@ class _CurrentWeightFormState extends State<_CurrentWeightForm> {
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      side: BorderSide(color: cs.outline.withValues(alpha:0.5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      side: BorderSide(
+                        color: cs.outline.withValues(alpha: 0.5),
+                      ),
                     ),
                     child: Text('İptal', style: TextStyle(color: cs.onSurface)),
                   ),
@@ -1062,7 +1303,9 @@ class _CurrentWeightFormState extends State<_CurrentWeightForm> {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: const Text('Kaydet'),
                   ),

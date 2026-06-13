@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cleartext (HTTP) trafiği kapalı, sadece HTTPS izinli -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+    </base-config>
+    <!-- Debug build'de kullanıcı sertifikalarına izin ver (proxy/test için) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

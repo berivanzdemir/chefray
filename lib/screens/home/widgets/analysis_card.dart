@@ -5,10 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 class AnalysisCard extends StatelessWidget {
   final bool hasAnalysis;
 
-  const AnalysisCard({
-    super.key,
-    required this.hasAnalysis,
-  });
+  const AnalysisCard({super.key, required this.hasAnalysis});
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +32,27 @@ class AnalysisCard extends StatelessWidget {
               flex: 4,
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 12, top: 20, bottom: 20, right: 4),
+                  padding: const EdgeInsets.only(
+                    left: 12,
+                    top: 20,
+                    bottom: 20,
+                    right: 4,
+                  ),
                   child: Image.asset(
                     'assets/analiz.jpeg',
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) => Center(
-                      child: Icon(Icons.analytics_rounded,
-                          color: Theme.of(context).colorScheme.primary, size: 48),
+                      child: Icon(
+                        Icons.analytics_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 48,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-            
+
             // Right Content
             Expanded(
               flex: 6,
@@ -69,8 +74,6 @@ class AnalysisCard extends StatelessWidget {
                         height: 1.15,
                         fontFamily: 'SF Pro Display',
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -83,8 +86,6 @@ class AnalysisCard extends StatelessWidget {
                         fontSize: 12.5,
                         fontFamily: 'SF Pro Display',
                       ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 10),
 
@@ -95,19 +96,22 @@ class AnalysisCard extends StatelessWidget {
                         child: Row(
                           children: [
                             _Chip(
-                                icon: Icons.water_drop_rounded,
-                                label: 'Kan Analizi',
-                                color: Colors.red.shade400),
+                              icon: Icons.water_drop_rounded,
+                              label: 'Kan Analizi',
+                              color: Colors.red.shade400,
+                            ),
                             const SizedBox(width: 6),
                             _Chip(
-                                icon: Icons.person_rounded,
-                                label: 'Diyet Profili',
-                                color: Theme.of(context).colorScheme.primary),
+                              icon: Icons.person_rounded,
+                              label: 'Diyet Profili',
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             const SizedBox(width: 6),
                             _Chip(
-                                icon: Icons.favorite_rounded,
-                                label: 'Tercihler',
-                                color: Colors.purple.shade400),
+                              icon: Icons.favorite_rounded,
+                              label: 'Tercihler',
+                              color: Colors.purple.shade400,
+                            ),
                           ],
                         ),
                       ),
@@ -128,19 +132,19 @@ class AnalysisCard extends StatelessWidget {
                             if (hasAnalysis) {
                               context.push('/personal-diet');
                             } else {
-                              context.push(
-                                  '/diet-upload?uploadType=dietPdf');
+                              context.push('/diet-upload?uploadType=dietPdf');
                             }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
-                            foregroundColor: Theme.of(context).colorScheme.surface,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surface,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -155,7 +159,9 @@ class AnalysisCard extends StatelessWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13,
-                                      color: Theme.of(context).colorScheme.surface,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
                                     ),
                                   ),
                                 ),
@@ -165,13 +171,16 @@ class AnalysisCard extends StatelessWidget {
                                 width: 26,
                                 height: 26,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.2),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surface.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 15,
-                                    color: Theme.of(context).colorScheme.surface),
+                                  Icons.arrow_forward_rounded,
+                                  size: 15,
+                                  color: Theme.of(context).colorScheme.surface,
+                                ),
                               ),
                             ],
                           ),
@@ -183,13 +192,14 @@ class AnalysisCard extends StatelessWidget {
                       const SizedBox(height: 12),
                       Center(
                         child: GestureDetector(
-                          onTap: () =>
-                              context.push('/analysis-history'),
+                          onTap: () => context.push('/analysis-history'),
                           child: Text(
                             'Analiz Özeti  >',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -212,8 +222,7 @@ class _Chip extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _Chip(
-      {required this.icon, required this.label, required this.color});
+  const _Chip({required this.icon, required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/ingredient_model.dart';
@@ -8,37 +7,143 @@ class IngredientResolverService {
   //  HARDCODED ASSET BASELINE (fallback when storage list fails)
   // ═══════════════════════════════════════════════════════════════════════════
   static final Set<String> _hardcodedAssets = {
-    "sogan.png", "tazesogan.png", "domates.png", "salca.png", "zeytinyagi.png",
-    "tuz.png", "su.png", "kapyabiber.png", "pulbiber.png", "kurutulmusbiber.png",
-    "kimyon.png", "kekik.png", "sumak.png", "tarcin.png", "karanfil.png",
-    "zerdecal.png", "zencefil.png", "vanilya.png", "baharat.png", "pirinc.png",
-    "bulgur.png", "arpasehriye.png", "kurufasulye.png", "fasulye.png", "nohut.png",
-    "mercimek.png", "yesilmercimek.png", "tavuk.png", "kiyma.png", "kirmiziet.png",
-    "balik.png", "somon.png", "tonbaligi.png", "yogurt.png", "sut.png",
-    "peynir.png", "kasar.png", "yumurta.png", "patlican.png", "kabak.png",
-    "havuc.png", "morhavuc.png", "kereviz.png", "ispanak.png", "semizotu.png",
-    "mantar.png", "marul.png", "morlahana.png", "lahana.png", "brokoli.png",
-    "karnibahar.png", "pirasa.png", "salatalik.png", "patates.png", "balkabagi.png",
-    "maydanoz.png", "dereotu.png", "nane.png", "tazenane.png", "feslegen.png",
-    "biberiye.png", "defneyapragi.png", "avokado.png", "limon.png", "kurukayisi.png",
-    "kuruuzum.png", "zeytin.png", "yesilzeytin.png", "yulaf.png", "un.png",
-    "seker.png", "susam.png", "bal.png",
-    "terayag.png", "sarmisak.png", "kakoa.png", "makrna.png",
-    "roka.png", "pancar.png", "pazi.png", "bamya.png", "borulce.png",
-    "bezelye.png", "barbunya.png", "kinoa.png", "kuskus.png", "irmik.png",
-    "tahin.png", "pekmez.png", "nareksisi.png", "nar.png", "portakal.png",
-    "greyfrut.png", "seftali.png", "cilek.png", "visne.png", "yabanmersini.png",
-    "armut.png", "ananas.png", "ayva.png", "yesilelma.png",
-    "badem.png", "filebadem.png", "ceviz.png", "findik.png", "fistik.png",
-    "kaju.png", "kuruyemis.png", "incir.png", "hurma.png",
-    "bittercikolata.png", "chia.png", "cajun.png",
-    "adacayi.png", "yenibahar.png", "yildizanason.png", "isot.png",
-    "kori.png", "kisnis.png", "karabiber.png",
-    "krema.png", "kaymak.png", "rokfor.png",
-    "ketcap.png", "panko.png", "pastirma.png", "lavas.png", "iskembe.png",
-    "keten.png", "karabugday.png", "bugday.png", "kabartmatozu.png",
-    "kornisontursu.png", "hashas.png", "ceridomates.png",
-    "bruksellahanasi.png", "enginar.png",
+    "sogan.png",
+    "tazesogan.png",
+    "domates.png",
+    "salca.png",
+    "zeytinyagi.png",
+    "tuz.png",
+    "su.png",
+    "kapyabiber.png",
+    "pulbiber.png",
+    "kurutulmusbiber.png",
+    "kimyon.png",
+    "kekik.png",
+    "sumak.png",
+    "tarcin.png",
+    "karanfil.png",
+    "zerdecal.png",
+    "zencefil.png",
+    "vanilya.png",
+    "baharat.png",
+    "pirinc.png",
+    "bulgur.png",
+    "arpasehriye.png",
+    "kurufasulye.png",
+    "fasulye.png",
+    "nohut.png",
+    "mercimek.png",
+    "yesilmercimek.png",
+    "tavuk.png",
+    "kiyma.png",
+    "kirmiziet.png",
+    "balik.png",
+    "somon.png",
+    "tonbaligi.png",
+    "yogurt.png",
+    "sut.png",
+    "peynir.png",
+    "kasar.png",
+    "yumurta.png",
+    "patlican.png",
+    "kabak.png",
+    "havuc.png",
+    "morhavuc.png",
+    "kereviz.png",
+    "ispanak.png",
+    "semizotu.png",
+    "mantar.png",
+    "marul.png",
+    "morlahana.png",
+    "lahana.png",
+    "brokoli.png",
+    "karnibahar.png",
+    "pirasa.png",
+    "salatalik.png",
+    "patates.png",
+    "balkabagi.png",
+    "maydanoz.png",
+    "dereotu.png",
+    "nane.png",
+    "tazenane.png",
+    "feslegen.png",
+    "biberiye.png",
+    "defneyapragi.png",
+    "avokado.png",
+    "limon.png",
+    "kurukayisi.png",
+    "kuruuzum.png",
+    "zeytin.png",
+    "yesilzeytin.png",
+    "yulaf.png",
+    "un.png",
+    "seker.png",
+    "susam.png",
+    "bal.png",
+    "terayag.png",
+    "sarmisak.png",
+    "kakoa.png",
+    "makrna.png",
+    "roka.png",
+    "pancar.png",
+    "pazi.png",
+    "bamya.png",
+    "borulce.png",
+    "bezelye.png",
+    "barbunya.png",
+    "kinoa.png",
+    "kuskus.png",
+    "irmik.png",
+    "tahin.png",
+    "pekmez.png",
+    "nareksisi.png",
+    "nar.png",
+    "portakal.png",
+    "greyfrut.png",
+    "seftali.png",
+    "cilek.png",
+    "visne.png",
+    "yabanmersini.png",
+    "armut.png",
+    "ananas.png",
+    "ayva.png",
+    "yesilelma.png",
+    "badem.png",
+    "filebadem.png",
+    "ceviz.png",
+    "findik.png",
+    "fistik.png",
+    "kaju.png",
+    "kuruyemis.png",
+    "incir.png",
+    "hurma.png",
+    "bittercikolata.png",
+    "chia.png",
+    "cajun.png",
+    "adacayi.png",
+    "yenibahar.png",
+    "yildizanason.png",
+    "isot.png",
+    "kori.png",
+    "kisnis.png",
+    "karabiber.png",
+    "krema.png",
+    "kaymak.png",
+    "rokfor.png",
+    "ketcap.png",
+    "panko.png",
+    "pastirma.png",
+    "lavas.png",
+    "iskembe.png",
+    "keten.png",
+    "karabugday.png",
+    "bugday.png",
+    "kabartmatozu.png",
+    "kornisontursu.png",
+    "hashas.png",
+    "ceridomates.png",
+    "bruksellahanasi.png",
+    "enginar.png",
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -64,12 +169,18 @@ class IngredientResolverService {
       final fetched = objects.map((e) => e.name.toLowerCase()).toSet();
       if (fetched.isNotEmpty) {
         _availableAssets = fetched;
-        debugPrint('IngredientResolverService: Loaded ${fetched.length} assets from live storage.');
+        debugPrint(
+          'IngredientResolverService: Loaded ${fetched.length} assets from live storage.',
+        );
       } else {
-        debugPrint('IngredientResolverService: Storage list returned empty. Using hardcoded baseline.');
+        debugPrint(
+          'IngredientResolverService: Storage list returned empty. Using hardcoded baseline.',
+        );
       }
     } catch (e) {
-      debugPrint('IngredientResolverService: Error fetching storage assets (using baseline fallback): $e');
+      debugPrint(
+        'IngredientResolverService: Error fetching storage assets (using baseline fallback): $e',
+      );
     }
 
     // Build normalized asset index from whatever set we have
@@ -83,7 +194,9 @@ class IngredientResolverService {
       final key = fileName.replaceAll(RegExp(r'\.(png|jpg|jpeg|webp)$'), '');
       _assetIndex[key] = fileName;
     }
-    debugPrint('IngredientResolverService: Built asset index with ${_assetIndex.length} entries.');
+    debugPrint(
+      'IngredientResolverService: Built asset index with ${_assetIndex.length} entries.',
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -94,52 +207,112 @@ class IngredientResolverService {
   /// Preserves spaces between words.
   static String _normalizeTurkishKeepSpaces(String text) {
     String s = text.toLowerCase().trim();
-    s = s.replaceAll('ç', 'c')
-         .replaceAll('ğ', 'g')
-         .replaceAll('ı', 'i')
-         .replaceAll('ö', 'o')
-         .replaceAll('ş', 's')
-         .replaceAll('ü', 'u')
-         .replaceAll('â', 'a')
-         .replaceAll('î', 'i')
-         .replaceAll('û', 'u');
+    s = s
+        .replaceAll('ç', 'c')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ı', 'i')
+        .replaceAll('ö', 'o')
+        .replaceAll('ş', 's')
+        .replaceAll('ü', 'u')
+        .replaceAll('â', 'a')
+        .replaceAll('î', 'i')
+        .replaceAll('û', 'u');
     s = s.replaceAll(RegExp(r'[^a-z0-9\s]'), '');
     s = s.replaceAll(RegExp(r'\s+'), ' ');
     return s.trim();
   }
 
-
-
   // Public alias kept for backward compatibility
-  static String normalizeTurkish(String text) => _normalizeTurkishKeepSpaces(text);
+  static String normalizeTurkish(String text) =>
+      _normalizeTurkishKeepSpaces(text);
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  CLEANING: remove quantities, units, prep words, brand names, parens
   // ═══════════════════════════════════════════════════════════════════════════
 
   static const Set<String> _quantityUnits = {
-    'adet', 'dis', 'gram', 'gr', 'g', 'kg', 'ml', 'litre', 'lt',
-    'fincan', 'demet', 'tutam', 'kilogram', 'paket', 'dilim', 'avuc',
-    'kase', 'damla', 'bardak', 'kasik', 'silme', 'tepeleme',
-    'porsiyon', 'bag', 'bagi', 'yaprak', 'sap', 'dal', 'tane',
+    'adet',
+    'dis',
+    'gram',
+    'gr',
+    'g',
+    'kg',
+    'ml',
+    'litre',
+    'lt',
+    'fincan',
+    'demet',
+    'tutam',
+    'kilogram',
+    'paket',
+    'dilim',
+    'avuc',
+    'kase',
+    'damla',
+    'bardak',
+    'kasik',
+    'silme',
+    'tepeleme',
+    'porsiyon',
+    'bag',
+    'bagi',
+    'yaprak',
+    'sap',
+    'dal',
+    'tane',
   };
 
   static const Set<String> _prepWords = {
-    'dogranmis', 'rendelenmis', 'haslanmis', 'kavrulmus', 'firinlanmis',
-    'kiymis', 'kiyilmis', 'ince', 'iri', 'kucuk', 'buyuk', 'kabuksuz',
-    'ayiklanmis', 'yikanmis', 'kup', 'pismis', 'kurutulmus', 'sogutulmus',
-    'eritilmis', 'cekilmis', 'ezilmis', 'yarim', 'ceyrek',
+    'dogranmis',
+    'rendelenmis',
+    'haslanmis',
+    'kavrulmus',
+    'firinlanmis',
+    'kiymis',
+    'kiyilmis',
+    'ince',
+    'iri',
+    'kucuk',
+    'buyuk',
+    'kabuksuz',
+    'ayiklanmis',
+    'yikanmis',
+    'kup',
+    'pismis',
+    'kurutulmus',
+    'sogutulmus',
+    'eritilmis',
+    'cekilmis',
+    'ezilmis',
+    'yarim',
+    'ceyrek',
   };
 
   static const Set<String> _brandNames = {
-    'sutas', 'pinar', 'icim', 'torku', 'sek', 'tat', 'tamek',
+    'sutas',
+    'pinar',
+    'icim',
+    'torku',
+    'sek',
+    'tat',
+    'tamek',
   };
 
   static const List<String> _multiWordUnits = [
-    'yemek kasigi', 'tatli kasigi', 'cay kasigi', 'su bardagi',
-    'cay bardagi', 'kahve fincani', 'goz karari', 'istege bagli',
-    'aldigi kadar', 'bir tutam', 'ince kiyilmis', 'buyuk boy',
-    'orta boy', 'kucuk boy',
+    'yemek kasigi',
+    'tatli kasigi',
+    'cay kasigi',
+    'su bardagi',
+    'cay bardagi',
+    'kahve fincani',
+    'goz karari',
+    'istege bagli',
+    'aldigi kadar',
+    'bir tutam',
+    'ince kiyilmis',
+    'buyuk boy',
+    'orta boy',
+    'kucuk boy',
   ];
 
   /// Strip quantities, units, prep words, brands, parentheses from ingredient text.
@@ -160,12 +333,15 @@ class IngredientResolverService {
 
     // Remove single-word units, prep words, and brand names
     final words = s.split(RegExp(r'\s+'));
-    final filtered = words.where((w) =>
-      w.isNotEmpty &&
-      !_quantityUnits.contains(w) &&
-      !_prepWords.contains(w) &&
-      !_brandNames.contains(w)
-    ).toList();
+    final filtered = words
+        .where(
+          (w) =>
+              w.isNotEmpty &&
+              !_quantityUnits.contains(w) &&
+              !_prepWords.contains(w) &&
+              !_brandNames.contains(w),
+        )
+        .toList();
 
     return filtered.join(' ').trim();
   }
@@ -424,7 +600,10 @@ class IngredientResolverService {
 
     // Fish (NOT karides, midye, kalamar, ahtapot)
     'balik': 'balik', 'levrek': 'balik', 'cipura': 'balik',
-    'hamsi': 'balik', 'uskumru': 'balik', 'istavrit': 'balik', 'palamut': 'balik',
+    'hamsi': 'balik',
+    'uskumru': 'balik',
+    'istavrit': 'balik',
+    'palamut': 'balik',
 
     // Red meat
     'dana': 'kirmiziet', 'kuzu': 'kirmiziet', 'biftek': 'kirmiziet',
@@ -527,7 +706,8 @@ class IngredientResolverService {
     // ── STEP 4: Single token match (longest token first, skip dangerous short words) ──
     if (resolvedAssetKey == null) {
       // Sort tokens by length descending to prefer longer/more specific tokens
-      final sortedTokens = List<String>.from(tokens)..sort((a, b) => b.length.compareTo(a.length));
+      final sortedTokens = List<String>.from(tokens)
+        ..sort((a, b) => b.length.compareTo(a.length));
       for (final token in sortedTokens) {
         if (token.length < 2) continue; // Skip single chars
 
@@ -600,7 +780,9 @@ class IngredientResolverService {
     debugPrint('- chosenAssetPath: "${buildIngredientImageUrl(resolvedFile)}"');
     debugPrint('- matchType: $matchType');
     debugPrint('- fallbackUsed: $fallbackUsed');
-    debugPrint('- assetExists: ${_assetIndex.containsKey(resolvedAssetKey ?? '')}');
+    debugPrint(
+      '- assetExists: ${_assetIndex.containsKey(resolvedAssetKey ?? '')}',
+    );
 
     return resolvedFile;
   }
@@ -642,7 +824,8 @@ class IngredientResolverService {
     String current = key;
     final visited = <String>{};
 
-    while (_missingAssetFallbacks.containsKey(current) && !visited.contains(current)) {
+    while (_missingAssetFallbacks.containsKey(current) &&
+        !visited.contains(current)) {
       visited.add(current);
       current = _missingAssetFallbacks[current]!;
       if (_assetIndex.containsKey(current)) {
@@ -666,7 +849,11 @@ class IngredientResolverService {
   }
 
   /// Entry point to process ingredients for display, taking exactly 6 items.
-  static List<IngredientModel> getDisplayIngredients(Map<String, dynamic> rawRecipe, String fallbackTitle, String recipeId) {
+  static List<IngredientModel> getDisplayIngredients(
+    Map<String, dynamic> rawRecipe,
+    String fallbackTitle,
+    String recipeId,
+  ) {
     List<IngredientModel> parsed = parseIngredientsFromRecipe(rawRecipe);
 
     if (parsed.isEmpty) {
@@ -681,7 +868,9 @@ class IngredientResolverService {
       final nameStr = ing.name;
 
       // [object Object] cleanup
-      if (nameStr.contains('[object Object]') || nameStr.contains('object Object') || nameStr.contains('Object')) {
+      if (nameStr.contains('[object Object]') ||
+          nameStr.contains('object Object') ||
+          nameStr.contains('Object')) {
         removedObjects.add(nameStr);
         continue;
       }
@@ -696,7 +885,8 @@ class IngredientResolverService {
 
       // Duplicate check based on resolved file name
       final fileName = resolveIngredientFileName(nameStr);
-      if (filtered.any((e) => resolveIngredientFileName(e.name) == fileName)) continue;
+      if (filtered.any((e) => resolveIngredientFileName(e.name) == fileName))
+        continue;
 
       filtered.add(ing);
     }
@@ -723,27 +913,41 @@ class IngredientResolverService {
     }
 
     if (finalIngredients.isEmpty) {
-      finalIngredients.add(const IngredientModel(
-        name: 'Malzeme bilgisi hazırlanıyor',
-        amount: '',
-        calories: 0,
-      ));
+      finalIngredients.add(
+        const IngredientModel(
+          name: 'Malzeme bilgisi hazırlanıyor',
+          amount: '',
+          calories: 0,
+        ),
+      );
     }
 
     debugPrint('RecipeShowScreen [DEBUG] recipe id: $recipeId');
     debugPrint('RecipeShowScreen [DEBUG] recipe title: $fallbackTitle');
-    debugPrint('RecipeShowScreen [DEBUG] ingredients_text raw: ${rawRecipe['ingredients_text']}');
-    debugPrint('RecipeShowScreen [DEBUG] parsed ingredients from ingredients_text: ${parsed.map((e) => e.name).toList()}');
+    debugPrint(
+      'RecipeShowScreen [DEBUG] ingredients_text raw: ${rawRecipe['ingredients_text']}',
+    );
+    debugPrint(
+      'RecipeShowScreen [DEBUG] parsed ingredients from ingredients_text: ${parsed.map((e) => e.name).toList()}',
+    );
     debugPrint('RecipeShowScreen [DEBUG] removed group labels: $removedGroups');
-    debugPrint('RecipeShowScreen [DEBUG] removed object items: $removedObjects');
-    debugPrint('RecipeShowScreen [DEBUG] final ingredients: ${finalIngredients.map((e) => e.name).toList()}');
-    debugPrint('RecipeShowScreen [DEBUG] resolved image filenames: $resolvedFilenames');
+    debugPrint(
+      'RecipeShowScreen [DEBUG] removed object items: $removedObjects',
+    );
+    debugPrint(
+      'RecipeShowScreen [DEBUG] final ingredients: ${finalIngredients.map((e) => e.name).toList()}',
+    );
+    debugPrint(
+      'RecipeShowScreen [DEBUG] resolved image filenames: $resolvedFilenames',
+    );
     debugPrint('RecipeShowScreen [DEBUG] storage image urls: $storageUrls');
 
     return finalIngredients;
   }
 
-  static List<IngredientModel> parseIngredientsFromRecipe(Map<String, dynamic> raw) {
+  static List<IngredientModel> parseIngredientsFromRecipe(
+    Map<String, dynamic> raw,
+  ) {
     final textVal = raw['ingredients_text']?.toString() ?? '';
     if (textVal.isNotEmpty) {
       final parsed = parseIngredientsText(textVal);
@@ -760,11 +964,9 @@ class IngredientResolverService {
     for (var part in parts) {
       final cleaned = part.trim();
       if (cleaned.isNotEmpty && !cleaned.toLowerCase().contains('bulunamadı')) {
-        result.add(IngredientModel(
-          name: cleaned,
-          amount: '1 porsiyon',
-          calories: 0,
-        ));
+        result.add(
+          IngredientModel(name: cleaned, amount: '1 porsiyon', calories: 0),
+        );
       }
     }
     return result;
@@ -772,16 +974,40 @@ class IngredientResolverService {
 
   static bool isGroupLabel(String textLower) {
     final t = textLower.trim();
-    if (t.endsWith(' için') || t.contains(' için ') || t.endsWith(' icin') || t.contains(' icin ')) {
+    if (t.endsWith(' için') ||
+        t.contains(' için ') ||
+        t.endsWith(' icin') ||
+        t.contains(' icin ')) {
       return true;
     }
     final blockedPhrases = [
-      'çorba için', 'salata için', 'köftesi için', 'terbiyesi için', 'sosu için',
-      'sos için', 'üzeri için', 'iç harcı için', 'iç harç için', 'iç malzemesi için',
-      'servis için', 'sunum için', 'hamuru için', 'kızartmak için', 'marine için',
-      'marinasyon için', 'garnitür için', 'ara kat için', 'üzeri', 'içi için',
-      'isteğe bağlı', 'malzemeler', 'ana malzemeler', 'harcı için', 'bulunamadı',
-      'şerbeti için', 'sandviç için'
+      'çorba için',
+      'salata için',
+      'köftesi için',
+      'terbiyesi için',
+      'sosu için',
+      'sos için',
+      'üzeri için',
+      'iç harcı için',
+      'iç harç için',
+      'iç malzemesi için',
+      'servis için',
+      'sunum için',
+      'hamuru için',
+      'kızartmak için',
+      'marine için',
+      'marinasyon için',
+      'garnitür için',
+      'ara kat için',
+      'üzeri',
+      'içi için',
+      'isteğe bağlı',
+      'malzemeler',
+      'ana malzemeler',
+      'harcı için',
+      'bulunamadı',
+      'şerbeti için',
+      'sandviç için',
     ];
     for (var phrase in blockedPhrases) {
       if (t == phrase || t.contains(phrase)) return true;
@@ -794,10 +1020,26 @@ class IngredientResolverService {
     s = s.replaceAll(RegExp(r'\(.*?\)'), ' ');
 
     final multiWordPhrases = [
-      'yemek kaşığı', 'tatlı kaşığı', 'çay kaşığı', 'su bardağı', 'çay bardağı',
-      'yemek kasigi', 'tatli kasigi', 'cay kasigi', 'su bardagi', 'cay bardagi',
-      'göz kararı', 'isteğe bağlı', 'aldığı kadar', 'bir tutam', 'ince kıyılmış',
-      'büyük boy', 'orta boy', 'küçük boy', 'kahve fincanı', 'kahve fincani'
+      'yemek kaşığı',
+      'tatlı kaşığı',
+      'çay kaşığı',
+      'su bardağı',
+      'çay bardağı',
+      'yemek kasigi',
+      'tatli kasigi',
+      'cay kasigi',
+      'su bardagi',
+      'cay bardagi',
+      'göz kararı',
+      'isteğe bağlı',
+      'aldığı kadar',
+      'bir tutam',
+      'ince kıyılmış',
+      'büyük boy',
+      'orta boy',
+      'küçük boy',
+      'kahve fincanı',
+      'kahve fincani',
     ];
 
     s = s.replaceAll(RegExp(r'[0-9\.,/]+'), ' ');
@@ -807,17 +1049,54 @@ class IngredientResolverService {
     }
 
     final singleWordPhrases = {
-      'adet', 'diş', 'gram', 'gr', 'g', 'kg', 'ml', 'litre',
-      'yarım', 'çeyrek', 'doğranmış', 'rendelenmiş', 'haşlanmış',
-      'kavrulmuş', 'fırınlanmış', 'fincan', 'demet', 'tutam',
-      'kilogram', 'paket', 'dilim', 'avuç', 'kase', 'damla',
-      'bardak', 'kaşık', 'kurutulmuş', 'silme', 'tepeleme',
-      'ayıklanmış', 'yıkanmış', 'porsiyon', 'bağ', 'bag',
-      'sütaş', 'sutas', 'pınar', 'pinar', 'içim', 'icim', 'torku', 'sek'
+      'adet',
+      'diş',
+      'gram',
+      'gr',
+      'g',
+      'kg',
+      'ml',
+      'litre',
+      'yarım',
+      'çeyrek',
+      'doğranmış',
+      'rendelenmiş',
+      'haşlanmış',
+      'kavrulmuş',
+      'fırınlanmış',
+      'fincan',
+      'demet',
+      'tutam',
+      'kilogram',
+      'paket',
+      'dilim',
+      'avuç',
+      'kase',
+      'damla',
+      'bardak',
+      'kaşık',
+      'kurutulmuş',
+      'silme',
+      'tepeleme',
+      'ayıklanmış',
+      'yıkanmış',
+      'porsiyon',
+      'bağ',
+      'bag',
+      'sütaş',
+      'sutas',
+      'pınar',
+      'pinar',
+      'içim',
+      'icim',
+      'torku',
+      'sek',
     };
 
     final words = s.split(RegExp(r'\s+'));
-    final filteredWords = words.where((w) => w.isNotEmpty && !singleWordPhrases.contains(w)).toList();
+    final filteredWords = words
+        .where((w) => w.isNotEmpty && !singleWordPhrases.contains(w))
+        .toList();
 
     String finalName = filteredWords.join(' ').trim();
     if (finalName.isEmpty) return raw;
@@ -860,8 +1139,16 @@ class IngredientResolverService {
 
     fallbackItems.forEach((keyword, displayName) {
       if (titleLower.contains(keyword)) {
-        if (!fallback.any((e) => e.name.toLowerCase() == displayName.toLowerCase())) {
-          fallback.add(IngredientModel(name: displayName, amount: '1 porsiyon', calories: 0));
+        if (!fallback.any(
+          (e) => e.name.toLowerCase() == displayName.toLowerCase(),
+        )) {
+          fallback.add(
+            IngredientModel(
+              name: displayName,
+              amount: '1 porsiyon',
+              calories: 0,
+            ),
+          );
         }
       }
     });
