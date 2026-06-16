@@ -18,7 +18,7 @@ Uygulamada kullanıcılar diyet listesi veya kan tahlili belgelerini yükleyebil
 
 ChefRay uygulamasının genel arayüzünü, temel özelliklerini ve kullanıcı deneyimini gösteren tanıtım videosuna aşağıdaki bağlantıdan ulaşabilirsiniz.
 
-🔗 ChefRay Tanıtım Videosunu İzle = https://drive.google.com/file/d/1kIivEQyGvFfcUIj0WuYkPfcqVfZk4nNL/view?usp=sharing
+🔗[ChefRay Tanıtım Videosunu İzle](https://drive.google.com/file/d/1kIivEQyGvFfcUIj0WuYkPfcqVfZk4nNL/view?usp=sharing)
 ---
 
 ## ✨ Temel Özellikler
